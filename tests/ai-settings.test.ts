@@ -87,7 +87,8 @@ test("blank, excessive, whitespace and control-character saves reject and preser
     assert.equal(await getAnthropicApiKey(db), savedKey);
   }
   assert.equal(aiSettingsSchema.parse({ apiKey: `sk-ant-${"x".repeat(4089)}` }).apiKey.length, 4096);
-  assert.throws(() => aiSettingsSchema.parse({ apiKey: "sk-Ngx1openai-style-key-000000000000000000000000000" }), /sk-ant-/);
+  assert.equal(aiSettingsSchema.parse({ apiKey: "sk-proj-openai-style-key" }).apiKey, "sk-proj-openai-style-key");
+  assert.throws(() => aiSettingsSchema.parse({ apiKey: "AIza-not-supported" }), /OpenAI/);
 });
 
 test("legacy databases migrate once under concurrent initialization and preserve Telegram settings", async (t) => {

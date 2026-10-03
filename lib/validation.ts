@@ -93,9 +93,9 @@ const apiKeySchema = z.string().trim()
   .max(4096, "API 키는 4096자 이내로 입력해주세요.")
   .refine((key) => !/[\s\p{Cc}]/u.test(key), "API 키에 공백이나 제어 문자를 사용할 수 없습니다.");
 
-// Anthropic 키는 sk-ant-로 시작한다. 다른 서비스의 키(OpenAI sk-… 등)를 저장하면 AI 분석이 매번 인증 오류로 실패한다.
+// AI 키는 Anthropic(sk-ant-…) 또는 OpenAI(sk-…)만 받는다. 키 앞부분으로 공급자를 고른다.
 export const aiSettingsSchema = z.object({
-  apiKey: apiKeySchema.refine((key) => key.startsWith("sk-ant-"), "Anthropic API 키는 sk-ant-로 시작합니다. console.anthropic.com에서 발급한 키인지 확인해주세요."),
+  apiKey: apiKeySchema.refine((key) => key.startsWith("sk-"), "Anthropic(sk-ant-…) 또는 OpenAI(sk-…) API 키를 입력해주세요."),
 }).strict();
 
 const dataProviderSchema = z.enum(["dataGoKr", "saramin"]);

@@ -68,7 +68,7 @@ test("anonymous visitors keep separate profile, schedules and API keys", async (
     expect(persisted.settings.aiKeySource).toBe("saved");
     await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "설정", exact: true }).click();
     await expect(page.getByRole("note", { name: "게스트 데이터 보안" })).toBeVisible();
-    await expect(page.getByLabel("ANTHROPIC_API_KEY", { exact: true })).toHaveValue("");
+    await expect(page.getByLabel("AI API 키 (Anthropic · OpenAI)", { exact: true })).toHaveValue("");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(await page.evaluate(() => JSON.stringify(Object.values(localStorage)))).not.toContain(key);
     await page.screenshot({ path: testInfo.outputPath("anonymous-settings.png"), fullPage: true });

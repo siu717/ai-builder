@@ -474,7 +474,7 @@ export default function Settings({
         </div>
         <form onSubmit={saveAiKey} className="ai-key-form">
           <label className="field">
-            ANTHROPIC_API_KEY
+            AI API 키 (Anthropic · OpenAI)
             <input
               type="password"
               autoComplete="new-password"
@@ -694,11 +694,15 @@ function StoredData({ settings }: { settings: PublicSettings }) {
   const rows: [string, string | null][] = overview
     ? [
         [
-          "Anthropic API 키",
+          "AI API 키",
           overview.keys.anthropic &&
-            (overview.keys.anthropicFormatValid === false
-              ? `${overview.keys.anthropic} · Anthropic 키 형식이 아닙니다(sk-ant-로 시작해야 함). AI 분석이 실패합니다.`
-              : overview.keys.anthropic),
+            `${overview.keys.anthropic} · ${
+              overview.keys.aiProvider === "anthropic"
+                ? "Anthropic (Claude)"
+                : overview.keys.aiProvider === "openai"
+                  ? "OpenAI"
+                  : "형식을 알 수 없는 키입니다. AI 분석이 실패합니다."
+            }`,
         ],
         ["공공데이터포털 키", overview.keys.dataGoKr],
         ["사람인 키", overview.keys.saramin],

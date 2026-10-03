@@ -31,7 +31,7 @@ test("AI keys can be saved, replaced and removed without appearing in public sta
       .getByRole("button", { name: "설정", exact: true })
       .click();
     const section = page.getByRole("region", { name: "AI 분석 설정" });
-    const input = section.getByLabel("ANTHROPIC_API_KEY", { exact: true });
+    const input = section.getByLabel("AI API 키 (Anthropic · OpenAI)", { exact: true });
     const save = section.getByRole("button", {
       name: "API 키 저장",
       exact: true,
@@ -173,7 +173,7 @@ test("an API key save failure preserves the draft and shows the error", async ({
     .getByRole("button", { name: "설정", exact: true })
     .click();
   const section = page.getByRole("region", { name: "AI 분석 설정" });
-  const input = section.getByLabel("ANTHROPIC_API_KEY", { exact: true });
+  const input = section.getByLabel("AI API 키 (Anthropic · OpenAI)", { exact: true });
   const fakeKey = `sk-ant-api03-e2e-retry-${randomUUID()}`;
   await page.route("**/api/settings/ai", (route) =>
     route.fulfill({
