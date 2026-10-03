@@ -203,3 +203,37 @@ test("sample flows return before any database key lookup", async (t) => {
   assert.equal((await analyzeText({ text: TASK_SAMPLE, kind: "assignment", referenceDate: "2026-10-03", classTime: "09:00", sample: true }, DEFAULT_PROFILE, new Date(), database)).mode, "sample");
   assert.equal((await coachResume({ jobText: COACH_JOB_SAMPLE, resumeText: COACH_RESUME_SAMPLE, sample: true }, database)).mode, "sample");
 });
+
+test("OpenAI keys are routed to the OpenAI API with a JSON response and the same validation", async (t) => {
+  const database = await fixture(t);
+  const previousFetch = globalThis.fetch;
+  const key = "sk-proj-test-openai-key";
+  await saveAnthropicApiKey({ apiKey: key }, database);
+  const requests: { url: string; headers: Headers; body: { model: string; response_format: unknown; messages: { role: string; content: string }[] } }[] = [];
+  globalThis.fetch = async (input: string | URL | Request, init?: RequestInit) => {
+    requests.push({ url: String(input), headers: new Headers(init?.headers), body: JSON.parse(String(init?.body)) });
+    return Response.json({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(mockAnalysis()) } }] });
+  };
+  try {
+    const result = await analyzeText({ text: "과제 공지", kind: "assignment", referenceDate: "2026-10-01", classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database);
+    assert.equal(result.mode, "live");
+    assert.equal(result.title, "과제 제출");
+    assert.equal(requests[0].url, "https://api.openai.com/v1/chat/completions");
+    assert.equal(requests[0].headers.get("authorization"), `Bearer ${key}`);
+    assert.deepEqual(requests[0].body.response_format, { type: "json_object" });
+    assert.match(requests[0].body.messages[0].content, /JSON Schema/);
+    assert.match(requests[0].body.messages[1].content, /untrustedDocument/);
+
+    globalThis.fetch = async () => Response.json({ error: { message: `leaked ${key}` } }, { status: 401 });
+    await assert.rejects(analyzeText({ text: "과제 공지", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database), (error: unknown) => {
+      assert.ok(error instanceof AIInputError);
+      assert.match(error.message, /HTTP 401.*OpenAI API 키/);
+      assert.ok(!error.message.includes(key));
+      return true;
+    });
+    globalThis.fetch = async () => Response.json({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ ...mockAnalysis(), kind: "job" }) } }] });
+    await assert.rejects(analyzeText({ text: "과제 공지", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database), /다른 종류/);
+  } finally {
+    globalThis.fetch = previousFetch;
+  }
+});

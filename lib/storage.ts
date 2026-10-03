@@ -2,6 +2,7 @@ import type { Client } from "@libsql/client";
 import { existsSync } from "node:fs";
 import { chmod, mkdir, readdir, stat, unlink } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
+import { aiProvider } from "./ai";
 import { isAnonymousPublicMode } from "./anonymous-session";
 import type { BackupFile, StorageOverview } from "./contracts";
 import { getDatabase, getSharedDatabase } from "./db";
@@ -92,8 +93,8 @@ export async function getStorageOverview(database?: Client): Promise<StorageOver
     },
     keys: {
       anthropic: saved("anthropic_api_key"),
-      anthropicFormatValid: String(settings.anthropic_api_key || "").trim()
-        ? String(settings.anthropic_api_key).trim().startsWith("sk-ant-")
+      aiProvider: String(settings.anthropic_api_key || "").trim()
+        ? aiProvider(String(settings.anthropic_api_key)) ?? "unknown"
         : null,
       dataGoKr: saved("data_go_kr_api_key"),
       saramin: saved("saramin_api_key"),

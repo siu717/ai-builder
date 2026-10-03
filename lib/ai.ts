@@ -105,31 +105,84 @@ const COACHING_INSTRUCTIONS = `목표 공고와 제출 서류를 비교해 서�
 feedback.quote는 resumeText에 실제로 존재하는 연속된 문자열을 그대로 인용하세요. suggestion은 구체적인 수정 제안이며 원문에 없는 성과와 경험을 사실처럼 추가하지 마세요. 수치가 없으면 실제 측정한 수치를 확인하도록 제안하세요.
 tasks는 사용자가 검토할 준비 할 일입니다. 할 일마다 목적을 notes에 작성하세요. 공고에 없는 면접 일시나 임의의 마감 날짜를 정하지 마세요. 준비 일정은 사용자가 나중에 직접 확정합니다.`;
 
+export type AIProvider = "anthropic" | "openai";
+const PROVIDER_LABELS: Record<AIProvider, string> = { anthropic: "Anthropic", openai: "OpenAI" };
+
+// 저장된 키의 앞부분으로 공급자를 고른다: sk-ant-는 Anthropic, 그 밖의 sk-는 OpenAI.
+export function aiProvider(key: string): AIProvider | null {
+  const trimmed = key.trim();
+  if (trimmed.startsWith("sk-ant-")) return "anthropic";
+  if (trimmed.startsWith("sk-")) return "openai";
+  return null;
+}
+
+class ProviderStatusError extends Error {
+  constructor(public readonly status: number) {
+    super(`HTTP ${status}`);
+  }
+}
+
 // 공급자 응답 본문(키가 섞일 수 있음)은 버리고 HTTP 상태로 원인만 알려준다.
-function aiFailure(error: unknown, action: string): AIInputError {
+function aiFailure(error: unknown, action: string, provider: AIProvider): AIInputError {
   if (error instanceof AIInputError) return error;
-  const status = error instanceof Anthropic.APIError ? error.status : undefined;
+  const status = error instanceof Anthropic.APIError || error instanceof ProviderStatusError ? error.status : undefined;
+  const name = PROVIDER_LABELS[provider];
   const reason = status === 401 || status === 403
-    ? "Anthropic API 키가 올바르지 않거나 권한이 없습니다. 설정 화면에서 sk-ant-로 시작하는 키를 다시 저장해 주세요."
+    ? `${name} API 키가 올바르지 않거나 권한이 없습니다. 설정 화면에서 키를 다시 저장해 주세요.`
     : status === 429
-      ? "Anthropic 요청 한도를 초과했습니다. 설정 화면의 키 사용량을 확인하고 잠시 후 다시 시도해 주세요."
+      ? `${name} 요청 한도를 초과했거나 크레딧이 부족합니다. 설정 화면의 키 사용량을 확인하고 잠시 후 다시 시도해 주세요.`
       : status === 404
-        ? "AI 모델을 찾을 수 없습니다. 설정 화면의 키와 서버의 ANTHROPIC_MODEL 설정을 확인해 주세요."
-        : "설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.";
+        ? `AI 모델을 찾을 수 없습니다. 설정 화면의 키와 서버의 ${provider === "openai" ? "OPENAI_MODEL" : "ANTHROPIC_MODEL"} 설정을 확인해 주세요.`
+        : "설정 화면의 AI API 키와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.";
   return new AIInputError(502, `${action}에 실패했습니다${status ? ` (HTTP ${status})` : ""}. ${reason}`);
 }
 
-async function createClient(database?: Client): Promise<Anthropic> {
+const INCOMPLETE = "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.";
+type OutputSchema = Parameters<typeof zodOutputFormat>[0];
+
+async function openaiJson(apiKey: string, system: string, content: string, schema: OutputSchema): Promise<unknown> {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: `${system}\n응답은 아래 JSON Schema를 따르는 JSON 객체 하나만 출력하세요.\n${JSON.stringify(z.toJSONSchema(schema as z.ZodType))}` },
+        { role: "user", content },
+      ],
+    }),
+    signal: AbortSignal.timeout(45_000),
+  });
+  if (!response.ok) throw new ProviderStatusError(response.status);
+  const data = await response.json() as { choices?: { finish_reason?: string; message?: { content?: string | null } }[] };
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason !== "stop" || !choice.message?.content) throw new AIInputError(502, INCOMPLETE);
+  return JSON.parse(choice.message.content);
+}
+
+// 설정된 키의 공급자로 구조화된 JSON을 생성하고, finish에서 검증한다. 오류는 공급자별 원인으로 바꾼다.
+async function generate<T>(database: Client | undefined, action: string, system: string, content: string, schema: OutputSchema, finish: (output: unknown) => T): Promise<T> {
   const apiKey = await getAnthropicApiKey(database);
   if (!apiKey) {
-    throw new AIInputError(503, "AI 분석을 사용하려면 설정 화면에서 ANTHROPIC_API_KEY를 저장해 주세요. 서버 환경변수로도 설정할 수 있습니다. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
+    throw new AIInputError(503, "AI 분석을 사용하려면 설정 화면에서 Anthropic 또는 OpenAI API 키를 저장해 주세요. 서버 환경변수 ANTHROPIC_API_KEY로도 설정할 수 있습니다. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
   }
-  return new Anthropic({
-    apiKey,
-    timeout: 45000,
-    maxRetries: 1,
-    logLevel: "off",
-  });
+  const provider = aiProvider(apiKey) ?? "anthropic";
+  try {
+    if (provider === "openai") return finish(await openaiJson(apiKey, system, content, schema));
+    const client = new Anthropic({ apiKey, timeout: 45000, maxRetries: 1, logLevel: "off" });
+    const response = await client.messages.parse({
+      model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
+      max_tokens: 4096,
+      system,
+      messages: [{ role: "user", content }],
+      output_config: { format: zodOutputFormat(schema) },
+    });
+    if (response.stop_reason !== "end_turn" || !response.parsed_output) throw new AIInputError(502, INCOMPLETE);
+    return finish(response.parsed_output);
+  } catch (error) {
+    throw aiFailure(error, action, provider);
+  }
 }
 
 function nextWeekThursday(referenceDate: string): string {
@@ -168,27 +221,14 @@ function sampleAnalysis(input: AnalyzeRequest, profile: Profile, now: Date): Ana
 
 export async function analyzeText(input: AnalyzeRequest, profile: Profile, now = new Date(), database?: Client): Promise<AnalysisResult> {
   if (input.sample) return sampleAnalysis(input, profile, now);
-  const client = await createClient(database);
-  try {
-    const response = await client.messages.parse({
-      model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
-      max_tokens: 4096,
-      system: `${SYSTEM_PROMPT}\n${ANALYSIS_INSTRUCTIONS}`,
-      messages: [{ role: "user", content: JSON.stringify({
-        kind: input.kind, referenceDate: input.referenceDate, classTime: input.classTime,
-        timeZone: "Asia/Seoul", profile, untrustedDocument: input.text,
-      }) }],
-      output_config: { format: zodOutputFormat(analysisWireSchema) },
-    });
-    if (response.stop_reason !== "end_turn" || !response.parsed_output) {
-      throw new AIInputError(502, "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.");
-    }
-    const result = analysisResultSchema.parse(response.parsed_output);
+  return generate(database, "AI 분석", `${SYSTEM_PROMPT}\n${ANALYSIS_INSTRUCTIONS}`, JSON.stringify({
+    kind: input.kind, referenceDate: input.referenceDate, classTime: input.classTime,
+    timeZone: "Asia/Seoul", profile, untrustedDocument: input.text,
+  }), analysisWireSchema, (output) => {
+    const result = analysisResultSchema.parse(output);
     if (result.kind !== input.kind) throw new AIInputError(502, "AI가 요청과 다른 종류의 결과를 반환했습니다. 다시 시도해 주세요.");
-    return { mode: "live", ...result };
-  } catch (error) {
-    throw aiFailure(error, "AI 분석");
-  }
+    return { mode: "live" as const, ...result };
+  });
 }
 
 export function validateCoachingQuotes(result: z.infer<typeof coachingResultSchema>, resumeText: string): void {
@@ -219,22 +259,11 @@ function sampleCoaching(input: CoachingRequest): CoachingResult {
 
 export async function coachResume(input: CoachingRequest, database?: Client): Promise<CoachingResult> {
   if (input.sample) return sampleCoaching(input);
-  const client = await createClient(database);
-  try {
-    const response = await client.messages.parse({
-      model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
-      max_tokens: 4096,
-      system: `${SYSTEM_PROMPT}\n${COACHING_INSTRUCTIONS}`,
-      messages: [{ role: "user", content: JSON.stringify({ untrustedJobDocument: input.jobText, untrustedResumeDocument: input.resumeText }) }],
-      output_config: { format: zodOutputFormat(coachingResultSchema) },
+  return generate(database, "AI 컨설팅", `${SYSTEM_PROMPT}\n${COACHING_INSTRUCTIONS}`,
+    JSON.stringify({ untrustedJobDocument: input.jobText, untrustedResumeDocument: input.resumeText }),
+    coachingResultSchema, (output) => {
+      const result = coachingResultSchema.parse(output);
+      validateCoachingQuotes(result, input.resumeText);
+      return { mode: "live" as const, ...result };
     });
-    if (response.stop_reason !== "end_turn" || !response.parsed_output) {
-      throw new AIInputError(502, "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.");
-    }
-    const result = coachingResultSchema.parse(response.parsed_output);
-    validateCoachingQuotes(result, input.resumeText);
-    return { mode: "live", ...result };
-  } catch (error) {
-    throw aiFailure(error, "AI 컨설팅");
-  }
 }
