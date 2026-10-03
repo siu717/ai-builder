@@ -105,6 +105,7 @@ flowchart LR
 | `/api/public-data` | GET | 공공데이터포털 장학금·공공 채용(공공기관 + 인사혁신처)·시험일정 |
 | `/api/scholarships` | GET | 국민대 수집 공지·수집 상태·자동 등록 설정 |
 | `/api/scholarships/preferences` | PUT | 자동 등록 설정 저장 후 즉시 동기화 |
+| `/api/scholarships/test` | POST | 데모용 자동화 테스트: 수집된 공지 하나를 AI 분석 후 텔레그램으로 바로 발송, 단계별 결과 반환(일정 미생성) |
 | `/api/kookmin/schedule` | GET | 국민대 학사일정(`?year=`) |
 | `/api/kookmin/notices`, `/api/kookmin/notices/[board]/[articleNo]` | GET | 학사·장학·일반 공지 목록과 본문 |
 | `/api/kookmin/ecampus/preview` | POST | eCampus 달력 URL 또는 ICS 내용 → 과제 목록(URL은 저장하지 않음) |
@@ -115,7 +116,7 @@ flowchart LR
 | `/api/analyze` | POST | 과제·공고 공지 텍스트 AI 분석 |
 | `/api/coach` | POST | 목표 공고 + 서류 AI 컨설팅 |
 | `/api/settings` | GET · PUT | 텔레그램 설정 조회·저장(토큰은 응답하지 않음) |
-| `/api/settings/ai`, `/api/settings/data-keys` | PUT · DELETE | AI·외부 데이터 키 저장·삭제(설정 여부·출처만 응답) |
+| `/api/settings/ai`, `/api/settings/openai`, `/api/settings/data-keys` | PUT · DELETE | Claude(`sk-ant-`)·OpenAI(`sk-`)·외부 데이터 키 저장·삭제(설정 여부·출처·사용 공급자만 응답) |
 | `/api/telegram/test` | POST | 가장 가까운 일정을 실제 알림 형식으로 테스트 발송 |
 | `/api/health` | GET | 상태 확인(Docker는 사이트 비밀번호를 붙여 호출, 게스트 모드에서는 DB를 만들지 않음) |
 
@@ -133,7 +134,7 @@ erDiagram
   scholarship_notices ||--o| scholarship_imports : "notice_id (DB 간 논리 참조)"
 
   campus_profile { int id PK  text value "JSON: 학년·전공·학점·관심 직무" }
-  campus_settings { text token  text chat_id  int enabled  text anthropic_api_key  text data_go_kr_api_key  text saramin_api_key  text worker_last_seen }
+  campus_settings { text token  text chat_id  int enabled  text anthropic_api_key  text openai_api_key  text data_go_kr_api_key  text saramin_api_key  text worker_last_seen }
   campus_events { text id PK  text value "JSON: 종류·제목·날짜·시각·체크리스트·알림"  int completed  int revision  text idempotency_key UK }
   campus_reminders { text id PK  text event_id  text channel "app | telegram"  text scheduled_at  int revision  text status  int attempts  text lease_until  text claimed_by }
   scholarship_preferences { int enabled  text keywords }
@@ -208,16 +209,20 @@ sequenceDiagram
   participant U as 화면
   participant A as /api/analyze · /api/coach
   participant L as lib/ai.ts
-  participant C as Anthropic
+  participant C as Claude 또는 OpenAI
   U->>A: 공지 텍스트(작성일·수업 시간) / 공고 + 서류
   A->>L: Zod 입력 검증
-  L->>L: 키 선택 (UI 저장 키 우선 → 환경변수, 게스트 모드는 저장 키만)
-  L->>C: messages.parse + Zod 출력 스키마
+  L->>L: 키 선택: Claude 키 → 없으면 OpenAI 키 (각각 UI 저장 키 우선 → 환경변수, 게스트 모드는 저장 키만)
+  L->>C: Claude messages.parse + Zod 출력 스키마 / OpenAI Chat Completions JSON 응답 + 스키마 안내
   C-->>L: 구조화 결과
   L->>L: 날짜·시각 실재 여부, 서류 인용문이 원문에 있는지 검증
   L-->>U: 결과 또는 오류 (입력 유지, 일정 자동 저장 없음)
   U->>U: 사용자가 확인·수정 후 일정 등록
 ```
+
+- 두 공급자의 결과를 같은 Zod 스키마로 검증한다. 실패하면 공급자 이름과 HTTP 상태(401·403 키, 429 한도, 404 모델)로 원인을 알리고 응답 본문은 버린다.
+- 키 칸은 접두사로 검증한다. DB를 열 때 Claude 칸에 있던 OpenAI 키(`sk-`, `sk-ant-` 아님)는 비어 있는 OpenAI 칸으로 옮긴다.
+- 장학공지 자동 등록(6.2)과 데모용 자동화 테스트(`/api/scholarships/test`, `runPipelineTest`)도 같은 `analyzeText`를 쓴다. 자동화 테스트는 일정을 만들지 않고 텔레그램으로 바로 보낸다.
 
 AI 결과는 항상 사용자 확인을 거쳐 일정이 된다. 샘플 결과는 샘플 입력에만 쓰고, 실제 입력의 분석 실패를 샘플로 대체하지 않는다.
 
@@ -276,7 +281,7 @@ flowchart TD
 | 항목 | 처리 |
 |---|---|
 | 비밀값 | API 키·봇 토큰은 서버 DB에만 저장, 상태 응답·로그·클라이언트 번들에 포함하지 않음 |
-| 공유 범위 | 공개 서버는 비밀번호를 아는 사람끼리 데이터·키를 공유 → 팀 공용 키만 저장. 게스트 모드는 방문자별 DB와 저장 키만 사용 |
+| 공유 범위 | 공개 서버는 접속자 모두가 데이터·키를 공유 → 팀 공용 키만 저장. `BASIC_AUTH_*`를 설정해야 비밀번호로 보호되며, 2026-10-03 현재 운영 서버는 미설정. 게스트 모드는 방문자별 DB와 저장 키만 사용 |
 | 파일 권한 | DB·WAL·SHM `0600`, 데이터·세션 디렉터리 `0700`, 세션 서명 키 `0600` |
 | 응답 헤더 | HSTS·nosniff·Referrer-Policy(Caddy), 게스트 모드는 `Cache-Control: private, no-store`·CORP same-origin 추가 |
 | 외부 요청 | 서버가 읽는 주소는 고정 출처뿐. 사용자가 넣는 URL은 eCampus 달력 내보내기 주소 형식만 허용 |
@@ -301,7 +306,7 @@ flowchart LR
 |---|---|---|
 | Docker Compose | web + worker(같은 이미지, 명령만 다름) + Caddy, `campus.knowverse.net`, `PUBLIC_ACCESS_MODE=private` 고정 | 상시 운영 |
 | nginx 서버 | Caddy 없이 web을 `127.0.0.1:3100`에 열고 기존 nginx로 프록시 | 80·443을 이미 쓰는 서버 |
-| Cloudflare 터널 | `scripts/share-public.sh`, 맥에서 실행. `private` 강제, 시작 전 DB 백업, DB 없으면 중단 | 무료 데모 |
+| Cloudflare 터널 | 맥에서 실행. 현재 운영은 `ai-builder-release`(main)를 `PORT=3220 npm start`로 띄우고 터널 하나만 연결. `.env.local`에 `DATABASE_URL`·`DATABASE_REQUIRE_EXISTING=1`·`APP_URL`(터널 주소) 고정. `scripts/share-public.sh`는 `private` 강제, 시작 전 DB 백업, DB 없으면 중단 | 무료 데모 |
 | 로컬 | `npm run dev`(web + worker 동시 실행) | 개발 |
 
 - worker가 없으면 앱 내 알림도 처리되지 않는다(`pending → sent`를 worker가 담당).
