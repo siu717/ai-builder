@@ -3,7 +3,8 @@ import type { Client } from "@libsql/client";
 import { load } from "cheerio";
 import robotsParser from "robots-parser";
 import { getDatabase, getSharedDatabase } from "./db";
-import { createEvent, getState, updateEvent } from "./store";
+import { createEvent, getPrivateSettings, getProfile, getState, updateEvent } from "./store";
+import { notificationText, sendTelegramMessage } from "./telegram";
 import type { AnalysisResult, EventInput, Profile } from "./contracts";
 import { AIInputError, analyzeText } from "./ai";
 import { z } from "zod";
@@ -294,4 +295,69 @@ export async function syncScholarshipEvents(notices: ScholarshipNotice[], databa
     await db.execute({ sql: "INSERT INTO scholarship_imports(notice_id, event_id, content_hash) VALUES(?, ?, ?) ON CONFLICT(notice_id) DO UPDATE SET content_hash = excluded.content_hash", args: [notice.id, eventId, notice.contentHash] });
   }
   return result;
+}
+
+// 데모용 자동화 점검: 수집된 공지 하나를 골라 AI 분석 후 텔레그램으로 바로 보낸다.
+// 일정을 만들지 않으므로 여러 번 실행해도 데이터가 쌓이지 않는다.
+export interface PipelineStep { id: "collect" | "analyze" | "telegram"; label: string; ok: boolean; detail: string }
+export interface PipelineTestResult {
+  notice: { title: string; url: string; deadline: string | null } | null;
+  steps: PipelineStep[];
+  message: string | null;
+}
+
+function seoulTime(value: string | null): string {
+  return value ? new Date(value).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "기록 없음";
+}
+
+export async function runPipelineTest(options: { database?: Client; shared?: Client; now?: Date; fetcher?: typeof fetch; analyze?: NoticeAnalyzer } = {}): Promise<PipelineTestResult> {
+  const db = options.database || await getDatabase();
+  const shared = options.shared || await getSharedDatabase();
+  const now = options.now || new Date();
+  const today = new Date(now.getTime() + 9 * 3_600_000).toISOString().slice(0, 10);
+  const status = await getCollectionStatus(shared);
+  const notices = await getNotices(shared);
+  const open = notices.filter((notice) => notice.deadline && notice.deadline >= today).sort((a, b) => a.deadline!.localeCompare(b.deadline!));
+  const notice = open[0] || notices[0];
+  const steps: PipelineStep[] = [{
+    id: "collect", label: "자동 수집", ok: Boolean(notice),
+    detail: notice
+      ? `국민대 장학공지 ${notices.length}건 · 마지막 수집 ${seoulTime(status.lastSuccess)} · 테스트 공지: ${notice.title}`
+      : `수집된 공지가 없습니다.${status.error ? ` 최근 오류: ${status.error}` : " 알림 워커가 실행 중인지 확인해주세요."}`,
+  }];
+  if (!notice) {
+    steps.push({ id: "analyze", label: "AI 분석", ok: false, detail: "수집된 공지가 없어 건너뛰었습니다." });
+    steps.push({ id: "telegram", label: "텔레그램 발송", ok: false, detail: "수집된 공지가 없어 건너뛰었습니다." });
+    return { notice: null, steps, message: null };
+  }
+
+  let notes: string;
+  try {
+    const analysis = await (options.analyze || analyzeNotice)(notice, await getProfile(db), db, now);
+    notes = analysisNotes(analysis);
+    steps.push({ id: "analyze", label: "AI 분석", ok: true, detail: notes });
+  } catch (error) {
+    const reason = error instanceof AIInputError ? error.message : "AI 분석에 실패했습니다.";
+    notes = `[AI 분석] ${reason}`;
+    steps.push({ id: "analyze", label: "AI 분석", ok: false, detail: reason });
+  }
+
+  const message = notificationText({
+    title: `[자동화 테스트] ${notice.title}`, kind: "scholarship",
+    date: notice.deadline || "확인 필요", time: notice.deadline ? notice.time : null,
+    notes, source: notice.url, isSample: false, reminders: [],
+  });
+  const settings = await getPrivateSettings(db);
+  if (!settings.token || !settings.chatId) {
+    steps.push({ id: "telegram", label: "텔레그램 발송", ok: false, detail: "설정에서 텔레그램 봇 토큰과 Chat ID를 저장해주세요." });
+  } else {
+    const sent = await sendTelegramMessage(settings.token, settings.chatId, message, options.fetcher || fetch);
+    steps.push({
+      id: "telegram", label: "텔레그램 발송", ok: sent.ok,
+      detail: sent.ok
+        ? `${settings.botUsername ? `@${settings.botUsername}` : "봇"}으로 보냈습니다.${settings.enabled ? "" : " (예약 알림은 꺼져 있습니다)"}`
+        : sent.error || "텔레그램 전송에 실패했습니다.",
+    });
+  }
+  return { notice: { title: notice.title, url: notice.url, deadline: notice.deadline }, steps, message };
 }
