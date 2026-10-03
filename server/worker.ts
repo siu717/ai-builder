@@ -3,6 +3,7 @@ import { closeDatabase, getSharedDatabase } from "../lib/db";
 import { processDueReminders } from "../lib/reminder-worker";
 import { forEachAnonymousDatabase, isAnonymousPublicMode, processAnonymousReminders } from "../lib/anonymous-session";
 import { collectScholarships, getNotices, syncScholarshipEvents } from "../lib/scholarships";
+import { backupIfDue } from "../lib/storage";
 
 loadEnvConfig(process.cwd());
 
@@ -12,6 +13,16 @@ let collection: Promise<unknown> | undefined;
 let lastSync = 0;
 // 자동 등록은 1분마다 맞춘다. 공지 수집 주기(30분)는 collection_state가 관리한다.
 const SYNC_INTERVAL_MS = 60_000;
+let lastBackupCheck = 0;
+// 백업 주기(6시간)는 backups 폴더의 마지막 자동 백업 시각으로 판단하고, 확인만 10분마다 한다.
+const BACKUP_CHECK_MS = 10 * 60_000;
+
+async function backups() {
+  if (Date.now() - lastBackupCheck < BACKUP_CHECK_MS) return;
+  lastBackupCheck = Date.now();
+  const backup = await backupIfDue(await getSharedDatabase());
+  if (backup) console.info(`DB 자동 백업: ${backup.name}`);
+}
 
 async function scholarships() {
   const shared = await getSharedDatabase();
@@ -37,7 +48,7 @@ process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
 
 async function main() {
-  console.info("캠퍼스 비서 알림 워커 실행 중 (5초 간격) · 국민대 장학공지 30분 간격 수집");
+  console.info("캠퍼스 비서 알림 워커 실행 중 (5초 간격) · 국민대 장학공지 30분 간격 수집 · DB 6시간 간격 자동 백업");
   while (!stopping) {
     try {
       if (isAnonymousPublicMode()) await processAnonymousReminders();
@@ -49,6 +60,11 @@ async function main() {
       await scholarships();
     } catch {
       console.error("장학공지 자동 등록에 실패했습니다. 다음 주기에 재시도합니다.");
+    }
+    try {
+      await backups();
+    } catch {
+      console.error("DB 자동 백업에 실패했습니다. 다음 주기에 재시도합니다.");
     }
     if (!stopping) {
       await new Promise<void>((resolve) => {

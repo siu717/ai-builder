@@ -14,6 +14,8 @@ import {
   Trash2,
   Database,
   ShieldCheck,
+  HardDrive,
+  History,
 } from "lucide-react";
 import {
   DATA_PROVIDERS,
@@ -21,6 +23,7 @@ import {
   type DataProvider,
   type Profile,
   type PublicSettings,
+  type StorageOverview,
 } from "@/lib/contracts";
 import { Busy, Message, request } from "./ui";
 
@@ -235,6 +238,7 @@ export default function Settings({
           </div>
         </section>
       )}
+      <StoredData settings={settings} />
       <section className="settings-section">
         <div className="section-heading">
           <h2>
@@ -629,6 +633,174 @@ export default function Settings({
         </div>
       </section>
     </div>
+  );
+}
+
+function formatBytes(bytes: number | null) {
+  if (bytes === null) return "-";
+  return bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))}KB`
+    : `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+}
+
+function formatTime(value: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// DB에 실제로 저장된 내용을 보여준다. 설정을 저장할 때마다 다시 읽는다.
+function StoredData({ settings }: { settings: PublicSettings }) {
+  const [overview, setOverview] = useState<StorageOverview | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [backingUp, setBackingUp] = useState(false);
+  const [note, setNote] = useState("");
+  useEffect(() => {
+    let active = true;
+    request<StorageOverview>("/api/storage")
+      .then((result) => {
+        if (!active) return;
+        setOverview(result);
+        setLoadError("");
+      })
+      .catch((err) => {
+        if (active)
+          setLoadError(
+            err instanceof Error ? err.message : "저장된 데이터를 불러오지 못했습니다.",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [settings]);
+  async function backupNow() {
+    setBackingUp(true);
+    setNote("");
+    try {
+      const result = await request<StorageOverview>("/api/storage", "POST", {});
+      setOverview(result);
+      setNote(`백업을 만들었습니다: ${result.backups.latest[0]?.name ?? ""}`);
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "백업하지 못했습니다.");
+    } finally {
+      setBackingUp(false);
+    }
+  }
+  const rows: [string, string | null][] = overview
+    ? [
+        ["Anthropic API 키", overview.keys.anthropic],
+        ["공공데이터포털 키", overview.keys.dataGoKr],
+        ["사람인 키", overview.keys.saramin],
+        ["텔레그램 봇 토큰", overview.keys.telegramToken],
+        [
+          "텔레그램 Chat ID",
+          overview.telegram.chatId
+            ? `${overview.telegram.chatId} · 알림 ${overview.telegram.enabled ? "켜짐" : "꺼짐"}`
+            : null,
+        ],
+        [
+          "학생 프로필",
+          [
+            overview.profile.name,
+            overview.profile.major,
+            overview.profile.year === "graduate"
+              ? "졸업 · 졸업 예정"
+              : overview.profile.year && `${overview.profile.year}학년`,
+          ]
+            .filter(Boolean)
+            .join(" · ") || null,
+        ],
+        [
+          "저장된 일정·알림",
+          `일정 ${overview.counts.events}개 · 알림 ${overview.counts.reminders}개 (발송 ${overview.counts.sentReminders}개) · 장학공지 ${overview.counts.scholarshipNotices}개`,
+        ],
+      ]
+    : [];
+  return (
+    <section className="settings-section stored-data-section" aria-label="저장된 데이터">
+      <div className="section-heading">
+        <h2>
+          <HardDrive size={19} />
+          저장된 데이터
+        </h2>
+        {overview && (
+          <span className="status-text status-met">
+            {overview.accessMode === "private" ? "서버 DB 1개에 영구 저장" : "브라우저별 저장"}
+          </span>
+        )}
+      </div>
+      {loadError && <Message text={loadError} error />}
+      {!overview && !loadError && <Busy label="저장된 데이터를 확인하는 중" />}
+      {overview && (
+        <>
+          <dl className="stored-data-list">
+            {rows.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd className={value ? "" : "stored-empty"}>{value ?? "저장 안 됨"}</dd>
+              </div>
+            ))}
+            {overview.database.path && (
+              <div>
+                <dt>DB 파일</dt>
+                <dd>
+                  <code>{overview.database.path}</code> · {formatBytes(overview.database.sizeBytes)} · 수정{" "}
+                  {formatTime(overview.database.modifiedAt)}
+                </dd>
+              </div>
+            )}
+          </dl>
+          {overview.accessMode === "private" && (
+            <div className="stored-backups">
+              <div className="setting-inline">
+                <span>
+                  <History size={16} />
+                  자동 백업
+                </span>
+                <span className="perm-copy">
+                  {overview.backups.intervalHours}시간마다 · 자동 백업 최근 {overview.backups.keep}개 보관 · 전체{" "}
+                  {overview.backups.total}개
+                </span>
+                <button
+                  type="button"
+                  className="button secondary"
+                  disabled={backingUp}
+                  onClick={() => void backupNow()}
+                >
+                  <Save size={15} />
+                  {backingUp ? "백업 중" : "지금 백업"}
+                </button>
+              </div>
+              {note && <p className="perm-note" role="status">{note}</p>}
+              {overview.backups.latest.length > 0 ? (
+                <ul className="stored-backup-list">
+                  {overview.backups.latest.map((file) => (
+                    <li key={file.name}>
+                      <code>{file.name}</code>
+                      <span>
+                        {formatTime(file.createdAt)} · {formatBytes(file.sizeBytes)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="perm-copy">아직 백업이 없습니다. 알림 워커가 실행되면 자동으로 만듭니다.</p>
+              )}
+              {overview.backups.directory && (
+                <p className="perm-copy">
+                  백업 위치: <code>{overview.backups.directory}</code>
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 

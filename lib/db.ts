@@ -1,4 +1,5 @@
 import { createClient, type Client } from "@libsql/client";
+import { existsSync } from "node:fs";
 import { chmod, mkdir, open } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { ANONYMOUS_COOKIE_NAME, closeAnonymousDatabases, getAnonymousDatabase, isAnonymousPublicMode, validateAnonymousSession } from "./anonymous-session";
@@ -98,7 +99,13 @@ export async function createSharedDatabase(databaseUrl: string): Promise<Client>
 
 // 방문자와 무관한 데이터(수집한 학교 공지)를 담는 DB. 비밀번호 보호 모드에서는 개인 DB와 같다.
 export function getSharedDatabase(): Promise<Client> {
-  database ??= createSharedDatabase(process.env.DATABASE_URL || "file:data/campus.db").catch((error) => {
+  const databaseUrl = process.env.DATABASE_URL || "file:data/campus.db";
+  // 운영 서버는 DATABASE_REQUIRE_EXISTING=1로 경로가 바뀌었을 때 빈 DB를 만들어 설정이 사라진 것처럼 보이지 않게 한다.
+  if (!database && process.env.DATABASE_REQUIRE_EXISTING === "1" && databaseUrl.startsWith("file:")
+    && !existsSync(resolve(decodeURIComponent(databaseUrl.slice(5))))) {
+    return Promise.reject(new Error(`DB 파일이 없습니다 (${databaseUrl}). 저장된 설정을 지키기 위해 빈 DB를 만들지 않습니다.`));
+  }
+  database ??= createSharedDatabase(databaseUrl).catch((error) => {
     database = undefined;
     throw error;
   });

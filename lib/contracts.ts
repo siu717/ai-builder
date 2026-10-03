@@ -146,6 +146,24 @@ export interface ExamSchedule {
   steps: ExamStep[];
 }
 
+export interface BackupFile {
+  name: string;
+  createdAt: string;
+  sizeBytes: number;
+  automatic: boolean;
+}
+
+// 설정 화면의 '저장된 데이터'. 비밀값은 앞뒤 4자만 보여준다.
+export interface StorageOverview {
+  accessMode: "anonymous" | "private";
+  database: { path: string | null; sizeBytes: number | null; modifiedAt: string | null };
+  keys: { anthropic: string | null; dataGoKr: string | null; saramin: string | null; telegramToken: string | null };
+  telegram: { chatId: string; enabled: boolean; botUsername: string | null };
+  profile: Profile;
+  counts: { events: number; reminders: number; sentReminders: number; scholarshipNotices: number };
+  backups: { directory: string | null; intervalHours: number; keep: number; latest: BackupFile[]; total: number };
+}
+
 export interface PublicDataResult<T> {
   items: T[];
   total: number;
