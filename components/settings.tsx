@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   Radio,
   KeyRound,
+  Sparkles,
+  Trash2,
 } from "lucide-react";
 import type { AppState, Profile, PublicSettings } from "@/lib/contracts";
 import { Busy, Message, request } from "./ui";
@@ -30,6 +32,10 @@ export default function Settings({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [aiKey, setAiKey] = useState("");
+  const [aiError, setAiError] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
+  const [confirmAiDelete, setConfirmAiDelete] = useState(false);
   const [permission, setPermission] = useState<
     NotificationPermission | "unsupported"
   >("unsupported");
@@ -107,6 +113,47 @@ export default function Settings({
       setPermission(result);
     } catch {
       setError("브라우저 알림 권한을 확인하지 못했습니다.");
+    }
+  }
+  async function saveAiKey(event: React.FormEvent) {
+    event.preventDefault();
+    if (!aiKey.trim() || busy !== null) return;
+    setBusy("ai-save");
+    setAiError("");
+    setAiMessage("");
+    try {
+      const state = await request<AppState>("/api/settings/ai", "PUT", {
+        apiKey: aiKey.trim(),
+      });
+      setAiKey("");
+      setConfirmAiDelete(false);
+      onSave(state);
+      setAiMessage("AI 분석용 API 키를 저장했습니다.");
+    } catch (err) {
+      setAiError(
+        err instanceof Error ? err.message : "API 키를 저장하지 못했습니다.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+  async function deleteAiKey() {
+    if (busy !== null) return;
+    setBusy("ai-delete");
+    setAiError("");
+    setAiMessage("");
+    try {
+      const state = await request<AppState>("/api/settings/ai", "DELETE");
+      setAiKey("");
+      setConfirmAiDelete(false);
+      onSave(state);
+      setAiMessage("저장된 API 키를 삭제했습니다.");
+    } catch (err) {
+      setAiError(
+        err instanceof Error ? err.message : "API 키를 삭제하지 못했습니다.",
+      );
+    } finally {
+      setBusy(null);
     }
   }
   return (
@@ -328,6 +375,102 @@ export default function Settings({
           </a>
         </form>
       </section>
+      <section
+        className="settings-section browser-section"
+        aria-label="AI 분석 설정"
+      >
+        <div className="section-heading">
+          <h2>
+            <Sparkles size={19} />
+            AI 분석 설정
+          </h2>
+          <span
+            className={`status-text ${settings.aiConfigured ? "status-met" : "status-unknown"}`}
+          >
+            {settings.aiKeySource === "saved"
+              ? "설정됨"
+              : settings.aiKeySource === "environment"
+                ? "환경변수 사용"
+                : "키 미설정"}
+          </span>
+        </div>
+        <form onSubmit={saveAiKey} className="ai-key-form">
+          <label className="field">
+            ANTHROPIC_API_KEY
+            <input
+              type="password"
+              autoComplete="new-password"
+              value={aiKey}
+              disabled={busy !== null}
+              onChange={(event) => setAiKey(event.target.value)}
+              placeholder={
+                settings.aiKeySource === "saved"
+                  ? "새 API 키 입력"
+                  : "API 키 입력"
+              }
+            />
+          </label>
+          <div className="inline-actions">
+            <button
+              type="submit"
+              className="button primary"
+              disabled={busy !== null || !aiKey.trim()}
+            >
+              {busy === "ai-save" ? (
+                <Busy label="저장 중" />
+              ) : (
+                <>
+                  <Save size={16} />
+                  API 키 저장
+                </>
+              )}
+            </button>
+            {settings.aiKeySource === "saved" && (
+              <button
+                type="button"
+                className="icon-button danger-text"
+                title="저장된 API 키 삭제"
+                aria-label="저장된 API 키 삭제"
+                disabled={busy !== null}
+                onClick={() => setConfirmAiDelete(true)}
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+          </div>
+          {confirmAiDelete && settings.aiKeySource === "saved" && (
+            <div
+              className="delete-confirm"
+              role="group"
+              aria-label="API 키 삭제 확인"
+            >
+              <span>저장된 API 키를 삭제할까요?</span>
+              <button
+                type="button"
+                className="button danger"
+                disabled={busy !== null}
+                onClick={deleteAiKey}
+              >
+                {busy === "ai-delete" ? (
+                  <Busy label="삭제 중" />
+                ) : (
+                  "API 키 삭제"
+                )}
+              </button>
+              <button
+                type="button"
+                className="text-button"
+                disabled={busy !== null}
+                onClick={() => setConfirmAiDelete(false)}
+              >
+                취소
+              </button>
+            </div>
+          )}
+          {aiError && <Message text={aiError} error />}
+          {aiMessage && <Message text={aiMessage} />}
+        </form>
+      </section>
       <section className="settings-section browser-section">
         <div className="section-heading">
           <h2>
@@ -371,22 +514,7 @@ export default function Settings({
               : "연결 대기"}
           </span>
         </div>
-        <div className="setting-inline">
-          <span>
-            <SparklesIcon />
-            AI 분석
-          </span>
-          <span
-            className={`status-text ${settings.aiConfigured ? "status-met" : "status-unknown"}`}
-          >
-            {settings.aiConfigured ? "연결됨" : "API 키 설정 필요"}
-          </span>
-        </div>
       </section>
     </div>
   );
-}
-
-function SparklesIcon() {
-  return <span className="ai-mini-icon">AI</span>;
 }

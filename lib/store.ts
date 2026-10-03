@@ -3,7 +3,7 @@ import type { Client, InStatement, Row, Transaction } from "@libsql/client";
 import { DEFAULT_PROFILE, type AppState, type CalendarEvent, type EventInput, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
 import { getDatabase } from "./db";
 import { RouteError } from "./http";
-import { profileSchema, settingsSchema, validateEvent } from "./validation";
+import { aiSettingsSchema, profileSchema, settingsSchema, validateEvent } from "./validation";
 import { sendTelegramMessage, verifyTelegramBot } from "./telegram";
 
 type Executor = Client | Transaction;
@@ -54,15 +54,32 @@ export async function getPrivateSettings(database?: Client) {
   };
 }
 
+async function getAnthropicConfiguration(database?: Client) {
+  const db = database || await getDatabase();
+  const result = await db.execute("SELECT anthropic_api_key FROM campus_settings WHERE id = 1");
+  const saved = String(result.rows[0]?.anthropic_api_key || "").trim();
+  const environment = (process.env.ANTHROPIC_API_KEY || "").trim();
+  return {
+    key: saved || environment,
+    source: saved ? "saved" as const : environment ? "environment" as const : null,
+  };
+}
+
+export async function getAnthropicApiKey(database?: Client): Promise<string> {
+  return (await getAnthropicConfiguration(database)).key;
+}
+
 export async function getPublicSettings(database?: Client): Promise<PublicSettings> {
   const settings = await getPrivateSettings(database);
+  const ai = await getAnthropicConfiguration(database);
   return {
     telegramConfigured: Boolean(settings.token && settings.chatId),
     telegramEnabled: settings.enabled,
     telegramChatId: settings.chatId,
     botUsername: settings.botUsername,
     workerLastSeen: settings.workerLastSeen,
-    aiConfigured: Boolean(process.env.ANTHROPIC_API_KEY),
+    aiConfigured: Boolean(ai.key),
+    aiKeySource: ai.source,
   };
 }
 
@@ -76,6 +93,19 @@ export async function getState(database?: Client): Promise<AppState> {
     notifications: reminders.rows.map(reminderFromRow),
     settings: await getPublicSettings(db),
   };
+}
+
+export async function saveAnthropicApiKey(input: unknown, database?: Client): Promise<AppState> {
+  const settings = aiSettingsSchema.parse(input);
+  const db = database || await getDatabase();
+  await db.execute({ sql: "UPDATE campus_settings SET anthropic_api_key = ? WHERE id = 1", args: [settings.apiKey] });
+  return getState(db);
+}
+
+export async function deleteAnthropicApiKey(database?: Client): Promise<AppState> {
+  const db = database || await getDatabase();
+  await db.execute("UPDATE campus_settings SET anthropic_api_key = '' WHERE id = 1");
+  return getState(db);
 }
 
 export async function saveProfile(input: unknown, database?: Client): Promise<AppState> {

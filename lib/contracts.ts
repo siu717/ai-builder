@@ -81,6 +81,7 @@ export interface PublicSettings {
   botUsername: string | null;
   workerLastSeen: string | null;
   aiConfigured: boolean;
+  aiKeySource: "saved" | "environment" | null;
 }
 
 export interface AppState {
