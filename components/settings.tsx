@@ -158,7 +158,7 @@ export default function Settings({
       return;
     }
     try {
-      new Notification("참십 Campus 테스트", {
+      new Notification("참십 테스트", {
         body: "브라우저 알림이 켜져 있습니다.",
       });
       setPermissionNote(
