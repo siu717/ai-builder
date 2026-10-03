@@ -74,6 +74,10 @@ export interface ReminderRecord {
   read: boolean;
 }
 
+export type KeySource = "saved" | "environment" | null;
+export type DataProvider = "dataGoKr" | "saramin";
+export const DATA_PROVIDERS: DataProvider[] = ["dataGoKr", "saramin"];
+
 export interface PublicSettings {
   telegramConfigured: boolean;
   telegramEnabled: boolean;
@@ -81,7 +85,8 @@ export interface PublicSettings {
   botUsername: string | null;
   workerLastSeen: string | null;
   aiConfigured: boolean;
-  aiKeySource: "saved" | "environment" | null;
+  aiKeySource: KeySource;
+  dataKeys: Record<DataProvider, KeySource>;
 }
 
 export interface AppState {

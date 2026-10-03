@@ -88,9 +88,15 @@ export const settingsSchema = z.object({
   }
 });
 
-export const aiSettingsSchema = z.object({
-  apiKey: z.string().trim()
-    .min(1, "API 키를 입력해주세요.")
-    .max(4096, "API 키는 4096자 이내로 입력해주세요.")
-    .refine((key) => !/[\s\p{Cc}]/u.test(key), "API 키에 공백이나 제어 문자를 사용할 수 없습니다."),
-}).strict();
+const apiKeySchema = z.string().trim()
+  .min(1, "API 키를 입력해주세요.")
+  .max(4096, "API 키는 4096자 이내로 입력해주세요.")
+  .refine((key) => !/[\s\p{Cc}]/u.test(key), "API 키에 공백이나 제어 문자를 사용할 수 없습니다.");
+
+export const aiSettingsSchema = z.object({ apiKey: apiKeySchema }).strict();
+
+const dataProviderSchema = z.enum(["dataGoKr", "saramin"]);
+
+export const dataKeySchema = z.object({ provider: dataProviderSchema, apiKey: apiKeySchema }).strict();
+
+export const dataKeyDeleteSchema = z.object({ provider: dataProviderSchema }).strict();

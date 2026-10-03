@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { Client, InStatement, Row, Transaction } from "@libsql/client";
-import { DEFAULT_PROFILE, type AppState, type CalendarEvent, type EventInput, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
+import { DATA_PROVIDERS, DEFAULT_PROFILE, type AppState, type DataProvider, type KeySource, type CalendarEvent, type EventInput, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
 import { getDatabase } from "./db";
 import { RouteError } from "./http";
-import { aiSettingsSchema, profileSchema, settingsSchema, validateEvent } from "./validation";
+import { aiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
 import { sendTelegramMessage, verifyTelegramBot } from "./telegram";
 
 type Executor = Client | Transaction;
@@ -69,9 +69,40 @@ export async function getAnthropicApiKey(database?: Client): Promise<string> {
   return (await getAnthropicConfiguration(database)).key;
 }
 
+const DATA_KEYS: Record<DataProvider, { column: string; environment: string }> = {
+  dataGoKr: { column: "data_go_kr_api_key", environment: "DATA_GO_KR_API_KEY" },
+  saramin: { column: "saramin_api_key", environment: "SARAMIN_API_KEY" },
+};
+
+async function getDataKeyConfiguration(provider: DataProvider, database?: Client): Promise<{ key: string; source: KeySource }> {
+  const db = database || await getDatabase();
+  const { column, environment: variable } = DATA_KEYS[provider];
+  const result = await db.execute(`SELECT ${column} AS api_key FROM campus_settings WHERE id = 1`);
+  const saved = String(result.rows[0]?.api_key || "").trim();
+  const environment = (process.env[variable] || "").trim();
+  return { key: saved || environment, source: saved ? "saved" : environment ? "environment" : null };
+}
+
+export async function getDataApiKey(provider: DataProvider, database?: Client): Promise<string> {
+  return (await getDataKeyConfiguration(provider, database)).key;
+}
+
+// 공공데이터포털은 Encoding 키(%2B 등)와 Decoding 키를 함께 보여준다. 요청 시 한 번만 인코딩하도록 Decoding 형태로 저장한다.
+function normalizeDataKey(provider: DataProvider, key: string): string {
+  if (provider !== "dataGoKr" || !/%[0-9a-f]{2}/i.test(key)) return key;
+  try {
+    return decodeURIComponent(key);
+  } catch {
+    throw new RouteError(400, "공공데이터포털 인증키 형식을 확인해주세요.");
+  }
+}
+
 export async function getPublicSettings(database?: Client): Promise<PublicSettings> {
   const settings = await getPrivateSettings(database);
   const ai = await getAnthropicConfiguration(database);
+  const dataKeys = Object.fromEntries(await Promise.all(
+    DATA_PROVIDERS.map(async (provider) => [provider, (await getDataKeyConfiguration(provider, database)).source]),
+  )) as Record<DataProvider, KeySource>;
   return {
     telegramConfigured: Boolean(settings.token && settings.chatId),
     telegramEnabled: settings.enabled,
@@ -80,6 +111,7 @@ export async function getPublicSettings(database?: Client): Promise<PublicSettin
     workerLastSeen: settings.workerLastSeen,
     aiConfigured: Boolean(ai.key),
     aiKeySource: ai.source,
+    dataKeys,
   };
 }
 
@@ -105,6 +137,20 @@ export async function saveAnthropicApiKey(input: unknown, database?: Client): Pr
 export async function deleteAnthropicApiKey(database?: Client): Promise<AppState> {
   const db = database || await getDatabase();
   await db.execute("UPDATE campus_settings SET anthropic_api_key = '' WHERE id = 1");
+  return getState(db);
+}
+
+export async function saveDataApiKey(input: unknown, database?: Client): Promise<AppState> {
+  const { provider, apiKey } = dataKeySchema.parse(input);
+  const db = database || await getDatabase();
+  await db.execute({ sql: `UPDATE campus_settings SET ${DATA_KEYS[provider].column} = ? WHERE id = 1`, args: [normalizeDataKey(provider, apiKey)] });
+  return getState(db);
+}
+
+export async function deleteDataApiKey(input: unknown, database?: Client): Promise<AppState> {
+  const { provider } = dataKeyDeleteSchema.parse(input);
+  const db = database || await getDatabase();
+  await db.execute(`UPDATE campus_settings SET ${DATA_KEYS[provider].column} = '' WHERE id = 1`);
   return getState(db);
 }
 

@@ -41,6 +41,12 @@ npm run dev
 
 모델은 `ANTHROPIC_MODEL`로 지정하며 기본값은 `claude-sonnet-4-6`이다. 전체 설정 항목은 [.env.example](.env.example)을 참고한다.
 
+### 외부 데이터 API 키
+
+**설정 → 외부 데이터 API**에서 공공데이터포털(`DATA_GO_KR_API_KEY`)과 사람인(`SARAMIN_API_KEY`) 키를 저장한다. 공공데이터포털은 공공기관 채용정보·큐넷 시험일정·장학금 데이터를 각각 활용신청한 뒤 마이페이지의 일반 인증키 하나를 입력하면 되고, Encoding 키를 넣어도 Decoding 형태로 저장한다. 키는 AI 키와 같은 방식으로 서버 SQLite에만 보관하며 환경변수도 지원한다. 키를 사용해 데이터를 가져오는 기능은 아직 연결하지 않았다.
+
+사람인 API 승인 전에는 [fixtures/saramin](fixtures/saramin)의 더미 데이터를 사용한다. `job-search.json`은 사람인 채용공고 검색 API 응답 형식의 가상 공고 100건이고, `student-profile.json`은 가상의 국민대학교 소프트웨어학부 3학년 프로필이다. `node fixtures/saramin/generate.mjs fixtures/saramin`으로 같은 데이터를 다시 만든다.
+
 API 키가 없어도 명시된 샘플 공고·과제·컨설팅으로 흐름을 확인할 수 있다. 샘플과 실제 AI 결과를 구분하고, 사용자 텍스트의 분석 실패를 샘플 결과로 대체하지 않는다.
 
 ### 텔레그램 알림
