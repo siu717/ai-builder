@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { createDatabase, createSharedDatabase } from "../lib/db";
 import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, parseNoticeLinks, parseScholarship, saveScholarshipPreferences, syncScholarshipEvents } from "../lib/scholarships";
 import { deleteEvent, getState, updateEvent } from "../lib/store";
+import { processDueReminders } from "../lib/reminder-worker";
 import type { EventInput } from "../lib/contracts";
 const now = new Date("2026-10-03T00:00:00Z");
 const url = "https://www.kookmin.ac.kr/user/kmuNews/notice/7/12345/view.do";
@@ -83,6 +84,40 @@ test("personal rules register once, update deadlines, preserve edits and respect
   await deleteEvent(event.id, user);
   await syncScholarshipEvents([notice], user, now);
   assert.equal((await getState(user)).events.length, 0);
+});
+
+test("auto-registered notices are sent to Telegram right away and again 3 and 1 days before the deadline", async (t) => {
+  const { user } = await fixture(t);
+  await user.execute("UPDATE campus_settings SET token = '123456:test-token', chat_id = '42', enabled = 1 WHERE id = 1");
+  await saveScholarshipPreferences({ enabled: true, keywords: "" }, user);
+  const notice = parseScholarship(html, url, now);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).created, 1);
+  const [event] = (await getState(user)).events;
+  assert.deepEqual(event.reminders, [
+    { at: "2026-10-03T00:01:00.000Z", channel: "telegram" },
+    { at: "2026-10-12T00:00:00.000Z", channel: "telegram" },
+    { at: "2026-10-14T00:00:00.000Z", channel: "telegram" },
+  ]);
+
+  const sent: { chat_id: string; text: string }[] = [];
+  const fetcher = (async (input: string | URL | Request, init?: RequestInit) => {
+    assert.match(String(input), /api\.telegram\.org\/bot123456:test-token\/sendMessage/);
+    sent.push(JSON.parse(String(init?.body)));
+    return new Response(JSON.stringify({ ok: true, result: {} }));
+  }) as typeof fetch;
+  const totals = await processDueReminders({ database: user, now: new Date(now.getTime() + 2 * 60_000), fetcher });
+  assert.equal(totals.sent, 1, "only the registration alert is due");
+  assert.equal(sent[0].chat_id, "42");
+  assert.match(sent[0].text, /소프트웨어 생활비 장학금/);
+  assert.match(sent[0].text, /마감: 2026-10-15 18:00/);
+  assert.ok(sent[0].text.includes(`원문: ${url}`));
+  assert.equal((await processDueReminders({ database: user, now: new Date("2026-10-12T00:00:05Z"), fetcher })).sent, 1);
+  assert.equal(sent.length, 2);
+
+  const late = parseScholarship(html.replace("12345", "12346").replace("10.15.(목) 18:00", "10.03.(토) 18:00"), url.replace("12345", "12346"), now);
+  await syncScholarshipEvents([late], user, now);
+  const urgent = (await getState(user)).events.find((item) => item.idempotencyKey === late.id)!;
+  assert.deepEqual(urgent.reminders.map((reminder) => reminder.at), ["2026-10-03T00:01:00.000Z"], "past D-3/D-1 slots are skipped");
 });
 
 test("uncertain source revisions stop reminders, past revisions update deadlines and stale automation cannot overwrite manual edits", async (t) => {

@@ -93,7 +93,7 @@ export default function ScholarshipFeed({
         <div className="automation-copy">
           <span className="opp-eyebrow">자동 등록</span>
           <h2>장학금 마감 자동 등록</h2>
-          <p>키워드가 맞고 신청 마감이 본문에 명확한 국민대 공지를 내 캘린더에 등록합니다. 원문 마감이 바뀌면 일정도 따라 바뀌고, 직접 고치거나 지운 일정은 다시 건드리지 않습니다.</p>
+          <p>키워드가 맞고 신청 마감이 본문에 명확한 국민대 공지를 내 캘린더에 등록합니다. 원문 마감이 바뀌면 일정도 따라 바뀌고, 직접 고치거나 지운 일정은 다시 건드리지 않습니다. 등록하면 텔레그램으로 바로 알리고, 마감 3일 전·1일 전 오전 9시에 다시 알립니다.</p>
         </div>
         <div className="automation-fields">
           <label className="check-inline">
