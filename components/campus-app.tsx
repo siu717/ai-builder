@@ -498,7 +498,7 @@ export default function CampusApp() {
             </span>
           </button>
           <nav className="main-nav" aria-label="주 메뉴">
-            {NAV.map(({ id, label }) => (
+            {NAV.filter(({ id }) => id !== "notifications").map(({ id, label }) => (
               <button
                 type="button"
                 key={id}
@@ -510,13 +510,21 @@ export default function CampusApp() {
                 }}
               >
                 <span>{label}</span>
-                {id === "notifications" && unread > 0 && (
-                  <span className="nav-count">{unread}</span>
-                )}
               </button>
             ))}
           </nav>
           <div className="topbar-actions">
+            <button
+              type="button"
+              className="icon-button notification-button"
+              title="알림함"
+              aria-label={`알림함, 읽지 않은 알림 ${unread}개`}
+              aria-current={view === "notifications" ? "page" : undefined}
+              onClick={() => setView("notifications")}
+            >
+              <Bell size={20} />
+              {unread > 0 && <span className="notification-dot" />}
+            </button>
             <button
               type="button"
               className="avatar topbar-avatar"
