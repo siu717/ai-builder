@@ -164,3 +164,9 @@ export function isoFromSeoul(value: string) {
     `${value.length === 16 ? `${value}:00` : value}+09:00`,
   ).toISOString();
 }
+
+export function reminderToISO(draft: { at: string; originalAt?: string }) {
+  return draft.originalAt && draft.at === seoulInput(draft.originalAt)
+    ? draft.originalAt
+    : isoFromSeoul(draft.at);
+}

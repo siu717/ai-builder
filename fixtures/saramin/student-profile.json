@@ -1,0 +1,9 @@
+{
+  "name": "한지우",
+  "year": "3",
+  "major": "소프트웨어학부 (국민대학교 소프트웨어융합대학)",
+  "gpa": "3.82",
+  "gpaScale": "4.5",
+  "interests": "백엔드 개발, 데이터 엔지니어링, LLM 기반 AI 서비스, 클라우드",
+  "experience": "국민대학교 소프트웨어학부 3학년 재학 중 (2027년 8월 졸업 예정, 서울 성북구 거주).\nJava·Spring Boot로 교내 동아리 출석·회비 관리 API를 만들고 AWS EC2와 RDS에 배포했습니다 (팀 4명, 백엔드 담당).\nPython·FastAPI와 Claude API로 강의 공지 요약 챗봇을 만들어 학과 디스코드에서 한 학기 동안 운영했습니다.\n캡스톤디자인에서 React·TypeScript 프론트엔드와 PostgreSQL 스키마 설계를 맡았습니다.\nSQLD 취득, TOEIC 860. Git·GitHub Actions로 협업과 CI를 경험했습니다.\n아직 인턴 경력은 없으며 2027년 상반기 인턴 또는 정규직 전환형 인턴을 찾고 있습니다."
+}

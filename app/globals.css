@@ -281,6 +281,10 @@ textarea { resize: vertical; line-height: 1.75; }
 .setting-inline > span:first-child { display: flex; align-items: center; gap: 7px; width: 140px; font-size: 11px; color: #75828a; }
 .setting-inline .button { margin-left: auto; }
 .ai-mini-icon { font-size: 9px; font-weight: 650; width: 16px; }
+.ai-key-form { max-width: 540px; }
+.data-key-form + .data-key-form { margin-top: 20px; border-top: 1px solid var(--line); }
+.data-key-form .setting-inline .text-button { margin-left: auto; }
+.data-key-hint { margin: 10px 0 12px; color: #75828a; font-size: 11px; line-height: 1.6; }
 .notification-empty { min-height: 370px; }
 .notification-row { display: flex; gap: 15px; align-items: center; padding: 18px 13px; border-bottom: 1px solid #edf2e0; }
 .notification-row.unread { background: #fcfef7; }

@@ -18,12 +18,12 @@ import {
   request,
   seoulDate,
   seoulInput,
-  isoFromSeoul,
+  reminderToISO,
 } from "./ui";
 import ChecklistEditor from "./checklist-editor";
 import type { ChecklistItem } from "@/lib/checklist";
 
-type ReminderDraft = { at: string; channel: Channel };
+type ReminderDraft = { at: string; channel: Channel; originalAt?: string };
 export type EventDraft = Partial<EventInput> & {
   id?: string;
   completed?: boolean;
@@ -51,7 +51,7 @@ export default function EventEditor({
   const [reminders, setReminders] = useState<ReminderDraft[]>(
     (initial.reminders || [])
       .filter((item) => new Date(item.at).getTime() > Date.now())
-      .map((item) => ({ at: seoulInput(item.at), channel: item.channel })),
+      .map((item) => ({ at: seoulInput(item.at), channel: item.channel, originalAt: item.at })),
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -65,13 +65,13 @@ export default function EventEditor({
   );
 
   function addReminder(offset?: number) {
-    let at: string;
+    let originalAt: string;
     if (offset !== undefined && date) {
       const value = new Date(`${date}T${time || "09:00"}:00+09:00`);
       value.setUTCDate(value.getUTCDate() - offset);
-      at = seoulInput(value.toISOString());
-    } else at = seoulInput(new Date(Date.now() + 60_000).toISOString());
-    setReminders([...reminders, { at, channel: "app" }]);
+      originalAt = value.toISOString();
+    } else originalAt = new Date(Date.now() + 60_000).toISOString();
+    setReminders([...reminders, { at: seoulInput(originalAt), originalAt, channel: "app" }]);
   }
 
   async function save(event: React.FormEvent) {
@@ -100,14 +100,14 @@ export default function EventEditor({
       return;
     }
     const formatted = reminders.map((item) => ({
-      at: isoFromSeoul(item.at),
+      at: reminderToISO(item),
       channel: item.channel,
     }));
     if (formatted.some((item) => new Date(item.at).getTime() <= Date.now())) {
       setError("이미 지난 알림 시각입니다. 미래 시각을 선택해 주세요.");
       return;
     }
-    const deadline = new Date(`${date}T${time || "23:59"}:00+09:00`).getTime();
+    const deadline = new Date(`${date}T${time ? `${time}:00` : "23:59:59.999"}+09:00`).getTime();
     if (formatted.some((item) => new Date(item.at).getTime() > deadline)) {
       setError("알림은 마감 날짜 또는 시각 이전으로 설정해 주세요.");
       return;

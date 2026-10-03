@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import type { AppState, EventInput } from "../lib/contracts";
 
-test("preparation checklist saves edits and progress on desktop and mobile", async ({ page, request }) => {
+test("preparation checklist saves edits and progress on desktop and mobile", async ({ page, request }, testInfo) => {
   const title = `준비물 검수 ${randomUUID().slice(0, 8)}`;
   const input: EventInput = {
     title,
@@ -37,6 +37,7 @@ test("preparation checklist saves edits and progress on desktop and mobile", asy
     await dialog.getByLabel("준비물 2", { exact: true }).fill("신청서 서명");
     await dialog.getByRole("checkbox", { name: "재학증명서 발급 준비 완료", exact: true }).check();
     await expect(dialog.getByText("1/2개 준비 완료", { exact: true })).toBeVisible();
+    await dialog.screenshot({ path: testInfo.outputPath("checklist-editor.png") });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await dialog.getByRole("button", { name: "일정 저장", exact: true }).click();
     await expect(dialog).not.toBeVisible();

@@ -144,7 +144,7 @@ export function AnalyzeModal({
               className={`connection-label ${configured ? "connected" : ""}`}
             >
               <span />
-              {configured ? "AI 연결됨" : "AI 연결 대기"}
+              {configured ? "AI 키 설정됨" : "AI 키 미설정"}
             </span>
           </div>
           <div className="segmented analysis-kinds">
@@ -596,7 +596,7 @@ export function Coaching({
           <h2>지원 준비</h2>
           <span className={`connection-label ${configured ? "connected" : ""}`}>
             <span />
-            {configured ? "AI 연결됨" : "AI 연결 대기"}
+            {configured ? "AI 키 설정됨" : "AI 키 미설정"}
           </span>
         </div>
         <label className="field">

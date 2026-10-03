@@ -1,12 +1,49 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test, { type TestContext } from "node:test";
 
 import {
-  AIInputError, DEFAULT_MODEL, analysisResultSchema, analyzeRequestSchema, analyzeText, coachResume,
-  coachingRequestSchema, coachingResultSchema, isCalendarDate, outputEffort, resolveModel, validateCoachingQuotes,
+  AIInputError, analysisResultSchema, analyzeRequestSchema, analyzeText, coachResume,
+  coachingRequestSchema, coachingResultSchema, isCalendarDate, validateCoachingQuotes,
 } from "../lib/ai";
 import { getCatalog } from "../lib/catalog";
 import { COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE, DEFAULT_PROFILE, TASK_SAMPLE } from "../lib/contracts";
+import { createDatabase } from "../lib/db";
+import { deleteAnthropicApiKey, saveAnthropicApiKey } from "../lib/store";
+
+async function fixture(t: TestContext) {
+  const directory = await mkdtemp(join(tmpdir(), "campus-ai-"));
+  const database = await createDatabase(`file:${join(directory, "campus.db")}`);
+  t.after(async () => { database.close(); await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => undefined); });
+  return database;
+}
+
+function sdkResponse(payload: object): Response {
+  return Response.json({
+    id: "msg_test", type: "message", role: "assistant", model: "claude-sonnet-4-6",
+    content: [{ type: "text", text: JSON.stringify(payload) }],
+    stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
+  });
+}
+
+function mockAnalysis() {
+  return {
+    title: "과제 제출", kind: "assignment", date: "2026-10-08", time: null,
+    subject: "수업", submission: "LMS", summary: "과제 제출 공지",
+    missing: ["마감 시간 확인 필요"], documents: [], conditions: [],
+  };
+}
+
+function mockCoaching() {
+  return {
+    summary: "실제 경험을 구체적으로 적어 주세요.",
+    feedback: [{ quote: "내 실제 서류", suggestion: "직접 수행한 업무를 설명해 주세요.", reason: "기여 범위를 확인하기 위해서입니다." }],
+    questions: ["본인이 맡은 역할은 무엇인가요?"],
+    tasks: [{ title: "경험 정리", notes: "실제 수행한 역할과 과정을 정리합니다." }],
+  };
+}
 
 test("input validation rejects nonexistent calendar days, invalid time and blank documents", () => {
   assert.equal(isCalendarDate("2026-02-29"), false);
@@ -46,12 +83,13 @@ test("sample analysis only accepts the exact supplied sample document", async ()
   assert.equal(result.time, null);
 });
 
-test("AI key absence returns an actionable error instead of pretending to analyze arbitrary text", async () => {
+test("AI key absence returns an actionable error instead of pretending to analyze arbitrary text", async (t) => {
+  const database = await fixture(t);
   const previous = process.env.ANTHROPIC_API_KEY;
   delete process.env.ANTHROPIC_API_KEY;
   try {
-    await assert.rejects(analyzeText({ text: "내 실제 과제 공지", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE), (error) => error instanceof AIInputError && error.status === 503 && error.message.includes("ANTHROPIC_API_KEY"));
-    await assert.rejects(coachResume({ jobText: "내 실제 공고", resumeText: "내 실제 서류", sample: false }), (error) => error instanceof AIInputError && error.status === 503);
+    await assert.rejects(analyzeText({ text: "내 실제 과제 공지", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database), (error) => error instanceof AIInputError && error.status === 503 && error.message.includes("설정 화면") && error.message.includes("ANTHROPIC_API_KEY"));
+    await assert.rejects(coachResume({ jobText: "내 실제 공고", resumeText: "내 실제 서류", sample: false }, database), (error) => error instanceof AIInputError && error.status === 503);
   } finally {
     if (previous === undefined) delete process.env.ANTHROPIC_API_KEY;
     else process.env.ANTHROPIC_API_KEY = previous;
@@ -75,7 +113,8 @@ test("coaching sample quotes only submitted facts and rejects changed sample inp
   await assert.rejects(coachResume({ jobText: COACH_JOB_SAMPLE, resumeText: `${COACH_RESUME_SAMPLE} 수정`, sample: true }), (error) => error instanceof AIInputError && error.status === 422);
 });
 
-test("live analysis uses the SDK structured output contract and validates mocked responses", async () => {
+test("live analysis uses the SDK structured output contract and validates mocked responses", async (t) => {
+  const database = await fixture(t);
   const previousKey = process.env.ANTHROPIC_API_KEY;
   const previousModel = process.env.ANTHROPIC_MODEL;
   const previousFetch = globalThis.fetch;
@@ -85,24 +124,17 @@ test("live analysis uses the SDK structured output contract and validates mocked
   let responseDate = "2026-10-08";
   globalThis.fetch = async (_input, init) => {
     requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
-    return Response.json({
-      id: "msg_test", type: "message", role: "assistant", model: "claude-sonnet-4-6",
-      content: [{ type: "text", text: JSON.stringify({
-        title: "과제 제출", kind: "assignment", date: responseDate, time: null,
-        subject: "수업", submission: "LMS", summary: "과제 제출 공지", missing: ["마감 시간 확인 필요"], documents: [], conditions: [],
-      }) }],
-      stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
-    });
+    return sdkResponse({ ...mockAnalysis(), date: responseDate });
   };
   try {
-    const result = await analyzeText({ text: "2026-10-08까지 과제 제출", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE);
+    const result = await analyzeText({ text: "2026-10-08까지 과제 제출", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database);
     assert.equal(result.mode, "live");
     assert.equal(result.time, null);
     assert.equal(requestBody?.model, "claude-sonnet-4-6");
     assert.deepEqual((requestBody?.output_config as { format: { type: string } }).format.type, "json_schema");
     assert.ok(String(requestBody?.system).includes("신뢰하지 않는 데이터"));
     responseDate = "2026-02-30";
-    await assert.rejects(analyzeText({ text: "날짜 분석", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE), (error) => error instanceof AIInputError && error.status === 502 && !error.message.includes("test-only-not-a-live-key"));
+    await assert.rejects(analyzeText({ text: "날짜 분석", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database), (error) => error instanceof AIInputError && error.status === 502 && !error.message.includes("test-only-not-a-live-key"));
   } finally {
     globalThis.fetch = previousFetch;
     if (previousKey === undefined) delete process.env.ANTHROPIC_API_KEY;
@@ -112,66 +144,62 @@ test("live analysis uses the SDK structured output contract and validates mocked
   }
 });
 
-test("default model is Claude Opus 5.5 and ANTHROPIC_MODEL still overrides it", async () => {
+test("saved AI keys reach both SDK calls and changes take effect without restarting", async (t) => {
+  const database = await fixture(t);
   const previousKey = process.env.ANTHROPIC_API_KEY;
-  const previousModel = process.env.ANTHROPIC_MODEL;
   const previousFetch = globalThis.fetch;
-  process.env.ANTHROPIC_API_KEY = "test-only-not-a-live-key";
-  delete process.env.ANTHROPIC_MODEL;
-  const bodies: Record<string, unknown>[] = [];
-  let stopReason = "end_turn";
+  const environmentKey = "sk-ant-test-environment";
+  const savedKey = "sk-ant-test-saved-1";
+  const rotatedKey = "sk-ant-test-saved-2";
+  process.env.ANTHROPIC_API_KEY = `  ${environmentKey}  `;
+  const sentKeys: Array<string | null> = [];
   globalThis.fetch = async (_input, init) => {
-    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
-    bodies.push(body);
-    return Response.json({
-      id: "msg_test", type: "message", role: "assistant", model: body.model,
-      content: stopReason === "refusal" ? [] : [{ type: "text", text: JSON.stringify({
-        title: "과제 제출", kind: "assignment", date: null, time: null,
-        subject: "수업", submission: "LMS", summary: "과제 제출 공지",
-        missing: ["마감 후보: 다음 주 목요일 수업 시작 전 (공지 작성일 확인 필요)"], documents: [], conditions: [],
-      }) }],
-      stop_reason: stopReason, stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
-    });
+    sentKeys.push(new Headers(init?.headers).get("x-api-key"));
+    const request = JSON.parse(String(init?.body)) as { messages: { content: string }[] };
+    const document = JSON.parse(request.messages[0].content) as Record<string, unknown>;
+    return sdkResponse("untrustedResumeDocument" in document ? mockCoaching() : mockAnalysis());
   };
-  const request = { text: "다음 주 목요일 수업 전까지 제출", kind: "assignment" as const, referenceDate: null, classTime: null, sample: false };
+  const callBoth = async () => {
+    assert.equal((await analyzeText({ text: "2026-10-08까지 과제 제출", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database)).mode, "live");
+    assert.equal((await coachResume({ jobText: "내 실제 공고", resumeText: "내 실제 서류", sample: false }, database)).mode, "live");
+  };
   try {
-    assert.equal(DEFAULT_MODEL, "claude-opus-5-5");
-    assert.equal(resolveModel(), "claude-opus-5-5");
-    const result = await analyzeText(request, DEFAULT_PROFILE);
-    assert.equal(result.date, null);
-    assert.equal(result.time, null);
-    assert.ok(result.missing[0].startsWith("마감 후보:"));
-    assert.equal(bodies[0].model, "claude-opus-5-5");
-    const config = bodies[0].output_config as { effort?: string; format: { type: string } };
-    assert.equal(config.effort, "low");
-    assert.equal(config.format.type, "json_schema");
-    assert.equal(bodies[0].thinking, undefined);
-    assert.equal(bodies[0].temperature, undefined);
-    assert.ok(String(bodies[0].system).includes("마감 후보"));
-
-    process.env.ANTHROPIC_MODEL = "  claude-haiku-4-5  ";
-    assert.equal(resolveModel(), "claude-haiku-4-5");
-    await analyzeText(request, DEFAULT_PROFILE);
-    assert.equal(bodies[1].model, "claude-haiku-4-5");
-    assert.equal((bodies[1].output_config as { effort?: string }).effort, undefined);
-
-    delete process.env.ANTHROPIC_MODEL;
-    stopReason = "refusal";
-    await assert.rejects(analyzeText(request, DEFAULT_PROFILE), (error) => error instanceof AIInputError && error.status === 502 && error.message.includes("처리하지 않았습니다"));
+    await saveAnthropicApiKey({ apiKey: savedKey }, database);
+    await callBoth();
+    await saveAnthropicApiKey({ apiKey: rotatedKey }, database);
+    await callBoth();
+    await deleteAnthropicApiKey(database);
+    await callBoth();
+    assert.deepEqual(sentKeys, [savedKey, savedKey, rotatedKey, rotatedKey, environmentKey, environmentKey]);
+    assert.equal(process.env.ANTHROPIC_API_KEY, `  ${environmentKey}  `);
+    delete process.env.ANTHROPIC_API_KEY;
+    await assert.rejects(callBoth(), (error) => error instanceof AIInputError && error.status === 503);
+    assert.equal(sentKeys.length, 6);
   } finally {
     globalThis.fetch = previousFetch;
     if (previousKey === undefined) delete process.env.ANTHROPIC_API_KEY;
     else process.env.ANTHROPIC_API_KEY = previousKey;
-    if (previousModel === undefined) delete process.env.ANTHROPIC_MODEL;
-    else process.env.ANTHROPIC_MODEL = previousModel;
   }
 });
 
-test("effort is only sent to models that accept it", () => {
-  for (const model of ["claude-sonnet-5-5", "claude-sonnet-5", "claude-sonnet-4-6", "claude-opus-5-5", "claude-opus-4-5", "claude-fable-5-1"]) {
-    assert.deepEqual(outputEffort(model), { effort: "low" }, model);
+test("AI failures never expose a saved key or provider error body", async (t) => {
+  const database = await fixture(t);
+  const previousFetch = globalThis.fetch;
+  const savedKey = "sk-ant-test-private-key";
+  await saveAnthropicApiKey({ apiKey: savedKey }, database);
+  globalThis.fetch = async () => Response.json({ type: "error", error: { type: "authentication_error", message: `provider leaked ${savedKey}` } }, { status: 401 });
+  const safeError = (error: unknown) => error instanceof AIInputError && error.status === 502 && error.message.includes("설정 화면") && !error.message.includes(savedKey) && !error.message.includes("provider leaked");
+  try {
+    await assert.rejects(analyzeText({ text: "공지", kind: "assignment", referenceDate: null, classTime: null, sample: false }, DEFAULT_PROFILE, new Date(), database), safeError);
+    await assert.rejects(coachResume({ jobText: "공고", resumeText: "서류", sample: false }, database), safeError);
+  } finally {
+    globalThis.fetch = previousFetch;
   }
-  for (const model of ["claude-haiku-4-5", "claude-haiku-4-5-20251001", "claude-sonnet-4-5", "claude-sonnet-4-5-20250929", "claude-sonnet-4-20250514", "claude-opus-4-1-20250805", "claude-3-5-haiku-20241022"]) {
-    assert.deepEqual(outputEffort(model), {}, model);
-  }
+});
+
+test("sample flows return before any database key lookup", async (t) => {
+  const database = await fixture(t);
+  t.mock.method(database, "execute", async () => { throw new Error("key lookup must not run for samples"); });
+  assert.equal((await analyzeText({ text: TASK_SAMPLE, kind: "assignment", referenceDate: "2026-10-03", classTime: "09:00", sample: true }, DEFAULT_PROFILE, new Date(), database)).mode, "sample");
+  assert.equal((await coachResume({ jobText: COACH_JOB_SAMPLE, resumeText: COACH_RESUME_SAMPLE, sample: true }, database)).mode, "sample");
 });

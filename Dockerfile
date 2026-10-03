@@ -27,7 +27,7 @@ ENV NODE_ENV=production \
 COPY --from=build --chown=node:node /app ./
 # lib/db.ts 가 데이터 디렉터리를 0700 으로 만들고 소유권을 요구하므로 node 사용자 소유로 둔다.
 # named volume 은 처음 생성될 때 이 디렉터리의 소유권을 물려받는다.
-RUN mkdir -p /app/data && chown node:node /app/data
+RUN mkdir -p /app/data && chown node:node /app/data && chmod 0700 /app/data
 USER node
 EXPOSE 3000
 # package.json 의 start 는 127.0.0.1 에 바인딩해 컨테이너 밖에서 닿지 않으므로 직접 실행한다.
