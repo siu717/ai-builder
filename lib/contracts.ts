@@ -150,6 +150,8 @@ export interface PublicDataResult<T> {
   items: T[];
   total: number;
   fetchedAt: string;
+  // 여러 서비스를 합쳐 조회할 때 일부 서비스가 실패한 이유
+  notices?: string[];
 }
 
 export interface AnalysisResult {

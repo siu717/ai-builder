@@ -111,6 +111,75 @@ test("public jobs skip closed postings, accept both row shapes and rank interest
   assert.deepEqual(first.documents, []);
 });
 
+function mpmXml(items: Record<string, string>[], totalCount = items.length): Response {
+  const body = items.map((item) => `<item>${Object.entries(item).map(([key, value]) => `<${key}>${value}</${key}>`).join("")}</item>`).join("");
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?><response><header><resultCode>00</resultCode><resultMsg>NORMAL SERVICE.</resultMsg></header><body><items>${body}</items><numOfRows>100</numOfRows><pageNo>1</pageNo><totalCount>${totalCount}</totalCount></body></response>`, { status: 200, headers: { "content-type": "application/xml" } });
+}
+
+const ALIO_EMPTY = { resultCode: 200, resultMsg: "성공", totalCount: 0, result: [] };
+
+test("MPM public jobs are read from XML, merged with ALIO and limited to open student-facing types", async () => {
+  const { fetcher, calls } = mockFetch((url) => {
+    if (url.pathname.startsWith("/1051000/")) return json(ALIO_EMPTY);
+    const type = url.searchParams.get("Pblanc_ty");
+    if (type === "e01") {
+      return mpmXml([
+        { idx: "101", title: "2026년 전산직 공개경쟁채용 &amp; 면접", insttname: "가상시청", type01: "g02", type02: "e01", regdate: "20260920", enddate: "20261020" },
+        { idx: "102", title: "마감된 행정직 채용", insttname: "가상부", type01: "g01", type02: "e01", regdate: "20260901", enddate: "20261002" },
+      ]);
+    }
+    if (type === "e03") return mpmXml([{ idx: "101", title: "중복 공고", insttname: "가상시청", type01: "g02", type02: "e03", regdate: "20260920", enddate: "20261020" }, { idx: "103", title: "<![CDATA[연구 계약직 채용]]>", insttname: "가상교육청", type01: "g04", type02: "e03", regdate: "20260925", enddate: "20261015" }]);
+    return mpmXml([]);
+  });
+  const result = await getPublicJobs(KEY, PROFILE, { fetcher, now: NOW });
+  const mpmCalls = calls.filter((url) => url.pathname === "/1760000/PblJobService/getList");
+  assert.deepEqual(mpmCalls.map((url) => url.searchParams.get("Pblanc_ty")), ["e01", "e02", "e03", "e04"]);
+  assert.equal(mpmCalls[0].searchParams.get("serviceKey"), KEY);
+  assert.equal(mpmCalls[0].searchParams.get("Instt_se"), "");
+  assert.equal(mpmCalls[0].searchParams.get("Begin_de"), "2026-08-04");
+  assert.equal(mpmCalls[0].searchParams.get("End_de"), "2026-10-03");
+  assert.deepEqual(result.items.map((item) => item.id), ["mpm-101", "mpm-103"], "interest matches first, closed and duplicate postings dropped");
+  assert.equal(result.notices, undefined);
+  const [first, second] = result.items;
+  assert.equal(first.title, "2026년 전산직 공개경쟁채용 & 면접");
+  assert.equal(first.organization, "가상시청");
+  assert.equal(first.date, "2026-10-20");
+  assert.equal(first.amount, "공개경쟁채용");
+  assert.deepEqual(first.tags, ["지방공무원", "공개경쟁채용", "나라일터"]);
+  assert.match(first.recommendation, /관심 직무 "전산"/);
+  assert.equal(first.conditions[0].status, "unknown", "eligibility is never shown as met without the posting text");
+  assert.match(first.originalText, /나라일터/);
+  assert.equal(second.title, "연구 계약직 채용");
+
+  await getPublicJobs(KEY, PROFILE, { fetcher, now: NOW });
+  assert.equal(calls.length, 5, "both services are cached");
+});
+
+test("one failing job service leaves the other's postings with a notice", async () => {
+  const alioRow = { recrutPblntSn: 9, recrutPbancTtl: "행정 채용", instNm: "가상공사", ongoingYn: "Y", pbancEndYmd: "20261020" };
+  const mpmDenied = mockFetch((url) => url.pathname.startsWith("/1051000/")
+    ? json({ resultCode: 200, totalCount: 1, result: [alioRow] })
+    : new Response("<OpenAPI_ServiceResponse><cmmMsgHeader><errMsg>SERVICE ERROR</errMsg><returnAuthMsg>SERVICE_ACCESS_DENIED_ERROR</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>"));
+  const partial = await getPublicJobs(KEY, PROFILE, { fetcher: mpmDenied.fetcher, now: NOW });
+  assert.deepEqual(partial.items.map((item) => item.id), ["alio-9"]);
+  assert.equal(partial.notices?.length, 1);
+  assert.match(partial.notices![0], /인사혁신처 공공취업정보: .*활용신청/);
+
+  clearPublicDataCache();
+  const mpmError = mockFetch((url) => url.pathname.startsWith("/1051000/")
+    ? json({ resultCode: 500, resultMsg: "점검 중" })
+    : mpmXml([{ idx: "7", title: "행정지원인력 채용", insttname: "가상청", type01: "g01", type02: "e04", regdate: "20260920", enddate: "20261010" }]));
+  const other = await getPublicJobs(KEY, PROFILE, { fetcher: mpmError.fetcher, now: NOW });
+  assert.deepEqual(other.items.map((item) => item.id), ["mpm-7"]);
+  assert.match(other.notices![0], /공공기관 채용정보: 점검 중/);
+
+  clearPublicDataCache();
+  const badCode = mockFetch((url) => url.pathname.startsWith("/1051000/")
+    ? json(ALIO_EMPTY)
+    : new Response("<response><header><resultCode>30</resultCode><resultMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</resultMsg></header></response>"));
+  assert.match((await getPublicJobs(KEY, PROFILE, { fetcher: badCode.fetcher, now: NOW })).notices![0], /SERVICE_KEY_IS_NOT_REGISTERED_ERROR|1~2시간/);
+});
+
 test("exam schedules accept the nested item shape and keep only dated steps", async () => {
   const item = {
     implYy: "2026", implSeq: "4", qualgbCd: "T", qualgbNm: "국가기술자격", description: "국가기술자격 기사 (2026년도 제4회)",
