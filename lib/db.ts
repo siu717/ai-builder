@@ -10,6 +10,9 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS campus_reminders_due ON campus_reminders(status, scheduled_at, next_attempt_at)`,
   `CREATE INDEX IF NOT EXISTS campus_reminders_event ON campus_reminders(event_id)`,
   `INSERT OR IGNORE INTO campus_settings(id) VALUES (1)`,
+  `CREATE TABLE IF NOT EXISTS campus_sources (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, url TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL, keywords TEXT NOT NULL DEFAULT '', auto_add INTEGER NOT NULL DEFAULT 0, enabled INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, last_synced_at TEXT, last_error TEXT, last_count INTEGER NOT NULL DEFAULT 0)`,
+  `CREATE TABLE IF NOT EXISTS campus_imports (id TEXT PRIMARY KEY, source_id TEXT NOT NULL, external_id TEXT NOT NULL, value TEXT NOT NULL, date TEXT, dismissed INTEGER NOT NULL DEFAULT 0, first_seen_at TEXT NOT NULL, added_at TEXT, UNIQUE(source_id, external_id))`,
+  `CREATE INDEX IF NOT EXISTS campus_imports_date ON campus_imports(date)`,
 ];
 
 export async function createDatabase(databaseUrl: string): Promise<Client> {

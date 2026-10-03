@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Layers,
   Clock3,
+  Rss,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -38,6 +39,7 @@ import CalendarView, { EventList, KindBadge, MonthCalendar } from "./calendar";
 import Opportunities from "./opportunities";
 import { AnalyzeModal, Coaching } from "./ai-tools";
 import Settings from "./settings";
+import AutoImport from "./auto-import";
 import { Busy, Message, request, seoulDate } from "./ui";
 
 type View =
@@ -46,6 +48,7 @@ type View =
   | "job"
   | "coaching"
   | "calendar"
+  | "imports"
   | "notifications"
   | "settings";
 const NAV: {
@@ -89,6 +92,13 @@ const NAV: {
     icon: CalendarDays,
     title: "통합 캘린더",
     subtitle: "장학금부터 과제까지 일정을 관리하세요.",
+  },
+  {
+    id: "imports",
+    label: "자동 수집",
+    icon: Rss,
+    title: "자동 수집",
+    subtitle: "장학금 · 채용 · 자격증 마감을 프로필에 맞춰 자동으로 등록합니다.",
   },
   {
     id: "notifications",
@@ -398,6 +408,8 @@ export default function CampusApp() {
       ? `샘플 공고 ${catalog.filter((item) => item.kind === view).length}개 · ${app.profile.major || "전공 미입력"}`
       : view === "calendar"
         ? `진행 중 ${app.events.filter((event) => !event.completed).length}개 · 완료 ${app.events.filter((event) => event.completed).length}개`
+        : view === "imports"
+          ? "장학금 · 채용 · 자격증 일정을 프로필에 맞춰 자동으로 모읍니다"
         : view === "notifications"
           ? `읽지 않은 알림 ${unread}개`
           : view === "settings"
@@ -587,6 +599,15 @@ export default function CampusApp() {
               onEdit={editEvent}
               onToggle={toggleEvent}
               onAdd={addEvent}
+            />
+          )}
+          {view === "imports" && (
+            <AutoImport
+              app={app}
+              onState={applyState}
+              onEdit={setEditor}
+              onToast={setToast}
+              onSettings={() => setView("settings")}
             />
           )}
           {view === "notifications" && (

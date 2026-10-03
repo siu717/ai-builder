@@ -90,6 +90,62 @@ export interface AppState {
   settings: PublicSettings;
 }
 
+export type ImportSourceType = "rss" | "kosaf" | "gov24" | "youth" | "alio" | "work24" | "saramin" | "qnet";
+export type ImportKind = "scholarship" | "job" | "career" | "assignment";
+
+export interface ImportSource {
+  id: string;
+  type: ImportSourceType;
+  /** 서버 키로 자동 켜지는 기본 수집원. 사용자가 끌 수는 있지만 지울 수는 없다. */
+  builtin: boolean;
+  name: string;
+  url: string;
+  kind: ImportKind;
+  keywords: string;
+  autoAdd: boolean;
+  enabled: boolean;
+  lastSyncedAt: string | null;
+  lastError: string | null;
+  lastCount: number;
+}
+
+export interface ImportCandidate {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  kind: ImportKind;
+  title: string;
+  organization: string;
+  date: string | null;
+  time: string | null;
+  url: string;
+  summary: string;
+  documents: string[];
+  dateNote: string | null;
+  /** 프로필의 전공·관심 직무 중 이 항목에 나오는 단어 */
+  matched: string[];
+  dismissed: boolean;
+  firstSeenAt: string;
+}
+
+export interface ImportProvider {
+  type: ImportSourceType;
+  label: string;
+  env: string;
+  signup: string;
+  configured: boolean;
+}
+
+export interface ImportState {
+  sources: ImportSource[];
+  items: ImportCandidate[];
+  providers: ImportProvider[];
+  profileTerms: string[];
+}
+
+/** 수집 항목으로 만든 일정의 중복 방지 키. 화면은 이 키로 등록 여부를 판단한다. */
+export const importEventKey = (id: string) => `import:${id}`;
+
 export interface EligibilityCondition {
   label: string;
   status: "met" | "unmet" | "unknown";
