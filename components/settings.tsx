@@ -378,7 +378,6 @@ export default function Settings({
               disabled={
                 busy !== null ||
                 !settings.telegramConfigured ||
-                !settings.telegramEnabled ||
                 token.length > 0 ||
                 chatId.trim() !== settings.telegramChatId ||
                 enabled !== settings.telegramEnabled

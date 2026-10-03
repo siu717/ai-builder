@@ -14,18 +14,20 @@ import {
 } from "lucide-react";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import type {
+  AppState,
   EligibilityCondition,
   Opportunity,
   PublicDataResult,
 } from "@/lib/contracts";
 import type { EventDraft } from "./event-editor";
 import ExamSchedules from "./exam-schedules";
+import ScholarshipFeed from "./scholarship-feed";
 import { Busy, Message, request, seoulDate } from "./ui";
 import { checklistFromDocuments } from "@/lib/checklist";
 
-type Source = "sample" | "public" | "exams";
+type Source = "kookmin" | "sample" | "public" | "exams";
 const SOURCE_LABELS = {
-  scholarship: { sample: "샘플", public: "한국장학재단" },
+  scholarship: { kookmin: "국민대 장학공지", public: "한국장학재단", sample: "샘플" },
   job: { sample: "샘플", public: "공공기관 채용", exams: "자격증 시험" },
 } as const;
 const MAX_VISIBLE = 120;
@@ -70,6 +72,7 @@ export default function Opportunities({
   onCoach,
   dataKeyReady,
   onSettings,
+  onState,
 }: {
   kind: "scholarship" | "job";
   opportunities: Opportunity[];
@@ -78,11 +81,12 @@ export default function Opportunities({
   onCoach: (text: string) => void;
   dataKeyReady: boolean;
   onSettings: () => void;
+  onState: (state: AppState) => void;
 }) {
   const [query, setQuery] = useState("");
   const [condition, setCondition] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [source, setSource] = useState<Source>("sample");
+  const [source, setSource] = useState<Source>(kind === "scholarship" ? "kookmin" : "sample");
   const [live, setLive] = useState<PublicDataResult<Opportunity> | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -147,13 +151,21 @@ export default function Opportunities({
             aria-pressed={source === id}
             onClick={() => choose(id)}
           >
-            {id !== "sample" && <Database size={14} />}
+            {id === "public" || id === "exams" ? <Database size={14} /> : null}
             {label}
           </button>
         ),
       )}
     </div>
   );
+  if (source === "kookmin") {
+    return (
+      <>
+        {switcher}
+        <ScholarshipFeed onAdd={onAdd} onSave={onState} />
+      </>
+    );
+  }
   if (source === "exams") {
     return (
       <>
