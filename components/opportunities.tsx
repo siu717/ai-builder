@@ -4,20 +4,20 @@ import { useState } from "react";
 import {
   Search,
   ArrowUpRight,
-  CalendarPlus,
-  CheckCircle2,
-  XCircle,
-  CircleHelp,
+  ArrowRight,
+  Check,
+  X,
   FileText,
-  Building2,
-  GraduationCap,
-  BriefcaseBusiness,
   ChevronRight,
   Database,
   RefreshCw,
 } from "lucide-react";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import type { Opportunity, PublicDataResult } from "@/lib/contracts";
+import type {
+  EligibilityCondition,
+  Opportunity,
+  PublicDataResult,
+} from "@/lib/contracts";
 import type { EventDraft } from "./event-editor";
 import ExamSchedules from "./exam-schedules";
 import { Busy, Message, request, seoulDate } from "./ui";
@@ -31,6 +31,37 @@ const SOURCE_LABELS = {
 const MAX_VISIBLE = 120;
 
 const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
+type ConditionStatus = EligibilityCondition["status"];
+type DueTier = "overdue" | "today" | "near" | "week" | "later";
+
+function daysLeft(date: string) {
+  return differenceInCalendarDays(parseISO(date), parseISO(seoulDate()));
+}
+function dueLabel(days: number) {
+  return days < 0 ? "마감 지남" : `D-${days}`;
+}
+// KMU80 D-day 단계: 지남 · 오늘 · D-1~2 · D-3~7 · 그 이후
+function dueTier(days: number): DueTier {
+  if (days < 0) return "overdue";
+  if (days === 0) return "today";
+  if (days <= 2) return "near";
+  if (days <= 7) return "week";
+  return "later";
+}
+
+function StatusMark({ status }: { status: ConditionStatus }) {
+  return (
+    <span className={`opp-status status-text status-${status}`}>
+      {status === "met" ? (
+        <Check size={16} strokeWidth={2.4} />
+      ) : status === "unmet" ? (
+        <X size={16} strokeWidth={2.4} />
+      ) : null}
+      <span className="opp-status-word">{conditionLabels[status]}</span>
+    </span>
+  );
+}
+
 export default function Opportunities({
   kind,
   opportunities,
@@ -96,6 +127,15 @@ export default function Opportunities({
         ? "met"
         : "unknown";
   }
+  const kindLabel = kind === "scholarship" ? "장학금" : "채용 공고";
+  const selectedDays = selected ? daysLeft(selected.date) : 0;
+  const counts = {
+    met: selected?.conditions.filter((entry) => entry.status === "met").length ?? 0,
+    unmet:
+      selected?.conditions.filter((entry) => entry.status === "unmet").length ?? 0,
+    unknown:
+      selected?.conditions.filter((entry) => entry.status === "unknown").length ?? 0,
+  };
   const switcher = (
     <div className="segmented source-switch" role="group" aria-label="공고 출처">
       {(Object.entries(SOURCE_LABELS[kind]) as [Source, string][]).map(
@@ -107,7 +147,7 @@ export default function Opportunities({
             aria-pressed={source === id}
             onClick={() => choose(id)}
           >
-            {id !== "sample" && <Database size={13} />}
+            {id !== "sample" && <Database size={14} />}
             {label}
           </button>
         ),
@@ -130,7 +170,7 @@ export default function Opportunities({
     return (
       <>
         {switcher}
-        <div className="empty-state">
+        <div className="empty-state public-data-state">
           <Database size={27} />
           {!dataKeyReady ? (
             <>
@@ -195,7 +235,7 @@ export default function Opportunities({
       </div>
       <div className="catalog-caption">
         <span>
-          {kind === "scholarship" ? "장학금" : "채용 공고"} {matches.length}개
+          {kindLabel} {matches.length}개
           {matches.length > results.length && ` 중 ${results.length}개 표시`}
         </span>
         {source === "sample" ? (
@@ -204,7 +244,9 @@ export default function Opportunities({
           <>
             <span className="public-tag">공공데이터포털</span>
             {live && (
-              <span>{format(new Date(live.fetchedAt), "HH:mm")} 기준 · 모집 중인 공고만</span>
+              <span>
+                {format(new Date(live.fetchedAt), "HH:mm")} 기준 · 모집 중인 공고만
+              </span>
             )}
             <button
               type="button"
@@ -212,14 +254,14 @@ export default function Opportunities({
               disabled={loading}
               onClick={() => void loadPublic(true)}
             >
-              <RefreshCw size={13} />
+              <RefreshCw size={14} />
               {loading ? "불러오는 중" : "새로고침"}
             </button>
           </>
         )}
       </div>
       {loadError && <Message text={loadError} error />}
-      <div className="opportunity-layout">
+      <div className={`opportunity-layout opp-kind-${kind}`}>
         <div className="opportunity-list">
           {results.length === 0 && (
             <div className="empty-state">
@@ -228,70 +270,106 @@ export default function Opportunities({
               <p>검색어나 지원 조건을 바꿔 보세요.</p>
             </div>
           )}
-          {results.map((item) => (
-            <button
-              className={`opportunity-card ${selected?.id === item.id ? "selected" : ""}`}
-              key={item.id}
-              onClick={() => setSelectedId(item.id)}
-            >
-              <div className="opportunity-card-top">
-                <span
-                  className={`organization-icon ${kind === "scholarship" ? "violet" : "cyan"}`}
-                >
-                  {kind === "scholarship" ? (
-                    <GraduationCap size={23} />
-                  ) : (
-                    <Building2 size={22} />
-                  )}
-                </span>
-                <span className="opportunity-org">{item.organization}</span>
-                <ChevronRight size={16} className="muted" />
-              </div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-              <div className="tag-row">
-                {item.tags.map((tag) => (
-                  <span className="plain-tag" key={tag}>
-                    {tag}
+          {results.map((item) => {
+            const days = daysLeft(item.date);
+            const isSelected = selected?.id === item.id;
+            return (
+              <button
+                className={`opportunity-card ${isSelected ? "selected" : ""}`}
+                key={item.id}
+                onClick={() => setSelectedId(item.id)}
+                aria-pressed={isSelected}
+              >
+                <div className="opportunity-card-top">
+                  <span className="opp-kind-dot" aria-hidden="true" />
+                  <span className="opportunity-org">{item.organization}</span>
+                  <ChevronRight size={16} className="opp-row-chevron" />
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                {item.tags.length > 0 && (
+                  <div className="tag-row">
+                    {item.tags.map((tag) => (
+                      <span className="plain-tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="opportunity-card-bottom">
+                  <span className="opp-due">
+                    <strong className={`opp-dday opp-due-${dueTier(days)}`}>
+                      {dueLabel(days)}
+                    </strong>
+                    <span className="opp-due-date">
+                      {format(parseISO(item.date), "M.d")} 마감
+                    </span>
                   </span>
-                ))}
-              </div>
-              <div className="opportunity-card-bottom">
-                <span className={`condition-summary status-${overall(item)}`}>
-                  {conditionLabels[overall(item)]}
-                </span>
-                <span>
-                  {format(parseISO(item.date), "M.d")} 마감{" "}
-                  <strong>
-                    {differenceInCalendarDays(
-                      parseISO(item.date),
-                      parseISO(seoulDate()),
-                    ) < 0
-                      ? "마감 지남"
-                      : `D-${differenceInCalendarDays(parseISO(item.date), parseISO(seoulDate()))}`}
-                  </strong>
-                </span>
-              </div>
-            </button>
-          ))}
+                  <span className="condition-summary">
+                    <StatusMark status={overall(item)} />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
         {selected && (
           <section className="opportunity-detail">
-            <div className="detail-eyebrow">
-              <span>{selected.organization}</span>
-              {selected.isSample ? (
-                <span className="sample-tag">샘플</span>
-              ) : (
-                <span className="public-tag">공공데이터</span>
-              )}
+            <div className="opp-detail-head">
+              <div className="opp-detail-heading">
+                <div className="detail-eyebrow">
+                  <span className="opp-crumb">{kindLabel}</span>
+                  <span className="opp-crumb-sep" aria-hidden="true">
+                    /
+                  </span>
+                  <span>{selected.organization}</span>
+                  {selected.isSample ? (
+                    <span className="sample-tag">샘플</span>
+                  ) : (
+                    <span className="public-tag">공공데이터</span>
+                  )}
+                </div>
+                <h2>{selected.title}</h2>
+              </div>
+              <div className="opp-detail-due">
+                <span
+                  className={`opp-dday opp-dday-lg opp-due-${dueTier(selectedDays)}`}
+                >
+                  {dueLabel(selectedDays)}
+                </span>
+                {selected.conditions.length > 0 && (
+                  <div className="opp-condition-meter">
+                    <span className="opp-meter-caption">
+                      지원 조건 {selected.conditions.length}개 중
+                    </span>
+                    <div
+                      className="opp-meter-bar"
+                      role="img"
+                      aria-label={`충족 ${counts.met}, 불충족 ${counts.unmet}, 확인 필요 ${counts.unknown}`}
+                    >
+                      {selected.conditions.map((entry, index) => (
+                        <span
+                          key={index}
+                          className={`opp-meter-seg opp-meter-${entry.status}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="opp-meter-legend">
+                      충족 {counts.met} · 불충족 {counts.unmet} · 확인 필요{" "}
+                      {counts.unknown}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-            <h2>{selected.title}</h2>
             <div className="detail-facts">
               <div>
                 <span>신청 마감</span>
                 <strong>
                   {format(parseISO(selected.date), "yyyy.MM.dd")}{" "}
-                  {selected.time || "시각 확인 필요"}
+                  {selected.time || (
+                    <span className="opp-needs-check">시각 확인 필요</span>
+                  )}
                 </strong>
               </div>
               <div>
@@ -302,39 +380,21 @@ export default function Opportunities({
               </div>
             </div>
             <div className="recommendation">
-              <span
-                className={kind === "scholarship" ? "violet-text" : "cyan-text"}
-              >
-                {kind === "scholarship" ? (
-                  <GraduationCap size={18} />
-                ) : (
-                  <BriefcaseBusiness size={18} />
-                )}
-              </span>
+              <span className="opp-eyebrow">추천 이유</span>
               <p>{selected.recommendation}</p>
             </div>
             <h3 className="detail-section-title">지원 조건</h3>
             <div className="conditions">
               {selected.conditions.map((entry, index) => (
                 <div className="condition" key={index}>
-                  <span className={`condition-icon status-${entry.status}`}>
-                    {entry.status === "met" ? (
-                      <CheckCircle2 size={17} />
-                    ) : entry.status === "unmet" ? (
-                      <XCircle size={17} />
-                    ) : (
-                      <CircleHelp size={17} />
-                    )}
+                  <span className="opp-condition-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  <div>
-                    <div className="condition-heading">
-                      <strong>{entry.label}</strong>
-                      <span className={`status-text status-${entry.status}`}>
-                        {conditionLabels[entry.status]}
-                      </span>
-                    </div>
+                  <div className="opp-condition-body">
+                    <strong>{entry.label}</strong>
                     <p>{entry.reason}</p>
                   </div>
+                  <StatusMark status={entry.status} />
                 </div>
               ))}
             </div>
@@ -342,10 +402,7 @@ export default function Opportunities({
             {selected.documents.length ? (
               <ul className="documents">
                 {selected.documents.map((document) => (
-                  <li key={document}>
-                    <FileText size={15} />
-                    {document}
-                  </li>
+                  <li key={document}>{document}</li>
                 ))}
               </ul>
             ) : (
@@ -387,8 +444,8 @@ export default function Opportunities({
                   })
                 }
               >
-                <CalendarPlus size={16} />
                 신청 일정 등록
+                <ArrowRight size={17} />
               </button>
               {kind === "job" && (
                 <button

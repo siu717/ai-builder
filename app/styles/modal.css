@@ -1,0 +1,134 @@
+/* modal — frame (backdrop · header · body · sticky action bar) + event editor form. KMU80 redesign. */
+:root {
+  --x-modal-backdrop: rgba(22, 24, 25, .48); /* --ink at 48% */
+}
+
+/* frame */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: var(--x-modal-backdrop);
+}
+.modal {
+  width: 560px;
+  max-width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-pop);
+}
+.modal-wide { width: 960px; }
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px 12px 12px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.modal-header h2 { font-size: var(--text-xl); font-weight: 700; line-height: 1.35; color: var(--ink); letter-spacing: -0.015em; }
+.modal-header .icon-button { width: 44px; height: 44px; min-width: 44px; color: var(--ink-2); }
+.modal-header .icon-button:hover { background: var(--surface-2); color: var(--ink); }
+.modal-body { padding: 24px; }
+
+/* sticky action bar — danger/delete left, primary right */
+.modal .modal-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px -24px -24px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+.modal-actions .icon-button.danger-text { margin-left: -10px; }
+.action-spacer { flex: 1; }
+
+/* inline delete confirmation (also used in settings) */
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0 0;
+  padding: 10px 10px 10px 16px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.delete-confirm > span { flex: 1; min-width: 180px; }
+.delete-confirm .text-button { color: var(--ink-2); padding-inline: 10px; }
+.delete-confirm .text-button:hover { color: var(--ink); }
+
+/* event editor form */
+.modal .field { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); gap: 8px; margin-bottom: 20px; }
+.modal .field input, .modal .field select { min-height: 44px; }
+.modal .field input, .modal .field select, .modal .field textarea { font-size: var(--text-md); font-weight: 400; color: var(--ink); }
+.modal .form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.modal .field-note { font-size: var(--text-xs); color: var(--ink-3); margin: -12px 0 20px; }
+
+.sample-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border: 1px solid var(--ink-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* reminders */
+.reminder-section { margin-top: 8px; padding-top: 14px; border-top: 2px solid var(--line-strong); }
+.modal .reminder-section .section-heading { margin-bottom: 4px; }
+.modal .reminder-section .section-heading h3 { font-size: var(--text-md); font-weight: 700; color: var(--ink); gap: 6px; }
+.modal .reminder-section .section-heading .muted { font-size: var(--text-xs); color: var(--ink-3); }
+.reminder-presets { display: flex; gap: 4px 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.modal .reminder-presets .text-button,
+.modal .reminder-section > .text-button { font-size: var(--text-sm); font-weight: 600; color: var(--kmu-blue); padding-inline: 2px; }
+.modal .reminder-presets .text-button:hover,
+.modal .reminder-section > .text-button:hover { color: var(--kmu-blue-dark); }
+.modal .reminder-section .field-note { margin: 0 0 8px; }
+.reminder-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px 44px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.modal .reminder-row input, .modal .reminder-row select { min-height: 44px; height: 44px; font-size: var(--text-md); padding-block: 0; color: var(--ink); }
+.modal .reminder-row input { padding-inline: 12px; }
+.modal .reminder-row .icon-button { width: 44px; min-width: 44px; height: 44px; }
+
+/* source disclosure inside the editor */
+.modal .original-source { margin: 20px 0 0; }
+
+@media (max-width: 640px) {
+  .modal-backdrop { padding: 12px; }
+  .modal { max-height: calc(100dvh - 24px); }
+  .modal .modal-header { padding: 10px 8px 10px 16px; min-height: 60px; }
+  .modal .modal-header h2 { font-size: var(--text-lg); }
+  .modal .modal-body { padding: 20px 16px; }
+  .modal .modal-actions { margin: 20px -16px -20px; padding: 10px 16px; }
+  .modal .form-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .modal .reminder-row { grid-template-columns: minmax(0, 1fr) 96px 44px; gap: 6px; }
+  .modal .reminder-row input, .modal .reminder-row select { font-size: var(--text-sm); padding-inline: 8px; }
+}

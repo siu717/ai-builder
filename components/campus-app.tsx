@@ -363,10 +363,8 @@ export default function CampusApp() {
     return (
       <div className="initial-screen">
         <div className="brand">
-          <span className="brand-symbol">C</span>
-          <strong>
-            참십 <span>Campus</span>
-          </strong>
+          <img src="/brand/kmu80-shield-blue.svg" alt="" />
+          <span className="brand-wordmark">참십 Campus</span>
         </div>
         {initialError ? (
           <>
@@ -406,64 +404,72 @@ export default function CampusApp() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <button
-          className="brand"
-          title="오늘의 캠퍼스"
-          onClick={() => setView("today")}
-        >
-          <span className="brand-symbol">C</span>
-          <strong>
-            참십 <span>Campus</span>
-          </strong>
-        </button>
-        <div className="workspace-label">MY CAMPUS</div>
-        <nav className="main-nav" aria-label="주 메뉴">
-          {NAV.map(({ id, label, icon: Icon }) => (
+      <header className="site-header">
+        <div className="site-header-inner">
+          <button
+            type="button"
+            className="brand"
+            title="오늘의 캠퍼스"
+            onClick={() => setView("today")}
+          >
+            <span className="brand-wordmark">참십 Campus</span>
+            <span className="brand-sub">국민대학교 AI 대학생활 비서</span>
+          </button>
+          <nav className="main-nav" aria-label="주 메뉴">
+            {NAV.map(({ id, label }) => (
+              <button
+                type="button"
+                key={id}
+                className={`nav-item ${view === id ? "active" : ""} ${id === "settings" ? "nav-settings" : ""}`}
+                aria-current={view === id ? "page" : undefined}
+                onClick={() => {
+                  setView(id);
+                  setError("");
+                }}
+              >
+                <span>{label}</span>
+                {id === "notifications" && unread > 0 && (
+                  <span className="nav-count">{unread}</span>
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className="topbar-actions">
             <button
               type="button"
-              key={id}
-              className={`nav-item ${view === id ? "active" : ""} ${id === "settings" ? "nav-settings" : ""}`}
-              aria-current={view === id ? "page" : undefined}
-              onClick={() => {
-                setView(id);
-                setError("");
-              }}
+              className="icon-button notification-button"
+              title="알림함"
+              aria-label={`알림함, 읽지 않은 알림 ${unread}개`}
+              onClick={() => setView("notifications")}
             >
-              <Icon size={19} />
-              <span>{label}</span>
-              {id === "notifications" && unread > 0 && (
-                <span className="nav-count">{unread}</span>
-              )}
-              {view === id && <span className="nav-active-dot" />}
+              <Bell size={20} />
+              {unread > 0 && <span className="notification-dot" />}
             </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="campus-photo">
-            <img src="/campus.jpg" alt="졸업을 기념하는 학생들" />
+            <button
+              type="button"
+              className="avatar topbar-avatar"
+              title="내 프로필"
+              aria-label="내 프로필"
+              onClick={() => setView("settings")}
+            >
+              <span>{app.profile.name.slice(0, 1)}</span>
+            </button>
           </div>
-          <button
-            className="sidebar-profile"
-            onClick={() => setView("settings")}
-          >
-            <span className="avatar">{app.profile.name.slice(0, 1)}</span>
-            <span>
-              <strong>{app.profile.name}</strong>
-              <small>{app.profile.major || "학생 프로필"}</small>
-            </span>
-            <ChevronRight size={16} />
-          </button>
+          <img
+            className="header-emblem"
+            src="/brand/kmu80-shield-white.svg"
+            alt="국민대학교 개교 80주년 엠블럼"
+          />
         </div>
-      </aside>
+      </header>
       <div className="workspace">
-        <header className="topbar">
+        <div className="topbar">
           <div className="breadcrumbs">
             <span>내 캠퍼스</span>
             <ChevronRight size={14} />
             <strong>{current.label}</strong>
           </div>
-          <div className="topbar-actions">
+          <div className="topbar-meta">
             {syncError && (
               <span
                 className="sync-warning"
@@ -476,26 +482,8 @@ export default function CampusApp() {
             <span className="topbar-date">
               {format(parseISO(today), "yyyy.MM.dd")}
             </span>
-            <button
-              type="button"
-              className="icon-button notification-button"
-              title="알림함"
-              aria-label={`알림함, 읽지 않은 알림 ${unread}개`}
-              onClick={() => setView("notifications")}
-            >
-              <Bell size={19} />
-              {unread > 0 && <span className="notification-dot" />}
-            </button>
-            <button
-              className="avatar topbar-avatar"
-              title="내 프로필"
-              aria-label="내 프로필"
-              onClick={() => setView("settings")}
-            >
-              {app.profile.name.slice(0, 1)}
-            </button>
           </div>
-        </header>
+        </div>
         <main>
           <div className="page-heading">
             <div>
@@ -608,11 +596,34 @@ export default function CampusApp() {
             />
           )}
           <footer className="workspace-footer">
-            <span>참십 Campus</span>
-            <span>
-              <Clock3 size={12} />
-              Asia/Seoul
-            </span>
+            <div className="footer-brand">
+              <div className="campus-photo">
+                <img src="/campus.jpg" alt="졸업을 기념하는 학생들" />
+              </div>
+              <div className="footer-brand-text">
+                <span className="footer-wordmark">참십 Campus</span>
+                <span className="footer-slogan">Make the Rule, Break the Rule</span>
+                <span className="footer-note">국민대학교 AI 대학생활 비서 · 개교 80주년 1946–2026</span>
+              </div>
+            </div>
+            <div className="footer-side">
+              <button
+                type="button"
+                className="sidebar-profile"
+                onClick={() => setView("settings")}
+              >
+                <span className="avatar">{app.profile.name.slice(0, 1)}</span>
+                <span>
+                  <strong>{app.profile.name}</strong>
+                  <small>{app.profile.major || "학생 프로필"}</small>
+                </span>
+                <ChevronRight size={16} />
+              </button>
+              <span className="footer-tz">
+                <Clock3 size={14} />
+                Asia/Seoul
+              </span>
+            </div>
           </footer>
         </main>
       </div>
@@ -653,6 +664,15 @@ export default function CampusApp() {
   );
 }
 
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+const DASHBOARD_TABS: [string, string][] = [
+  ["all", "전체"],
+  ["assignment", "과제"],
+  ["scholarship", "장학금"],
+  ["job", "채용"],
+  ["career", "취업 준비"],
+];
+
 function Dashboard({
   app,
   onEdit,
@@ -673,6 +693,7 @@ function Dashboard({
   onAnalyze: () => void;
 }) {
   const today = seoulDate();
+  const todayDate = parseISO(today);
   const [selectedDate, setSelectedDate] = useState(today);
   const [filter, setFilter] = useState("all");
   const active = app.events.filter((event) => !event.completed);
@@ -694,67 +715,105 @@ function Dashboard({
     .slice(0, 3);
   const selected = active.filter((event) => event.date === selectedDate);
   return (
-    <>
-      <div className="summary-strip">
-        <Summary
-          icon={CalendarDays}
-          label="오늘 마감"
-          value={dueToday}
-          tone="green"
+    <div className="today-board">
+      <section className="today-panel" aria-label="오늘 요약">
+        <img
+          className="today-watermark"
+          src="/brand/kmu80-shield-white.svg"
+          alt=""
         />
-        <Summary icon={Layers} label="이번 주 일정" value={week} tone="cyan" />
-        <Summary
-          icon={CircleAlert}
-          label="지난 마감"
-          value={missed}
-          tone="amber"
-        />
-        <Summary
-          icon={CheckCheck}
-          label="완료한 일정"
-          value={app.events.filter((event) => event.completed).length}
-          tone="violet"
-        />
-      </div>
-      <div className="dashboard-layout">
-        <div className="dashboard-main">
-          <section className="deadlines-section">
-            <div className="section-heading">
-              <h2>
-                다가오는 마감{" "}
-                <span className="count-label">{active.length}</span>
-              </h2>
-              <button
-                className="text-button"
-                onClick={() => onNavigate("calendar")}
-              >
-                전체 보기 <ArrowRight size={15} />
-              </button>
+        <div className="today-date">
+          <span className="today-eyebrow">
+            TODAY · {format(todayDate, "yyyy")}
+          </span>
+          <span className="today-numeral">{format(todayDate, "MM.dd")}</span>
+          <span className="today-weekday">
+            {WEEKDAYS[todayDate.getDay()]}요일
+          </span>
+        </div>
+        <div className="summary-strip">
+          <Summary
+            icon={CalendarDays}
+            label="오늘 마감"
+            value={dueToday}
+            tone="green"
+          />
+          <Summary icon={Layers} label="이번 주 일정" value={week} tone="cyan" />
+          <Summary
+            icon={CircleAlert}
+            label="지난 마감"
+            value={missed}
+            tone="amber"
+          />
+          <Summary
+            icon={CheckCheck}
+            label="완료한 일정"
+            value={app.events.filter((event) => event.completed).length}
+            tone="violet"
+          />
+        </div>
+        <section className="mini-calendar-section">
+          <MonthCalendar
+            small
+            events={active}
+            onDateSelect={setSelectedDate}
+          />
+          <div className="selected-day">
+            <div>
+              <strong>{format(parseISO(selectedDate), "M월 d일")}</strong>
+              <span>
+                {selected.length
+                  ? `일정 ${selected.length}개`
+                  : "여유로운 하루"}
+              </span>
             </div>
+            {selected.slice(0, 3).map((event) => (
+              <button
+                className="mini-event"
+                onClick={() => onEdit(event)}
+                key={event.id}
+              >
+                <span className={`calendar-dot dot-${event.kind}`} />
+                <span>{event.title}</span>
+                <ChevronRight size={16} />
+              </button>
+            ))}
+          </div>
+        </section>
+      </section>
+      <div className="today-ledger">
+        <section className="deadlines-section">
+          <div className="section-heading ledger-head">
+            <h2>
+              다가오는 마감{" "}
+              <span className="count-label">{active.length}</span>
+            </h2>
             <div className="category-tabs">
-              {[
-                ["all", "전체"],
-                ["assignment", "과제"],
-                ["scholarship", "장학금"],
-                ["job", "채용"],
-                ["career", "취업 준비"],
-              ].map(([value, label]) => (
+              {DASHBOARD_TABS.map(([value, label]) => (
                 <button
                   type="button"
                   key={value}
                   className={filter === value ? "active" : ""}
+                  aria-pressed={filter === value}
                   onClick={() => setFilter(value)}
                 >
                   {label}
+                  <span className="tab-count" aria-hidden="true">
+                    {value === "all"
+                      ? active.length
+                      : active.filter((event) => event.kind === value).length}
+                  </span>
                 </button>
               ))}
             </div>
-            <EventList
-              events={upcoming}
-              onEdit={onEdit}
-              onToggle={onToggle}
-              onAdd={onAdd}
-            />
+          </div>
+          <EventList
+            events={upcoming}
+            onEdit={onEdit}
+            onToggle={onToggle}
+            onAdd={onAdd}
+          />
+          <div className="ledger-foot">
             {!app.events.length && (
               <div className="sample-action">
                 <button
@@ -766,81 +825,25 @@ function Dashboard({
                     <Busy label="추가 중" />
                   ) : (
                     <>
-                      <Layers size={15} />
+                      <Layers size={16} />
                       샘플 일정 추가
                     </>
                   )}
                 </button>
               </div>
             )}
-          </section>
-          <section className="next-section">
-            <div className="section-heading">
-              <h2>캠퍼스에서 다음으로</h2>
-            </div>
-            <div className="quick-actions">
-              <button onClick={() => onNavigate("scholarship")}>
-                <span className="quick-icon violet">
-                  <GraduationCap size={24} />
-                </span>
-                <span>
-                  <strong>장학금 찾아보기</strong>
-                  <small>{app.events.filter((event) => event.kind === "scholarship").length}개 신청 일정</small>
-                </span>
-                <ArrowUpRight size={18} />
-              </button>
-              <button onClick={() => onNavigate("job")}>
-                <span className="quick-icon cyan">
-                  <BriefcaseBusiness size={23} />
-                </span>
-                <span>
-                  <strong>취업 준비 이어가기</strong>
-                  <small>{app.events.filter((event) => event.kind === "job").length}개 지원 일정</small>
-                </span>
-                <ArrowUpRight size={18} />
-              </button>
-              <button onClick={onAnalyze}>
-                <span className="quick-icon amber">
-                  <FileText size={23} />
-                </span>
-                <span>
-                  <strong>과제 공지 정리하기</strong>
-                  <small>{app.events.filter((event) => event.kind === "assignment").length}개 제출 일정</small>
-                </span>
-                <ArrowUpRight size={18} />
-              </button>
-            </div>
-          </section>
-        </div>
-        <aside className="dashboard-aside">
-          <section className="mini-calendar-section">
-            <MonthCalendar
-              small
-              events={active}
-              onDateSelect={setSelectedDate}
-            />
-            <div className="selected-day">
-              <div>
-                <strong>{format(parseISO(selectedDate), "M월 d일")}</strong>
-                <span>
-                  {selected.length
-                    ? `일정 ${selected.length}개`
-                    : "여유로운 하루"}
-                </span>
-              </div>
-              {selected.slice(0, 3).map((event) => (
-                <button
-                  className="mini-event"
-                  onClick={() => onEdit(event)}
-                  key={event.id}
-                >
-                  <span className={`calendar-dot dot-${event.kind}`} />
-                  <span>{event.title}</span>
-                  <ChevronRight size={14} />
-                </button>
-              ))}
-            </div>
-          </section>
+            <button
+              className="text-button ledger-more"
+              onClick={() => onNavigate("calendar")}
+            >
+              전체 보기
+              <span className="round-arrow" aria-hidden="true">
+                <ArrowRight size={15} />
+              </span>
+            </button>
+          </div>
+        </section>
+        <div className="today-extras">
           <section className="upcoming-notifications">
             <div className="section-heading">
               <h2>다가오는 알림</h2>
@@ -874,7 +877,7 @@ function Dashboard({
               ))
             ) : (
               <div className="small-empty">
-                <Bell size={21} strokeWidth={1.5} />
+                <Bell size={20} strokeWidth={1.5} />
                 <span>예약된 알림이 없어요</span>
               </div>
             )}
@@ -888,12 +891,55 @@ function Dashboard({
                   ? "텔레그램 연결됨"
                   : "텔레그램 연결하기"}
               </span>
-              <ChevronRight size={14} />
+              <ChevronRight size={16} />
             </button>
           </section>
-        </aside>
+          <section className="next-section">
+            <div className="section-heading">
+              <h2>캠퍼스에서 다음으로</h2>
+            </div>
+            <div className="quick-actions">
+              <button onClick={() => onNavigate("scholarship")}>
+                <span className="quick-icon quick-scholarship">
+                  <GraduationCap size={20} />
+                </span>
+                <span>
+                  <strong>장학금 찾아보기</strong>
+                  <small>{app.events.filter((event) => event.kind === "scholarship").length}개 신청 일정</small>
+                </span>
+                <span className="round-arrow" aria-hidden="true">
+                  <ArrowUpRight size={15} />
+                </span>
+              </button>
+              <button onClick={() => onNavigate("job")}>
+                <span className="quick-icon quick-job">
+                  <BriefcaseBusiness size={20} />
+                </span>
+                <span>
+                  <strong>취업 준비 이어가기</strong>
+                  <small>{app.events.filter((event) => event.kind === "job").length}개 지원 일정</small>
+                </span>
+                <span className="round-arrow" aria-hidden="true">
+                  <ArrowUpRight size={15} />
+                </span>
+              </button>
+              <button onClick={onAnalyze}>
+                <span className="quick-icon quick-assignment">
+                  <FileText size={20} />
+                </span>
+                <span>
+                  <strong>과제 공지 정리하기</strong>
+                  <small>{app.events.filter((event) => event.kind === "assignment").length}개 제출 일정</small>
+                </span>
+                <span className="round-arrow" aria-hidden="true">
+                  <ArrowUpRight size={15} />
+                </span>
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -909,17 +955,17 @@ function Summary({
   tone: string;
 }) {
   return (
-    <div className="summary-item">
-      <span className={`summary-icon ${tone}`}>
-        <Icon size={20} />
-      </span>
-      <div>
+    <div className={`summary-item tone-${tone}${value > 0 ? " has-value" : ""}`}>
+      <strong>
+        {value}
+        <small>개</small>
+      </strong>
+      <span className="summary-label">
+        <span className="summary-icon" aria-hidden="true">
+          <Icon size={14} />
+        </span>
         <span>{label}</span>
-        <strong>
-          {value}
-          <small>개</small>
-        </strong>
-      </div>
+      </span>
     </div>
   );
 }
@@ -991,7 +1037,7 @@ function Notifications({
           </button>
         </div>
         <button
-          className="button secondary"
+          className="notification-read-all"
           onClick={() => onRead()}
           disabled={
             !notifications.some(
@@ -1007,7 +1053,9 @@ function Notifications({
       </div>
       {!records.length ? (
         <div className="empty-state notification-empty">
-          <Bell size={31} strokeWidth={1.5} />
+          <span className="notification-empty-icon" aria-hidden="true">
+            <Bell size={26} strokeWidth={1.6} />
+          </span>
           <h3>
             {filter === "scheduled"
               ? "예약된 알림이 없어요"
@@ -1027,8 +1075,15 @@ function Notifications({
                 key={item.id}
                 className={`notification-row ${!item.read ? "unread" : ""}`}
               >
+                {!item.read &&
+                  (item.status === "sent" || item.status === "failed") && (
+                    <span
+                      className="notification-unread-dot"
+                      aria-hidden="true"
+                    />
+                  )}
                 <span
-                  className={`notification-kind-icon ${item.status === "failed" ? "failed" : ""}`}
+                  className={`notification-kind-icon notification-kind-${item.kind} ${item.status === "failed" ? "failed" : ""}`}
                 >
                   {item.status === "failed" ? (
                     <CircleAlert size={19} />
@@ -1061,8 +1116,17 @@ function Notifications({
                   )}
                 </div>
                 <span
-                  className={`notification-status ${item.status === "failed" ? "overdue" : ""}`}
+                  className={`notification-status status-${item.status}`}
                 >
+                  {item.status === "failed" ? (
+                    <CircleAlert size={15} aria-hidden="true" />
+                  ) : item.status === "sent" ? (
+                    <CheckCheck size={15} aria-hidden="true" />
+                  ) : item.status === "cancelled" ? (
+                    <X size={15} aria-hidden="true" />
+                  ) : (
+                    <Clock3 size={15} aria-hidden="true" />
+                  )}
                   {labels[item.status]}
                 </span>
                 {!item.read &&

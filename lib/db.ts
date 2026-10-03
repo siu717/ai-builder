@@ -1,5 +1,5 @@
 import { createClient, type Client } from "@libsql/client";
-import { chmod, mkdir } from "node:fs/promises";
+import { chmod, mkdir, open } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 const SCHEMA = [
@@ -12,6 +12,16 @@ const SCHEMA = [
   `INSERT OR IGNORE INTO campus_settings(id) VALUES (1)`,
 ];
 
+async function protectSidecars(path: string): Promise<void> {
+  for (const suffix of ["-wal", "-shm"]) {
+    try {
+      await chmod(`${path}${suffix}`, 0o600);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+}
+
 export async function createDatabase(databaseUrl: string): Promise<Client> {
   if (!databaseUrl.startsWith("file:")) {
     throw new Error("DATABASE_URL must be a local SQLite file URL.");
@@ -19,6 +29,14 @@ export async function createDatabase(databaseUrl: string): Promise<Client> {
   const path = resolve(decodeURIComponent(databaseUrl.slice(5)));
   const createdDirectory = await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   if (createdDirectory) await chmod(dirname(path), 0o700);
+  // SQLite derives new WAL/SHM modes from the main file when opening it.
+  const file = await open(path, "a", 0o600);
+  try {
+    await file.chmod(0o600);
+  } finally {
+    await file.close();
+  }
+  await protectSidecars(path);
   const client = createClient({ url: `file:${path}` });
   try {
     await client.execute("PRAGMA busy_timeout = 5000");
@@ -36,7 +54,7 @@ export async function createDatabase(databaseUrl: string): Promise<Client> {
     } finally {
       migration.close();
     }
-    await chmod(path, 0o600);
+    await protectSidecars(path);
     return client;
   } catch (error) {
     client.close();
