@@ -693,7 +693,13 @@ function StoredData({ settings }: { settings: PublicSettings }) {
   }
   const rows: [string, string | null][] = overview
     ? [
-        ["Anthropic API 키", overview.keys.anthropic],
+        [
+          "Anthropic API 키",
+          overview.keys.anthropic &&
+            (overview.keys.anthropicFormatValid === false
+              ? `${overview.keys.anthropic} · Anthropic 키 형식이 아닙니다(sk-ant-로 시작해야 함). AI 분석이 실패합니다.`
+              : overview.keys.anthropic),
+        ],
         ["공공데이터포털 키", overview.keys.dataGoKr],
         ["사람인 키", overview.keys.saramin],
         ["텔레그램 봇 토큰", overview.keys.telegramToken],

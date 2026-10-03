@@ -268,6 +268,7 @@ export async function syncScholarshipEvents(notices: ScholarshipNotice[], databa
         analysisNote = error instanceof AIInputError && error.status === 503
           ? "[AI 분석] Anthropic API 키가 없어 분석하지 못했습니다."
           : "[AI 분석] 분석에 실패했습니다. 원문을 직접 확인해주세요.";
+        console.error(`장학공지 AI 분석 실패 (${notice.id}): ${error instanceof AIInputError ? error.message : "알 수 없는 오류"}`);
       }
     }
     const autoNote = "국민대 공지에서 자동 등록했습니다. 지원 자격과 제출 서류는 원문을 확인해주세요.";

@@ -34,8 +34,8 @@ test("guest credentials stay isolated and expired sessions cannot dispatch remin
   assert.equal(initial.settings.aiConfigured, false);
   assert.equal(initial.settings.telegramChatId, "");
   assert.deepEqual(initial.settings.dataKeys, { dataGoKr: null, saramin: null });
-  await saveAnthropicApiKey({ apiKey: "guest-ai-key" }, a);
-  assert.equal(await getAnthropicApiKey(a), "guest-ai-key");
+  await saveAnthropicApiKey({ apiKey: "sk-ant-guest-ai-key" }, a);
+  assert.equal(await getAnthropicApiKey(a), "sk-ant-guest-ai-key");
   assert.equal(await getAnthropicApiKey(b), "");
   const verify: typeof fetch = async () => Response.json({ ok: true, result: { username: "guest_bot" } });
   await saveSettings({ telegramToken: "123456:abcdefghijklmnopqrstuvwxy", telegramChatId: "12345", telegramEnabled: true }, a, verify);
@@ -54,7 +54,7 @@ test("guest credentials stay isolated and expired sessions cannot dispatch remin
   assert.equal((await getState(b)).notifications.length, 0);
   assert.equal((await stat(join(directory, ".session-secret"))).mode & 0o777, 0o600);
   await closeAnonymousDatabases();
-  assert.equal(await getAnthropicApiKey(await getAnonymousDatabase(first.session)), "guest-ai-key");
+  assert.equal(await getAnthropicApiKey(await getAnonymousDatabase(first.session)), "sk-ant-guest-ai-key");
   const expired = new Date(first.session.expiresAt + 1);
   assert.equal(await validateAnonymousSession(first.value, expired), null);
   await processAnonymousReminders({ now: expired, fetcher });

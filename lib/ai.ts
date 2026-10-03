@@ -105,6 +105,20 @@ const COACHING_INSTRUCTIONS = `목표 공고와 제출 서류를 비교해 서�
 feedback.quote는 resumeText에 실제로 존재하는 연속된 문자열을 그대로 인용하세요. suggestion은 구체적인 수정 제안이며 원문에 없는 성과와 경험을 사실처럼 추가하지 마세요. 수치가 없으면 실제 측정한 수치를 확인하도록 제안하세요.
 tasks는 사용자가 검토할 준비 할 일입니다. 할 일마다 목적을 notes에 작성하세요. 공고에 없는 면접 일시나 임의의 마감 날짜를 정하지 마세요. 준비 일정은 사용자가 나중에 직접 확정합니다.`;
 
+// 공급자 응답 본문(키가 섞일 수 있음)은 버리고 HTTP 상태로 원인만 알려준다.
+function aiFailure(error: unknown, action: string): AIInputError {
+  if (error instanceof AIInputError) return error;
+  const status = error instanceof Anthropic.APIError ? error.status : undefined;
+  const reason = status === 401 || status === 403
+    ? "Anthropic API 키가 올바르지 않거나 권한이 없습니다. 설정 화면에서 sk-ant-로 시작하는 키를 다시 저장해 주세요."
+    : status === 429
+      ? "Anthropic 요청 한도를 초과했습니다. 설정 화면의 키 사용량을 확인하고 잠시 후 다시 시도해 주세요."
+      : status === 404
+        ? "AI 모델을 찾을 수 없습니다. 설정 화면의 키와 서버의 ANTHROPIC_MODEL 설정을 확인해 주세요."
+        : "설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.";
+  return new AIInputError(502, `${action}에 실패했습니다${status ? ` (HTTP ${status})` : ""}. ${reason}`);
+}
+
 async function createClient(database?: Client): Promise<Anthropic> {
   const apiKey = await getAnthropicApiKey(database);
   if (!apiKey) {
@@ -173,8 +187,7 @@ export async function analyzeText(input: AnalyzeRequest, profile: Profile, now =
     if (result.kind !== input.kind) throw new AIInputError(502, "AI가 요청과 다른 종류의 결과를 반환했습니다. 다시 시도해 주세요.");
     return { mode: "live", ...result };
   } catch (error) {
-    if (error instanceof AIInputError) throw error;
-    throw new AIInputError(502, "AI 분석에 실패했습니다. 설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.");
+    throw aiFailure(error, "AI 분석");
   }
 }
 
@@ -222,7 +235,6 @@ export async function coachResume(input: CoachingRequest, database?: Client): Pr
     validateCoachingQuotes(result, input.resumeText);
     return { mode: "live", ...result };
   } catch (error) {
-    if (error instanceof AIInputError) throw error;
-    throw new AIInputError(502, "AI 컨설팅에 실패했습니다. 설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.");
+    throw aiFailure(error, "AI 컨설팅");
   }
 }

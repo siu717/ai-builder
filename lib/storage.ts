@@ -92,6 +92,9 @@ export async function getStorageOverview(database?: Client): Promise<StorageOver
     },
     keys: {
       anthropic: saved("anthropic_api_key"),
+      anthropicFormatValid: String(settings.anthropic_api_key || "").trim()
+        ? String(settings.anthropic_api_key).trim().startsWith("sk-ant-")
+        : null,
       dataGoKr: saved("data_go_kr_api_key"),
       saramin: saved("saramin_api_key"),
       telegramToken: saved("token"),
