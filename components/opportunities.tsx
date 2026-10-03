@@ -21,6 +21,14 @@ import { seoulDate } from "./ui";
 import { checklistFromDocuments } from "@/lib/checklist";
 
 const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
+// "내게 맞는 공고 먼저": 조건 충족 → 확인 필요 → 불충족 순서입니다.
+const FIT_RANK = { met: 0, unknown: 1, unmet: 2 } as const;
+// 프로필은 props로 받지 않으므로, 조건 판정 사유에 남은 "입력해 주세요" 안내로 빈 항목을 알아냅니다.
+const PROFILE_GAPS = [
+  { label: "학년", phrase: "학년을 입력" },
+  { label: "전공", phrase: "전공을 입력" },
+  { label: "학점", phrase: "학점과 만점 기준을 함께 입력" },
+];
 export default function Opportunities({
   kind,
   opportunities,
@@ -37,7 +45,8 @@ export default function Opportunities({
   const [query, setQuery] = useState("");
   const [condition, setCondition] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const results = opportunities.filter(
+  const [fitFirst, setFitFirst] = useState(true);
+  const filtered = opportunities.filter(
     (item) =>
       item.kind === kind &&
       `${item.title} ${item.organization} ${item.tags.join(" ")}`
@@ -45,7 +54,20 @@ export default function Opportunities({
         .includes(query.toLowerCase()) &&
       (condition === "all" || overall(item) === condition),
   );
+  // Array.prototype.sort는 안정 정렬이므로 같은 상태 안에서는 기존(마감) 순서가 유지됩니다.
+  const results = fitFirst
+    ? [...filtered].sort(
+        (a, b) => FIT_RANK[overall(a)] - FIT_RANK[overall(b)],
+      )
+    : filtered;
   const selected = results.find((item) => item.id === selectedId) || results[0];
+  const profileGaps = PROFILE_GAPS.filter(({ phrase }) =>
+    opportunities.some((item) =>
+      item.conditions.some(
+        (entry) => entry.status === "unknown" && entry.reason.includes(phrase),
+      ),
+    ),
+  ).map(({ label }) => label);
   function overall(item: Opportunity) {
     return item.conditions.some((entry) => entry.status === "unmet")
       ? "unmet"
@@ -82,12 +104,27 @@ export default function Opportunities({
           공고 입력
         </button>
       </div>
-      <div className="catalog-caption">
+      <div className="catalog-caption tt-caption">
         <span>
           {kind === "scholarship" ? "장학금" : "채용 공고"} {results.length}개
         </span>
         <span className="sample-tag">샘플 공고</span>
+        <label className="tt-sort-toggle">
+          <input
+            type="checkbox"
+            checked={fitFirst}
+            onChange={(event) => setFitFirst(event.target.checked)}
+          />
+          <span>내게 맞는 공고 먼저</span>
+        </label>
       </div>
+      {profileGaps.length > 0 && (
+        <p className="tt-nudge">
+          {profileGaps.join("·")} 미입력 · 설정의 학생 프로필을 채우면 지원
+          조건을 더 정확히 비교합니다. 비어 있는 조건은 확인 필요로
+          표시됩니다.
+        </p>
+      )}
       <div className="opportunity-layout">
         <div className="opportunity-list">
           {results.length === 0 && (

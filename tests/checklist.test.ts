@@ -34,7 +34,7 @@ async function fixture(t: TestContext) {
   };
   t.after(async () => {
     clients.forEach((db) => db.close());
-    await rm(directory, { recursive: true, force: true });
+    await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => undefined);
   });
   return { db: await open(), open };
 }

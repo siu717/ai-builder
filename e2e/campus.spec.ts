@@ -18,6 +18,20 @@ function sampleEvent(title: string): EventInput {
   return { title, kind: "assignment", date: nextDay(), time: null, notes: "E2E 샘플", source: "검수용 샘플 공지", isSample: true, reminders: [], idempotencyKey: randomUUID() };
 }
 
+// next dev의 개발 도구 버튼(<nextjs-portal>, 화면 왼쪽 아래)이 모바일 화면에서 일정 대화상자의
+// "일정 삭제" 버튼을 덮어 클릭을 가로챈다. 개발 서버에만 있는 요소이므로 검수 중에는 숨긴다.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const hide = () => {
+      const style = document.createElement("style");
+      style.textContent = "nextjs-portal { display: none !important; }";
+      document.head.appendChild(style);
+    };
+    if (document.head) hide();
+    else document.addEventListener("DOMContentLoaded", hide, { once: true });
+  });
+});
+
 test("calendar editing, persistence, completion, deletion and responsive layout", async ({ page, request }, testInfo) => {
   const title = `검수 과제 ${randomUUID().slice(0, 8)}`;
   const response = await request.post("/api/events", { data: sampleEvent(title) });

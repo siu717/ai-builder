@@ -10,9 +10,41 @@ import {
   CheckCircle2,
   Radio,
   KeyRound,
+  CircleHelp,
 } from "lucide-react";
 import type { AppState, Profile, PublicSettings } from "@/lib/contracts";
 import { Busy, Message, request } from "./ui";
+
+type BrowserPermission = NotificationPermission | "unsupported";
+
+const PERMISSION_LABELS: Record<BrowserPermission, string> = {
+  unsupported: "지원 안 함",
+  granted: "허용됨",
+  denied: "거부됨",
+  default: "요청 전",
+};
+
+// lib/catalog.ts가 학년 조건 비교에 사용하는 형식과 같습니다.
+const YEAR_PATTERN = /^([1-6])(?:\s*학년)?$/;
+const YEAR_OPTIONS = ["1", "2", "3", "4", "5", "6"];
+const GPA_SCALES = ["4.5", "4.3", "4.0"];
+
+function missingProfileInfo(profile: Profile, year: string) {
+  return [
+    year === ""
+      ? "학년: 학년 조건이 있는 공고는 '확인 필요'로 표시됩니다."
+      : null,
+    profile.major.trim() === ""
+      ? "전공: 전공 조건을 비교할 수 없습니다."
+      : null,
+    profile.gpa.trim() === ""
+      ? "학점: 학점 조건을 만점 기준과 함께 비교할 수 없습니다."
+      : null,
+    profile.interests.trim() === ""
+      ? "관심 직무: 채용 공고의 직무 적합성을 안내할 수 없습니다."
+      : null,
+  ].filter((item): item is string => item !== null);
+}
 
 export default function Settings({
   profile,
@@ -30,14 +62,19 @@ export default function Settings({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [permission, setPermission] = useState<
-    NotificationPermission | "unsupported"
-  >("unsupported");
+  const [permission, setPermission] =
+    useState<BrowserPermission>("unsupported");
+  const [permissionNote, setPermissionNote] = useState("");
   useEffect(() => {
-    if ("Notification" in window) setPermission(Notification.permission);
+    // Notification은 브라우저에만 있으므로 마운트 후에 확인합니다.
+    if (typeof window !== "undefined" && "Notification" in window)
+      setPermission(Notification.permission);
   }, []);
   const field = (key: keyof Profile, value: string) =>
     setDraft({ ...draft, [key]: value });
+  const yearValue = YEAR_PATTERN.exec(draft.year.trim())?.[1] ?? "";
+  const unrecognizedYear = draft.year.trim() !== "" && yearValue === "";
+  const missingInfo = missingProfileInfo(draft, yearValue);
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
     setBusy("profile");
@@ -100,13 +137,48 @@ export default function Settings({
       setBusy(null);
     }
   }
-  async function enableBrowser() {
-    if (!("Notification" in window)) return;
+  async function requestBrowserPermission() {
+    if (!("Notification" in window)) {
+      setPermission("unsupported");
+      return;
+    }
     try {
       const result = await Notification.requestPermission();
       setPermission(result);
+      setPermissionNote(
+        result === "granted"
+          ? "브라우저 알림을 허용했습니다. 테스트 알림으로 확인해 보세요."
+          : result === "denied"
+            ? "권한이 거부되어 앱 내 알림만 표시됩니다. 다시 받으려면 브라우저의 사이트 설정에서 알림을 허용해 주세요."
+            : "권한 요청을 닫았습니다. 필요할 때 다시 요청할 수 있습니다.",
+      );
     } catch {
-      setError("브라우저 알림 권한을 확인하지 못했습니다.");
+      setPermissionNote(
+        "브라우저 알림 권한을 확인하지 못했습니다. 앱 내 알림은 계속 표시됩니다.",
+      );
+    }
+  }
+  function sendTestNotification() {
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+      setPermission(
+        "Notification" in window ? Notification.permission : "unsupported",
+      );
+      setPermissionNote(
+        "브라우저 알림 권한이 허용되지 않아 테스트 알림을 보내지 않았습니다.",
+      );
+      return;
+    }
+    try {
+      new Notification("참십 Campus 테스트", {
+        body: "브라우저 알림이 켜져 있습니다.",
+      });
+      setPermissionNote(
+        "테스트 알림을 보냈습니다. 보이지 않으면 운영체제의 알림 설정(방해 금지 모드 등)을 확인해 주세요.",
+      );
+    } catch {
+      setPermissionNote(
+        "이 브라우저는 페이지에서 알림을 직접 표시하지 못합니다. 앱 내 알림으로 확인해 주세요.",
+      );
     }
   }
   return (
@@ -134,15 +206,15 @@ export default function Settings({
             <label className="field">
               학년
               <select
-                value={draft.year}
+                value={yearValue}
                 onChange={(event) => field("year", event.target.value)}
               >
                 <option value="">미입력</option>
-                <option value="1">1학년</option>
-                <option value="2">2학년</option>
-                <option value="3">3학년</option>
-                <option value="4">4학년</option>
-                <option value="graduate">졸업 · 졸업 예정</option>
+                {YEAR_OPTIONS.map((year) => (
+                  <option key={year} value={year}>
+                    {year}학년
+                  </option>
+                ))}
               </select>
             </label>
             <label className="field">
@@ -159,9 +231,10 @@ export default function Settings({
                 학점
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0"
-                  max={draft.gpaScale}
+                  max={draft.gpaScale || undefined}
                   value={draft.gpa}
                   onChange={(event) => field("gpa", event.target.value)}
                   placeholder="미입력"
@@ -173,9 +246,16 @@ export default function Settings({
                   value={draft.gpaScale}
                   onChange={(event) => field("gpaScale", event.target.value)}
                 >
-                  <option value="4.5">4.5</option>
-                  <option value="4.3">4.3</option>
-                  <option value="4.0">4.0</option>
+                  {!GPA_SCALES.includes(draft.gpaScale) && (
+                    <option value={draft.gpaScale}>
+                      {draft.gpaScale || "미입력"}
+                    </option>
+                  )}
+                  {GPA_SCALES.map((scale) => (
+                    <option key={scale} value={scale}>
+                      {scale}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -198,6 +278,29 @@ export default function Settings({
               placeholder="프로젝트, 인턴 경험, 사용 기술, 자격증"
             />
           </label>
+          {unrecognizedYear && (
+            <p className="field-note">
+              저장된 학년 &quot;{draft.year}&quot;은(는) 조건 비교에 사용할 수
+              없습니다. 1~6학년 중에서 다시 선택해 주세요.
+            </p>
+          )}
+          {missingInfo.length > 0 && (
+            <div className="missing-fields">
+              <h4>
+                <CircleHelp size={16} />
+                부족한 정보
+              </h4>
+              <ul>
+                {missingInfo.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <p className="tt-note">
+                비어 있어도 저장하고 공고를 조회할 수 있습니다. 입력하지 않은
+                정보는 임의로 채우지 않고 &apos;확인 필요&apos;로 처리합니다.
+              </p>
+            </div>
+          )}
           <button
             className="button primary"
             type="submit"
@@ -335,28 +438,47 @@ export default function Settings({
             브라우저 알림
           </h2>
         </div>
-        <div className="setting-inline">
+        <div className="setting-inline perm-row">
           <span>알림 권한</span>
           <span
-            className={`status-text ${permission === "granted" ? "status-met" : "status-unknown"}`}
+            className={`status-text ${permission === "granted" ? "status-met" : permission === "denied" ? "status-unmet" : "status-unknown"}`}
+            role="status"
+            aria-label={`브라우저 알림 권한 ${PERMISSION_LABELS[permission]}`}
           >
-            {permission === "granted"
-              ? "허용됨"
-              : permission === "denied"
-                ? "차단됨"
-                : permission === "unsupported"
-                  ? "지원하지 않는 브라우저"
-                  : "권한 대기"}
+            {PERMISSION_LABELS[permission]}
           </span>
-          <button
-            className="button secondary"
-            onClick={enableBrowser}
-            disabled={permission !== "default"}
-          >
-            <BellRing size={16} />
-            권한 요청
-          </button>
+          <div className="perm-actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={requestBrowserPermission}
+              disabled={permission === "unsupported" || permission === "granted"}
+            >
+              <BellRing size={16} />
+              알림 권한 요청
+            </button>
+            {permission === "granted" && (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={sendTestNotification}
+              >
+                <Send size={15} />
+                테스트 알림 보내기
+              </button>
+            )}
+          </div>
         </div>
+        {permissionNote && (
+          <p className="perm-note" role="status">
+            {permissionNote}
+          </p>
+        )}
+        <p className="perm-copy">
+          알림은 앱과 알림 워커가 실행 중일 때 발송되며, 권한을 거부하면 앱 내
+          알림만 표시됩니다. 브라우저 알림은 브라우저가 지원하고 권한을 허용한
+          경우에만 앱 내 알림과 함께 표시합니다.
+        </p>
         <div className="setting-inline">
           <span>
             <Radio size={16} />

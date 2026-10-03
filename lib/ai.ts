@@ -97,11 +97,39 @@ const SYSTEM_PROMPT = `당신은 대학생활 공고 분석 도우미입니다. 
 const ANALYSIS_INSTRUCTIONS = `공고의 제목, 과목/직무, 마감 날짜와 시각, 제출 방법, 제출 서류, 요약을 추출하세요. kind는 요청한 종류와 동일하게 출력하세요.
 date는 실제 존재하는 YYYY-MM-DD 또는 null, time은 원문이나 제공한 수업 시간으로 확인되는 HH:mm 또는 null입니다. 날짜만 명시되었으면 time=null로 두며 23:59를 추가하지 마세요. 날짜가 확인되지 않으면 date와 time을 모두 null로 두고 missing에 확인할 사항을 적으세요.
 상대 날짜(오늘, 내일, 다음 주 등)는 사용자가 명시적으로 제공한 referenceDate(공지 작성일)를 기준으로만 해석하세요. referenceDate=null이면 상대 날짜를 확정하지 마세요. 원문에 연도가 없는 월·일도 referenceDate가 없으면 연도를 만들어 내지 말고 date=null로 두세요. '다음 주'는 작성일 다음 달력 주(월요일 시작)를 뜻합니다. '수업 전'은 제공한 classTime을 마감 후보로 사용하고 확인할 사항에 해당 시각이 수업 시작 기준임을 적으세요. classTime=null이면 time=null로 두세요.
+마감이 애매해서 date나 time을 확정하지 못했다면, 사용자가 직접 고를 수 있도록 missing에 원문 근거와 함께 마감 후보를 적으세요. 원문만으로 계산되는 후보는 '마감 후보: YYYY-MM-DD HH:mm (근거: 원문 표현)' 형식으로, 날짜를 계산할 기준이 없으면 '마감 후보: 다음 주 목요일 수업 시작 전 (공지 작성일 확인 필요)'처럼 원문 표현과 필요한 정보를 그대로 적으세요. 후보가 여러 개면 항목을 나누어 적으세요. 후보를 적었더라도 확인되지 않은 date와 time은 null로 유지하고, 후보에 23:59 같은 임의의 시각을 넣지 마세요.
 조건은 필수와 우대를 label의 '필수: ' 또는 '우대: '로 구분하고 현재 프로필과 비교하여 met/unmet/unknown을 정하세요. 원문에 있는 조건 문구를 reason에 인용하고 판단 근거를 쓰세요. profile에 미기재인 능력은 보유하지 않았다고 단정하지 마세요. 학점 만점 기준이 다르면 공식 환산 기준이 입력에 없는 한 unknown입니다. 관심 직무 적합성을 지원 자격으로 취급하지 마세요. 과제라면 조건 배열은 비워도 됩니다.`;
 
 const COACHING_INSTRUCTIONS = `목표 공고와 제출 서류를 비교해 서류 피드백, 면접 질문, 준비 할 일을 작성하세요.
 feedback.quote는 resumeText에 실제로 존재하는 연속된 문자열을 그대로 인용하세요. suggestion은 구체적인 수정 제안이며 원문에 없는 성과와 경험을 사실처럼 추가하지 마세요. 수치가 없으면 실제 측정한 수치를 확인하도록 제안하세요.
 tasks는 사용자가 검토할 준비 할 일입니다. 할 일마다 목적을 notes에 작성하세요. 공고에 없는 면접 일시나 임의의 마감 날짜를 정하지 마세요. 준비 일정은 사용자가 나중에 직접 확정합니다.`;
+
+// 기본 모델은 Claude Opus 5.5입니다. 날짜 접미사를 붙이지 않은 ID를 그대로 사용하며 ANTHROPIC_MODEL로 바꿀 수 있습니다.
+export const DEFAULT_MODEL = "claude-opus-5-5";
+
+// effort 파라미터를 받지 않는 이전 세대 모델(ANTHROPIC_MODEL로 지정한 경우)에는 보내지 않습니다.
+const NO_EFFORT_MODELS = /claude-(?:3|haiku-4-5|sonnet-4-5|sonnet-4-\d{8}|opus-4-1|opus-4-\d{8})/;
+
+export function resolveModel(): string {
+  return process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL;
+}
+
+// 추출·피드백 작업은 low effort로 충분합니다. 응답 지연과 사고 토큰 사용을 줄입니다.
+export function outputEffort(model: string): { effort: "low" } | Record<string, never> {
+  return NO_EFFORT_MODELS.test(model) ? {} : { effort: "low" };
+}
+
+// 사고(thinking) 토큰도 max_tokens에 포함되므로 구조화 응답이 잘리지 않도록 여유를 둡니다.
+const MAX_OUTPUT_TOKENS = 16000;
+
+function assertCompleted(response: { stop_reason: string | null; parsed_output?: unknown }): void {
+  if (response.stop_reason === "refusal") {
+    throw new AIInputError(502, "AI가 이 입력을 처리하지 않았습니다. 입력 내용을 확인한 뒤 다시 시도해 주세요.");
+  }
+  if (response.stop_reason !== "end_turn" || !response.parsed_output) {
+    throw new AIInputError(502, "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.");
+  }
+}
 
 function createClient(): Anthropic {
   if (!process.env.ANTHROPIC_API_KEY?.trim()) {
@@ -153,19 +181,18 @@ export async function analyzeText(input: AnalyzeRequest, profile: Profile, now =
   if (input.sample) return sampleAnalysis(input, profile, now);
   const client = createClient();
   try {
+    const model = resolveModel();
     const response = await client.messages.parse({
-      model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
-      max_tokens: 4096,
+      model,
+      max_tokens: MAX_OUTPUT_TOKENS,
       system: `${SYSTEM_PROMPT}\n${ANALYSIS_INSTRUCTIONS}`,
       messages: [{ role: "user", content: JSON.stringify({
         kind: input.kind, referenceDate: input.referenceDate, classTime: input.classTime,
         timeZone: "Asia/Seoul", profile, untrustedDocument: input.text,
       }) }],
-      output_config: { format: zodOutputFormat(analysisWireSchema) },
+      output_config: { ...outputEffort(model), format: zodOutputFormat(analysisWireSchema) },
     });
-    if (response.stop_reason !== "end_turn" || !response.parsed_output) {
-      throw new AIInputError(502, "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.");
-    }
+    assertCompleted(response);
     const result = analysisResultSchema.parse(response.parsed_output);
     if (result.kind !== input.kind) throw new AIInputError(502, "AI가 요청과 다른 종류의 결과를 반환했습니다. 다시 시도해 주세요.");
     return { mode: "live", ...result };
@@ -205,16 +232,15 @@ export async function coachResume(input: CoachingRequest): Promise<CoachingResul
   if (input.sample) return sampleCoaching(input);
   const client = createClient();
   try {
+    const model = resolveModel();
     const response = await client.messages.parse({
-      model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
-      max_tokens: 4096,
+      model,
+      max_tokens: MAX_OUTPUT_TOKENS,
       system: `${SYSTEM_PROMPT}\n${COACHING_INSTRUCTIONS}`,
       messages: [{ role: "user", content: JSON.stringify({ untrustedJobDocument: input.jobText, untrustedResumeDocument: input.resumeText }) }],
-      output_config: { format: zodOutputFormat(coachingResultSchema) },
+      output_config: { ...outputEffort(model), format: zodOutputFormat(coachingResultSchema) },
     });
-    if (response.stop_reason !== "end_turn" || !response.parsed_output) {
-      throw new AIInputError(502, "AI 응답이 완료되지 않았습니다. 입력을 유지한 채 다시 시도해 주세요.");
-    }
+    assertCompleted(response);
     const result = coachingResultSchema.parse(response.parsed_output);
     validateCoachingQuotes(result, input.resumeText);
     return { mode: "live", ...result };

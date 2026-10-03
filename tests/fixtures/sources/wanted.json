@@ -1,0 +1,168 @@
+{
+ "links": {
+  "prev": null,
+  "next": "/api/v4/jobs?country=kr&locations=all&years=0&limit=20&offset=20&job_sort=job.latest_order"
+ },
+ "data": [
+  {
+   "status": "active",
+   "hidden": false,
+   "is_like": false,
+   "score": null,
+   "is_bookmark": false,
+   "company": {
+    "id": 23336,
+    "industry_name": "IT, 컨텐츠",
+    "application_response_stats": {
+     "avg_rate": 97.3,
+     "level": "very_high",
+     "delayed_count": 0,
+     "avg_day": null,
+     "remained_count": 0,
+     "type": "applied_reply_done"
+    },
+    "name": "플라잎"
+   },
+   "annual_to": 1,
+   "compare_country": true,
+   "due_time": "2026-10-31",
+   "like_count": 0,
+   "id": 390423,
+   "address": {
+    "location_key": "gyeonggi",
+    "district": "성남시",
+    "country": "한국",
+    "location": "경기",
+    "full_location": "경기 성남시 분당구 정자일로 239, 102동 801호",
+    "district_key": "gyeonggi.seongnam-si"
+   },
+   "matching_score": null,
+   "position": "Robot Control Engineer (전문연구요원 가능)",
+   "is_recommended": false,
+   "reward": {
+    "formatted_total": "100만원",
+    "formatted_recommender": "50만원",
+    "formatted_recommendee": "50만원"
+   },
+   "category_tags": [
+    {
+     "parent_id": 513,
+     "id": 817
+    },
+    {
+     "parent_id": 513,
+     "id": 10145
+    }
+   ],
+   "annual_from": 0
+  },
+  {
+   "status": "active",
+   "hidden": false,
+   "is_like": false,
+   "score": null,
+   "is_bookmark": false,
+   "company": {
+    "id": 52487,
+    "industry_name": "IT, 컨텐츠",
+    "application_response_stats": {
+     "avg_rate": 85.71,
+     "level": "normal",
+     "delayed_count": 0,
+     "avg_day": null,
+     "remained_count": 0,
+     "type": "applied_reply_done"
+    },
+    "name": "로아이"
+   },
+   "annual_to": 1,
+   "compare_country": true,
+   "due_time": null,
+   "like_count": 0,
+   "id": 390398,
+   "address": {
+    "location_key": "seoul",
+    "district": "강남구",
+    "country": "한국",
+    "location": "서울",
+    "full_location": "서울 강남구 선릉로 577, 3층",
+    "district_key": "seoul.gangnam-gu"
+   },
+   "matching_score": null,
+   "position": "[인턴]Simulation Engineer (전환형)",
+   "is_recommended": false,
+   "reward": {
+    "formatted_total": "100만원",
+    "formatted_recommender": "50만원",
+    "formatted_recommendee": "50만원"
+   },
+   "category_tags": [
+    {
+     "parent_id": 513,
+     "id": 857
+    },
+    {
+     "parent_id": 513,
+     "id": 10132
+    },
+    {
+     "parent_id": 513,
+     "id": 10145
+    }
+   ],
+   "annual_from": 0
+  },
+  {
+   "status": "active",
+   "hidden": false,
+   "is_like": false,
+   "score": null,
+   "is_bookmark": false,
+   "company": {
+    "id": 33868,
+    "industry_name": "IT, 컨텐츠",
+    "application_response_stats": {
+     "avg_rate": 97.88,
+     "level": "very_high",
+     "delayed_count": 0,
+     "avg_day": null,
+     "remained_count": 0,
+     "type": "applied_reply_done"
+    },
+    "name": "넥스트그라운드"
+   },
+   "annual_to": 1,
+   "compare_country": true,
+   "due_time": "2026-10-16",
+   "like_count": 0,
+   "id": 390302,
+   "address": {
+    "location_key": "seoul",
+    "district": "강남구",
+    "country": "한국",
+    "location": "서울",
+    "full_location": "서울 강남구 테헤란로7길 22, 스파크플러스",
+    "district_key": "seoul.gangnam-gu"
+   },
+   "matching_score": null,
+   "position": "[인턴] 백엔드 개발자",
+   "is_recommended": false,
+   "reward": {
+    "formatted_total": "100만원",
+    "formatted_recommender": "50만원",
+    "formatted_recommendee": "50만원"
+   },
+   "category_tags": [
+    {
+     "parent_id": 518,
+     "id": 660
+    },
+    {
+     "parent_id": 518,
+     "id": 872
+    }
+   ],
+   "annual_from": 0
+  }
+ ]
+}

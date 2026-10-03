@@ -19,7 +19,7 @@ async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "campus-backend-"));
   const path = join(directory, "private", "campus.db");
   const db = await createDatabase(`file:${path}`);
-  t.after(async () => { db.close(); await rm(directory, { recursive: true, force: true }); });
+  t.after(async () => { db.close(); await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => undefined); });
   return { db, path };
 }
 
@@ -34,8 +34,8 @@ test("SQLite persists profile, schedules, checklist and safe settings across con
   assert.equal(state.events.length, 1);
   assert.equal(state.events[0].checklist?.[0].completed, true);
   assert.equal(state.notifications.length, 1);
-  assert.equal((await stat(path)).mode & 0o777, 0o600);
-  assert.equal((await stat(join(path, ".."))).mode & 0o777, 0o700);
+  if (process.platform !== "win32") assert.equal((await stat(path)).mode & 0o777, 0o600);
+  if (process.platform !== "win32") assert.equal((await stat(join(path, ".."))).mode & 0o777, 0o700);
 });
 
 test("date and Seoul reminder validation reject impossible, past, late and duplicate reminders", () => {

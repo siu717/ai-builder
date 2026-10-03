@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
 import {
   LayoutDashboard,
+  School,
   GraduationCap,
   BriefcaseBusiness,
   MessagesSquare,
@@ -28,20 +29,30 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type {
   AppState,
+  BookmarkletPayload,
   CalendarEvent,
+  KookminScheduleItem,
   Opportunity,
   ReminderRecord,
 } from "@/lib/contracts";
 import { KIND_LABELS } from "@/lib/contracts";
+import { decodeBookmarkletPayload } from "@/lib/kookmin/bookmarklet";
 import EventEditor, { type EventDraft } from "./event-editor";
 import CalendarView, { EventList, KindBadge, MonthCalendar } from "./calendar";
 import Opportunities from "./opportunities";
 import { AnalyzeModal, Coaching } from "./ai-tools";
 import Settings from "./settings";
 import { Busy, Message, request, seoulDate } from "./ui";
+import Kookmin from "./kookmin";
+import {
+  dateRange,
+  upcomingSchedule,
+  type ScheduleState,
+} from "./kookmin-shared";
 
 type View =
   | "today"
+  | "kookmin"
   | "scholarship"
   | "job"
   | "coaching"
@@ -61,6 +72,13 @@ const NAV: {
     icon: LayoutDashboard,
     title: "오늘의 캠퍼스",
     subtitle: "오늘 할 일과 다가오는 마감을 확인하세요.",
+  },
+  {
+    id: "kookmin",
+    label: "국민대",
+    icon: School,
+    title: "국민대 소식",
+    subtitle: "학사일정·공지·eCampus 과제를 캘린더로 가져오세요",
   },
   {
     id: "scholarship",
@@ -126,7 +144,61 @@ export default function CampusApp() {
   const mutationRef = useRef(false);
   const revisionRef = useRef(0);
   const [loadKey, setLoadKey] = useState(0);
+  const [schedule, setSchedule] = useState<ScheduleState>({
+    status: "loading",
+    items: [],
+    error: "",
+  });
+  const [kmuPayload, setKmuPayload] = useState<BookmarkletPayload | null>(null);
+  const scheduleToken = useRef(0);
+  const hashHandled = useRef(false);
   const today = seoulDate();
+
+  const loadSchedule = useCallback(async () => {
+    const current = ++scheduleToken.current;
+    setSchedule({ status: "loading", items: [], error: "" });
+    try {
+      const data = await request<{ items: KookminScheduleItem[] }>(
+        "/api/kookmin/schedule",
+      );
+      if (current === scheduleToken.current)
+        setSchedule({ status: "ready", items: data.items, error: "" });
+    } catch (err) {
+      if (current === scheduleToken.current)
+        setSchedule({
+          status: "error",
+          items: [],
+          error:
+            err instanceof Error
+              ? err.message
+              : "학사일정을 불러오지 못했습니다.",
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSchedule();
+  }, [loadSchedule]);
+
+  const loaded = app !== null;
+  useEffect(() => {
+    if (!loaded || hashHandled.current) return;
+    hashHandled.current = true;
+    const prefix = "#kmu-import=";
+    const hash = window.location.hash;
+    if (!hash.startsWith(prefix)) return;
+    try {
+      setKmuPayload(
+        decodeBookmarkletPayload(decodeURIComponent(hash.slice(prefix.length))),
+      );
+      setView("kookmin");
+    } catch {
+      setError(
+        "가져온 데이터를 읽지 못했습니다. eCampus에서 다시 시도해 주세요.",
+      );
+    }
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [loaded]);
 
   const loadCatalog = useCallback(async () => {
     try {
@@ -394,6 +466,8 @@ export default function CampusApp() {
   const addEvent = (date?: string) => setEditor({ date: date || today });
   const pageContext = view === "today"
     ? format(parseISO(today), "yyyy년 M월 d일")
+    : view === "kookmin"
+      ? current.subtitle
     : view === "scholarship" || view === "job"
       ? `샘플 공고 ${catalog.filter((item) => item.kind === view).length}개 · ${app.profile.major || "전공 미입력"}`
       : view === "calendar"
@@ -559,6 +633,19 @@ export default function CampusApp() {
               onSamples={sampleSchedules}
               sampleBusy={sampleBusy}
               onAnalyze={() => setAnalysis("assignment")}
+              schedule={schedule}
+              onReloadSchedule={loadSchedule}
+            />
+          )}
+          {view === "kookmin" && (
+            <Kookmin
+              events={app.events}
+              schedule={schedule}
+              onReloadSchedule={loadSchedule}
+              onAdd={setEditor}
+              onImported={(state) => applyState(state)}
+              onToast={setToast}
+              initialPayload={kmuPayload}
             />
           )}
           {(view === "scholarship" || view === "job") && (
@@ -660,6 +747,8 @@ function Dashboard({
   onSamples,
   sampleBusy,
   onAnalyze,
+  schedule,
+  onReloadSchedule,
 }: {
   app: AppState;
   onEdit: (event: CalendarEvent) => void;
@@ -669,6 +758,8 @@ function Dashboard({
   onSamples: () => void;
   sampleBusy: boolean;
   onAnalyze: () => void;
+  schedule: ScheduleState;
+  onReloadSchedule: () => void;
 }) {
   const today = seoulDate();
   const [selectedDate, setSelectedDate] = useState(today);
@@ -690,6 +781,7 @@ function Dashboard({
     .filter((item) => item.status === "pending" || item.status === "sending")
     .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
     .slice(0, 3);
+  const academic = upcomingSchedule(schedule.items, today).slice(0, 3);
   const selected = active.filter((event) => event.date === selectedDate);
   return (
     <>
@@ -733,6 +825,7 @@ function Dashboard({
               {[
                 ["all", "전체"],
                 ["assignment", "과제"],
+                ["academic", "학사"],
                 ["scholarship", "장학금"],
                 ["job", "채용"],
                 ["career", "취업 준비"],
@@ -839,56 +932,102 @@ function Dashboard({
               ))}
             </div>
           </section>
-          <section className="upcoming-notifications">
-            <div className="section-heading">
-              <h2>다가오는 알림</h2>
-              <button
-                className="icon-button"
-                title="알림함 보기"
-                aria-label="알림함 보기"
-                onClick={() => onNavigate("notifications")}
-              >
-                <ArrowUpRight size={17} />
-              </button>
-            </div>
-            {pending.length ? (
-              pending.map((item) => (
-                <div className="pending-notification" key={item.id}>
-                  <span className="notification-kind-icon">
-                    {item.channel === "telegram" ? (
-                      <Send size={16} />
-                    ) : (
-                      <Bell size={16} />
-                    )}
-                  </span>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <small>
-                      {notificationTime(item.scheduledAt)} ·{" "}
-                      {item.channel === "telegram" ? "텔레그램" : "앱"}
-                    </small>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="small-empty">
-                <Bell size={21} strokeWidth={1.5} />
-                <span>예약된 알림이 없어요</span>
+          {/* One grid cell on narrow layouts: the widget stacks above the reminders. */}
+          <div className="kmu-aside-stack">
+            <section className="kmu-widget" aria-label="국민대 학사일정">
+              <div className="section-heading">
+                <h2>국민대 학사일정</h2>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => onNavigate("kookmin")}
+                >
+                  모두 보기 <ArrowRight size={14} />
+                </button>
               </div>
-            )}
-            <button
-              className="telegram-link"
-              onClick={() => onNavigate("settings")}
-            >
-              <Send size={16} />
-              <span>
-                {app.settings.telegramConfigured && app.settings.telegramEnabled
-                  ? "텔레그램 연결됨"
-                  : "텔레그램 연결하기"}
-              </span>
-              <ChevronRight size={14} />
-            </button>
-          </section>
+              {schedule.status === "loading" ? (
+                <div className="small-empty">
+                  <Busy label="불러오는 중" />
+                </div>
+              ) : schedule.status === "error" ? (
+                <div className="small-empty">
+                  <span>불러오지 못했어요</span>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={onReloadSchedule}
+                  >
+                    <RefreshCw size={12} />
+                    다시 시도
+                  </button>
+                </div>
+              ) : academic.length ? (
+                <ul className="kmu-widget-list">
+                  {academic.map((item) => (
+                    <li key={item.id}>
+                      <span className="calendar-dot dot-academic" />
+                      <span className="kmu-widget-title">{item.title}</span>
+                      <small>{dateRange(item.startDate, item.endDate)}</small>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="small-empty">
+                  <span>다가오는 학사일정이 없어요</span>
+                </div>
+              )}
+            </section>
+            <section className="upcoming-notifications">
+              <div className="section-heading">
+                <h2>다가오는 알림</h2>
+                <button
+                  className="icon-button"
+                  title="알림함 보기"
+                  aria-label="알림함 보기"
+                  onClick={() => onNavigate("notifications")}
+                >
+                  <ArrowUpRight size={17} />
+                </button>
+              </div>
+              {pending.length ? (
+                pending.map((item) => (
+                  <div className="pending-notification" key={item.id}>
+                    <span className="notification-kind-icon">
+                      {item.channel === "telegram" ? (
+                        <Send size={16} />
+                      ) : (
+                        <Bell size={16} />
+                      )}
+                    </span>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <small>
+                        {notificationTime(item.scheduledAt)} ·{" "}
+                        {item.channel === "telegram" ? "텔레그램" : "앱"}
+                      </small>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="small-empty">
+                  <Bell size={21} strokeWidth={1.5} />
+                  <span>예약된 알림이 없어요</span>
+                </div>
+              )}
+              <button
+                className="telegram-link"
+                onClick={() => onNavigate("settings")}
+              >
+                <Send size={16} />
+                <span>
+                  {app.settings.telegramConfigured && app.settings.telegramEnabled
+                    ? "텔레그램 연결됨"
+                    : "텔레그램 연결하기"}
+                </span>
+                <ChevronRight size={14} />
+              </button>
+            </section>
+          </div>
         </aside>
       </div>
     </>

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  AIInputError, analysisResultSchema, analyzeRequestSchema, analyzeText, coachResume,
-  coachingRequestSchema, coachingResultSchema, isCalendarDate, validateCoachingQuotes,
+  AIInputError, DEFAULT_MODEL, analysisResultSchema, analyzeRequestSchema, analyzeText, coachResume,
+  coachingRequestSchema, coachingResultSchema, isCalendarDate, outputEffort, resolveModel, validateCoachingQuotes,
 } from "../lib/ai";
 import { getCatalog } from "../lib/catalog";
 import { COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE, DEFAULT_PROFILE, TASK_SAMPLE } from "../lib/contracts";
@@ -109,5 +109,69 @@ test("live analysis uses the SDK structured output contract and validates mocked
     else process.env.ANTHROPIC_API_KEY = previousKey;
     if (previousModel === undefined) delete process.env.ANTHROPIC_MODEL;
     else process.env.ANTHROPIC_MODEL = previousModel;
+  }
+});
+
+test("default model is Claude Opus 5.5 and ANTHROPIC_MODEL still overrides it", async () => {
+  const previousKey = process.env.ANTHROPIC_API_KEY;
+  const previousModel = process.env.ANTHROPIC_MODEL;
+  const previousFetch = globalThis.fetch;
+  process.env.ANTHROPIC_API_KEY = "test-only-not-a-live-key";
+  delete process.env.ANTHROPIC_MODEL;
+  const bodies: Record<string, unknown>[] = [];
+  let stopReason = "end_turn";
+  globalThis.fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+    bodies.push(body);
+    return Response.json({
+      id: "msg_test", type: "message", role: "assistant", model: body.model,
+      content: stopReason === "refusal" ? [] : [{ type: "text", text: JSON.stringify({
+        title: "과제 제출", kind: "assignment", date: null, time: null,
+        subject: "수업", submission: "LMS", summary: "과제 제출 공지",
+        missing: ["마감 후보: 다음 주 목요일 수업 시작 전 (공지 작성일 확인 필요)"], documents: [], conditions: [],
+      }) }],
+      stop_reason: stopReason, stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
+    });
+  };
+  const request = { text: "다음 주 목요일 수업 전까지 제출", kind: "assignment" as const, referenceDate: null, classTime: null, sample: false };
+  try {
+    assert.equal(DEFAULT_MODEL, "claude-opus-5-5");
+    assert.equal(resolveModel(), "claude-opus-5-5");
+    const result = await analyzeText(request, DEFAULT_PROFILE);
+    assert.equal(result.date, null);
+    assert.equal(result.time, null);
+    assert.ok(result.missing[0].startsWith("마감 후보:"));
+    assert.equal(bodies[0].model, "claude-opus-5-5");
+    const config = bodies[0].output_config as { effort?: string; format: { type: string } };
+    assert.equal(config.effort, "low");
+    assert.equal(config.format.type, "json_schema");
+    assert.equal(bodies[0].thinking, undefined);
+    assert.equal(bodies[0].temperature, undefined);
+    assert.ok(String(bodies[0].system).includes("마감 후보"));
+
+    process.env.ANTHROPIC_MODEL = "  claude-haiku-4-5  ";
+    assert.equal(resolveModel(), "claude-haiku-4-5");
+    await analyzeText(request, DEFAULT_PROFILE);
+    assert.equal(bodies[1].model, "claude-haiku-4-5");
+    assert.equal((bodies[1].output_config as { effort?: string }).effort, undefined);
+
+    delete process.env.ANTHROPIC_MODEL;
+    stopReason = "refusal";
+    await assert.rejects(analyzeText(request, DEFAULT_PROFILE), (error) => error instanceof AIInputError && error.status === 502 && error.message.includes("처리하지 않았습니다"));
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousKey === undefined) delete process.env.ANTHROPIC_API_KEY;
+    else process.env.ANTHROPIC_API_KEY = previousKey;
+    if (previousModel === undefined) delete process.env.ANTHROPIC_MODEL;
+    else process.env.ANTHROPIC_MODEL = previousModel;
+  }
+});
+
+test("effort is only sent to models that accept it", () => {
+  for (const model of ["claude-sonnet-5-5", "claude-sonnet-5", "claude-sonnet-4-6", "claude-opus-5-5", "claude-opus-4-5", "claude-fable-5-1"]) {
+    assert.deepEqual(outputEffort(model), { effort: "low" }, model);
+  }
+  for (const model of ["claude-haiku-4-5", "claude-haiku-4-5-20251001", "claude-sonnet-4-5", "claude-sonnet-4-5-20250929", "claude-sonnet-4-20250514", "claude-opus-4-1-20250805", "claude-3-5-haiku-20241022"]) {
+    assert.deepEqual(outputEffort(model), {}, model);
   }
 });

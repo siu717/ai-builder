@@ -1,6 +1,6 @@
 import type { ChecklistItem } from "./checklist";
 
-export const EVENT_KINDS = ["scholarship", "job", "career", "interview", "assignment"] as const;
+export const EVENT_KINDS = ["scholarship", "job", "career", "interview", "assignment", "academic"] as const;
 export type EventKind = (typeof EVENT_KINDS)[number];
 export type Channel = "app" | "telegram";
 
@@ -10,6 +10,7 @@ export const KIND_LABELS: Record<EventKind, string> = {
   career: "취업 준비",
   interview: "면접",
   assignment: "과제",
+  academic: "학사 일정",
 };
 
 export interface Profile {
@@ -134,4 +135,104 @@ export interface CoachingResult {
   feedback: { quote: string; suggestion: string; reason: string }[];
   questions: string[];
   tasks: { title: string; notes: string }[];
+}
+
+export type KookminBoard = "academic" | "scholarship" | "general";
+
+export const KOOKMIN_BOARD_LABELS: Record<KookminBoard, string> = {
+  academic: "학사공지",
+  scholarship: "장학공지",
+  general: "일반공지",
+};
+
+export interface KookminScheduleItem {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  year: number;
+  source: string;
+}
+
+export interface KookminNotice {
+  id: string;
+  board: KookminBoard;
+  articleNo: string;
+  title: string;
+  date: string;
+  url: string;
+}
+
+export interface KookminNoticeDetail extends KookminNotice {
+  text: string;
+}
+
+export interface EcampusAssignment {
+  uid: string;
+  title: string;
+  course: string | null;
+  date: string;
+  time: string | null;
+  description: string | null;
+  url: string | null;
+}
+
+export interface KookminImportItem {
+  kind: EventKind;
+  title: string;
+  date: string;
+  time: string | null;
+  notes: string;
+  source: string;
+  idempotencyKey: string;
+  reminders: ReminderInput[];
+}
+
+export interface KookminImportResult {
+  created: number;
+  skipped: number;
+  failed: { idempotencyKey: string; error: string }[];
+  state: AppState;
+}
+
+export interface BookmarkletPayload {
+  v: 1;
+  source: "ecampus-bookmarklet";
+  exportedAt: string;
+  items: EcampusAssignment[];
+}
+
+/** 키가 필요한 소스에 키가 없을 때 돌려주는 오류 문구. UI는 이 값을 "키 필요"로 표시한다. */
+export const LIVE_KEY_MISSING = "API 키가 설정되지 않았습니다";
+
+export interface LiveOpportunity {
+  id: string;
+  kind: "scholarship" | "job";
+  title: string;
+  organization: string;
+  description: string;
+  date: string | null;
+  time: string | null;
+  postedAt: string | null;
+  tags: string[];
+  url: string;
+  sourceId: string;
+  sourceName: string;
+  matchReason: string;
+  matchScore: number;
+  isSample: false;
+}
+
+export interface LiveSourceStatus {
+  id: string;
+  name: string;
+  ok: boolean;
+  count: number;
+  error: string | null;
+}
+
+export interface LiveOpportunityResponse {
+  items: LiveOpportunity[];
+  sources: LiveSourceStatus[];
+  fetchedAt: string;
 }

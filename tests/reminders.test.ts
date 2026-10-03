@@ -19,7 +19,7 @@ async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "campus-worker-"));
   const path = join(directory, "campus.db");
   const db = await createDatabase(`file:${path}`);
-  t.after(async () => { db.close(); await rm(directory, { recursive: true, force: true }); });
+  t.after(async () => { db.close(); await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => undefined); });
   await db.execute("UPDATE campus_settings SET token = '123456:abcdefghijklmnopqrstuvwxy', chat_id = '123', enabled = 1 WHERE id = 1");
   return { db, path };
 }
