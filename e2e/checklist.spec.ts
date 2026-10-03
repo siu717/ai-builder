@@ -67,6 +67,8 @@ test("preparation checklist saves edits and progress on desktop and mobile", asy
 test("scholarship documents become an editable preparation list before saving", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "장학금", exact: true }).click();
+  // 장학금 화면의 기본 출처는 국민대 장학공지이므로 샘플 출처로 바꾼다.
+  await page.getByRole("group", { name: "공고 출처" }).getByRole("button", { name: "샘플", exact: true }).click();
   const documents = await page.locator(".opportunity-detail .documents li").allTextContents();
   expect(documents.length).toBeGreaterThan(0);
   await page.getByRole("button", { name: "신청 일정 등록", exact: true }).click();

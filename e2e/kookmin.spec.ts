@@ -187,7 +187,7 @@ test("school notices open the event editor directly or through AI analysis", asy
   let dialog = page.getByRole("dialog");
   await expect(dialog).toHaveAttribute("aria-label", "새 일정");
   await expect(dialog.getByLabel("일정 제목", { exact: true })).toHaveValue(notice.title);
-  await expect(dialog.getByLabel("종류", { exact: true })).toHaveValue("academic");
+  await expect(dialog.getByRole("combobox", { name: "종류", exact: true })).toHaveValue("academic");
   await expect(dialog.getByLabel("날짜", { exact: true })).toHaveValue("");
   await dialog.getByRole("button", { name: "취소", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -196,7 +196,7 @@ test("school notices open the event editor directly or through AI analysis", asy
   await page.getByRole("button", { name: `${notice.title} AI로 분석`, exact: true }).click();
   dialog = page.getByRole("dialog");
   await expect(dialog).toHaveAttribute("aria-label", "국민대 공지 AI 분석");
-  await expect(dialog.getByLabel("공지 내용", { exact: true })).toHaveValue(detail.text);
+  await expect(dialog.getByRole("textbox", { name: "공지 내용", exact: true })).toHaveValue(detail.text);
   await dialog.getByRole("button", { name: "분석", exact: true }).click();
   await expect(dialog.locator(".analysis-title")).toHaveText(analysis.title);
   expect(analyzeBody).toEqual({ text: detail.text, kind: "assignment", referenceDate: notice.date, classTime: null, sample: false });

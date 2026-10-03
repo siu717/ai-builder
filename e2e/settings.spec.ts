@@ -52,7 +52,8 @@ test("profile edits survive reload and unconfigured Telegram cannot be activated
     await page.getByRole("combobox", { name: "학년", exact: true }).selectOption("3");
     await page.getByLabel("전공", { exact: true }).fill("컴퓨터공학");
     await page.getByRole("button", { name: "프로필 저장", exact: true }).click();
-    await expect(page.getByRole("status")).toHaveText("학생 프로필을 저장했습니다.");
+    // 브라우저 알림 권한 표시도 status 역할이므로 저장 메시지로 좁힌다.
+    await expect(page.getByRole("status").filter({ hasText: "학생 프로필을 저장했습니다." })).toBeVisible();
     await page.reload();
     await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "설정", exact: true }).click();
     await expect(page.getByLabel("이름", { exact: true })).toHaveValue(name);

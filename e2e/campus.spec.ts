@@ -119,6 +119,8 @@ test("catalogs show samples, credentials stay private and invalid schedules are 
   expect(opportunities.filter((item: { kind: string }) => item.kind === "job").length).toBeGreaterThan(0);
   await page.goto("/");
   await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "장학금", exact: true }).click();
+  // 장학금 화면의 기본 출처는 국민대 장학공지이므로 샘플 출처로 바꾼다.
+  await page.getByRole("group", { name: "공고 출처" }).getByRole("button", { name: "샘플", exact: true }).click();
   await expect(page.locator(".opportunity-card").first()).toBeVisible();
   await expect(page.getByText("샘플 공고", { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("scholarships.png"), fullPage: true });
