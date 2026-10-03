@@ -22,6 +22,7 @@ export interface PublicDataOptions {
 }
 
 const RECRUITMENT_URL = "https://apis.data.go.kr/1051000/recruitment/list";
+const MPM_JOBS_URL = "https://apis.data.go.kr/1760000/PblJobService/getList";
 const EXAM_URL = "https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList";
 // 한국장학재단 파일데이터는 매월 새 uddi로 갱신되므로 명세에서 최신 경로를 찾는다.
 const SCHOLARSHIP_SPEC_URL = "https://infuser.odcloud.kr/oas/docs?namespace=15028252/v1";
@@ -57,7 +58,8 @@ function keyId(serviceKey: string): string {
   return createHash("sha256").update(serviceKey).digest("hex").slice(0, 12);
 }
 
-async function getJson(url: URL, label: string, fetcher: Fetcher): Promise<unknown> {
+// 본문을 JSON으로 해석해 보고, XML로만 응답하는 서비스를 위해 원문도 함께 돌려준다.
+async function getBody(url: URL, label: string, fetcher: Fetcher): Promise<{ text: string; data: unknown }> {
   let response: Response;
   try {
     response = await fetcher(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(TIMEOUT_MS) });
@@ -85,8 +87,32 @@ async function getJson(url: URL, label: string, fetcher: Fetcher): Promise<unkno
       : typeof message === "string" && message ? message : `응답 오류 (${response.status})`;
     throw new RouteError(502, `${label}: ${reason}`);
   }
+  return { text, data };
+}
+
+async function getJson(url: URL, label: string, fetcher: Fetcher): Promise<unknown> {
+  const { data } = await getBody(url, label, fetcher);
   if (data === null || typeof data !== "object") throw new RouteError(502, `${label}: 응답 형식을 해석하지 못했습니다.`);
   return data;
+}
+
+function decodeXml(value: string): string {
+  return value
+    .replace(/^<!\[CDATA\[([\s\S]*)\]\]>$/, "$1")
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+}
+
+function xmlValue(xml: string, tag: string): string {
+  const match = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
+  return match ? decodeXml(match[1].trim()) : "";
+}
+
+// 공공데이터포털 XML 응답의 <item> 하나는 하위 태그가 한 단계뿐이라 정규식으로 충분하다.
+function xmlItems(xml: string): Row[] {
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, body]) =>
+    Object.fromEntries([...body.matchAll(/<(\w+)>([\s\S]*?)<\/\1>/g)].map(([, tag, value]) => [tag, decodeXml(value.trim())])));
 }
 
 function text(value: unknown): string {
@@ -399,11 +425,7 @@ function jobOpportunity(row: RecruitmentRow & { end: string }, profile: Profile)
   }
   const qualification = textCondition("지원 자격", row.qualification, "지원 자격 전문을 원문에서 확인해 주세요.");
   if (qualification) conditions.push(qualification);
-  const haystack = `${row.title} ${row.fields.join(" ")}`.toLowerCase();
-  const interest = interestWords(profile).find((word) => haystack.includes(word.toLowerCase()));
-  const fit = interest
-    ? `관심 직무 "${interest}"와 연결되는 공고입니다. `
-    : profile.interests.trim() ? "관심 직무와 직접 연결되는 키워드가 없습니다. 직무 내용을 확인해 주세요. " : "관심 직무를 입력하면 직무 적합성을 비교할 수 있습니다. ";
+  const { fit, matched } = interestFit(`${row.title} ${row.fields.join(" ")}`, profile);
   const lines: [string, string][] = [
     ["기관", row.organization], ["공고", row.title], ["채용 구분", row.recruitType],
     ["고용 유형", row.hireTypes.join(", ")], ["채용 인원", row.headcount ? `${row.headcount}명` : ""],
@@ -428,19 +450,166 @@ function jobOpportunity(row: RecruitmentRow & { end: string }, profile: Profile)
     conditions,
     recommendation: `${fit}${summary(conditions)}`,
     isSample: false,
-    matched: Boolean(interest),
+    matched,
   };
 }
 
+function interestFit(haystack: string, profile: Profile): { fit: string; matched: boolean } {
+  const lower = haystack.toLowerCase();
+  const interest = interestWords(profile).find((word) => lower.includes(word.toLowerCase()));
+  const fit = interest
+    ? `관심 직무 "${interest}"와 연결되는 공고입니다. `
+    : profile.interests.trim() ? "관심 직무와 직접 연결되는 키워드가 없습니다. 직무 내용을 확인해 주세요. " : "관심 직무를 입력하면 직무 적합성을 비교할 수 있습니다. ";
+  return { fit, matched: Boolean(interest) };
+}
+
+// 인사혁신처 나라일터 공고유형 중 학생이 지원할 수 있는 유형만 조회한다.
+// 공모직위·전입공모는 재직 공무원 대상이고, 공공기관 공모(e08)는 공공기관 채용정보와 겹친다.
+const MPM_TYPES: Record<string, string> = { e01: "공개경쟁채용", e02: "경력경쟁채용", e03: "계약직", e04: "행정지원인력" };
+const MPM_AGENCIES: Record<string, string> = { g01: "국가공무원", g02: "지방공무원", g03: "공공기관", g04: "교육청" };
+const MPM_LABEL = "인사혁신처 공공취업정보";
+// 접수 기간이 두 달을 넘는 공고는 드물어 최근 등록분만 조회해 호출 수를 줄인다.
+const MPM_LOOKBACK_DAYS = 60;
+
+interface MpmRow {
+  id: string;
+  title: string;
+  organization: string;
+  agency: string;
+  hireType: string;
+  start: string | null;
+  end: string | null;
+}
+
+function mpmPage(raw: string, data: unknown): { items: Row[]; total: number } {
+  if (data && typeof data === "object") {
+    const root = data as { response?: unknown };
+    const { header, body } = (root.response || root) as { header?: { resultCode?: unknown; resultMsg?: unknown }; body?: { items?: unknown; totalCount?: unknown } };
+    if (header?.resultCode === undefined) throw new RouteError(502, `${MPM_LABEL}: 응답 형식을 해석하지 못했습니다.`);
+    if (!["00", "0"].includes(String(header.resultCode))) throw new RouteError(502, `${MPM_LABEL}: ${text(header.resultMsg) || `응답 코드 ${header.resultCode}`}`);
+    const items = body?.items && typeof body.items === "object" && !Array.isArray(body.items) && "item" in body.items
+      ? (body.items as { item: unknown }).item
+      : body?.items;
+    return {
+      items: Array.isArray(items) ? items as Row[] : items && typeof items === "object" ? [items as Row] : [],
+      total: Number(body?.totalCount || 0),
+    };
+  }
+  const code = xmlValue(raw, "resultCode");
+  if (!code) throw new RouteError(502, `${MPM_LABEL}: 응답 형식을 해석하지 못했습니다.`);
+  if (!["00", "0"].includes(code)) throw new RouteError(502, `${MPM_LABEL}: ${xmlValue(raw, "resultMsg") || `응답 코드 ${code}`}`);
+  return { items: xmlItems(raw), total: Number(xmlValue(raw, "totalCount") || 0) };
+}
+
+async function mpmRows(serviceKey: string, fetcher: Fetcher, refresh: boolean, today: string): Promise<MpmRow[]> {
+  const since = addDays(today, -MPM_LOOKBACK_DAYS);
+  return cached(`mpm:${keyId(serviceKey)}:${since}`, CACHE_MS, refresh, async () => {
+    const rows: Row[] = [];
+    for (const type of Object.keys(MPM_TYPES)) {
+      let collected = 0;
+      for (let page = 1; page <= 3; page += 1) {
+        const url = new URL(MPM_JOBS_URL);
+        // Instt_se를 비우면 국가직·지방직·공공기관 전체를 조회한다.
+        url.search = new URLSearchParams({
+          serviceKey, pageNo: String(page), numOfRows: "100", Pblanc_ty: type, Instt_se: "",
+          Begin_de: since, End_de: today, Sort_order: "1",
+        }).toString();
+        const { text: body, data } = await getBody(url, MPM_LABEL, fetcher);
+        const { items, total } = mpmPage(body, data);
+        rows.push(...items);
+        collected += items.length;
+        if (items.length < 100 || collected >= total) break;
+      }
+    }
+    const unique = new Map<string, MpmRow>();
+    for (const row of rows) {
+      const idx = text(row.idx);
+      if (!idx || unique.has(idx)) continue;
+      unique.set(idx, {
+        id: `mpm-${idx}`,
+        title: text(row.title),
+        organization: text(row.insttname),
+        agency: MPM_AGENCIES[text(row.type01)] || "",
+        hireType: MPM_TYPES[text(row.type02)] || "",
+        start: toIsoDate(row.regdate),
+        end: toIsoDate(row.enddate),
+      });
+    }
+    return [...unique.values()];
+  });
+}
+
+function addDays(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function mpmOpportunity(row: MpmRow & { end: string }, profile: Profile): Opportunity & { matched: boolean } {
+  // 목록 조회에는 응시 자격이 없으므로 '확인 필요'로 남겨 조건 충족으로 오해하지 않게 한다.
+  const conditions: EligibilityCondition[] = [{
+    label: "필수: 응시 자격",
+    status: "unknown",
+    reason: "공공취업정보 목록에는 응시 자격이 없습니다. 나라일터 공고 원문에서 확인해 주세요.",
+  }];
+  const { fit, matched } = interestFit(row.title, profile);
+  const lines: [string, string][] = [
+    ["기관", row.organization], ["공고", row.title], ["기관 구분", row.agency], ["채용 유형", row.hireType],
+    ["공고 기간", `${row.start || "등록일 미기재"} ~ ${row.end}`],
+  ];
+  return {
+    id: row.id,
+    kind: "job",
+    title: row.title,
+    organization: row.organization,
+    description: [row.agency, row.hireType].filter(Boolean).join(" · ") || "공공 채용 공고",
+    date: row.end,
+    time: null,
+    amount: row.hireType || "원문 확인",
+    tags: [row.agency, row.hireType, "나라일터"].filter(Boolean),
+    source: `${MPM_LABEL} · 나라일터 (공공데이터포털)`,
+    originalText: `[공공데이터포털 · ${MPM_LABEL}]\n${lines.filter(([, value]) => value).map(([label, value]) => `${label}: ${value}`).join("\n")}\n응시 자격, 제출 서류, 마감 시각은 나라일터(www.gojobs.go.kr)의 공고 원문에서 확인하세요.`,
+    documents: [],
+    conditions,
+    recommendation: `${fit}${summary(conditions)}`,
+    isSample: false,
+    matched,
+  };
+}
+
+function failureMessage(reason: unknown, label: string): string {
+  return reason instanceof RouteError ? reason.message : `${label}: 공고를 불러오지 못했습니다.`;
+}
+
 export async function getPublicJobs(serviceKey: string, profile: Profile, options: PublicDataOptions = {}): Promise<PublicDataResult<Opportunity>> {
-  const rows = await recruitmentRows(serviceKey, options.fetcher || fetch, Boolean(options.refresh));
+  const fetcher = options.fetcher || fetch;
+  const refresh = Boolean(options.refresh);
   const today = seoulToday(options.now);
-  const items = rows
-    .filter((row): row is RecruitmentRow & { end: string } => Boolean(row.title && row.ongoing && row.end && row.end >= today))
-    .map((row) => jobOpportunity(row, profile))
+  // 한 서비스의 활용신청이 안 됐거나 장애가 나도 다른 서비스의 공고는 보여준다.
+  const [alio, mpm] = await Promise.allSettled([recruitmentRows(serviceKey, fetcher, refresh), mpmRows(serviceKey, fetcher, refresh, today)]);
+  if (alio.status === "rejected" && mpm.status === "rejected") throw alio.reason;
+  const alioRows = alio.status === "fulfilled" ? alio.value : [];
+  const mpmRowsFound = mpm.status === "fulfilled" ? mpm.value : [];
+  const items = [
+    ...alioRows
+      .filter((row): row is RecruitmentRow & { end: string } => Boolean(row.title && row.ongoing && row.end && row.end >= today))
+      .map((row) => jobOpportunity(row, profile)),
+    ...mpmRowsFound
+      .filter((row): row is MpmRow & { end: string } => Boolean(row.title && row.end && row.end >= today))
+      .map((row) => mpmOpportunity(row, profile)),
+  ]
     .sort((a, b) => Number(b.matched) - Number(a.matched) || a.date.localeCompare(b.date))
     .map(({ matched: _matched, ...item }) => item);
-  return { items, total: rows.length, fetchedAt: new Date().toISOString() };
+  const notices = [
+    ...(alio.status === "rejected" ? [failureMessage(alio.reason, "공공기관 채용정보")] : []),
+    ...(mpm.status === "rejected" ? [failureMessage(mpm.reason, MPM_LABEL)] : []),
+  ];
+  return {
+    items,
+    total: alioRows.length + mpmRowsFound.length,
+    fetchedAt: new Date().toISOString(),
+    ...(notices.length ? { notices } : {}),
+  };
 }
 
 const EXAM_STEPS: { id: string; label: string; start: string; end?: string }[] = [

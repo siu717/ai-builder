@@ -28,7 +28,7 @@ import { checklistFromDocuments } from "@/lib/checklist";
 type Source = "kookmin" | "sample" | "public" | "exams";
 const SOURCE_LABELS = {
   scholarship: { kookmin: "국민대 장학공지", public: "한국장학재단", sample: "샘플" },
-  job: { sample: "샘플", public: "공공기관 채용", exams: "자격증 시험" },
+  job: { sample: "샘플", public: "공공 채용", exams: "자격증 시험" },
 } as const;
 const MAX_VISIBLE = 120;
 
@@ -189,7 +189,7 @@ export default function Opportunities({
               <h3>공공데이터포털 인증키가 필요해요</h3>
               <p>
                 설정 → 외부 데이터 API에 인증키를 입력하면{" "}
-                {kind === "scholarship" ? "한국장학재단 장학금" : "공공기관 채용 공고"}을
+                {kind === "scholarship" ? "한국장학재단 장학금" : "공공기관·공무원 채용 공고"}을
                 불러옵니다.
               </p>
               <button type="button" className="button primary" onClick={onSettings}>
@@ -273,6 +273,8 @@ export default function Opportunities({
         )}
       </div>
       {loadError && <Message text={loadError} error />}
+      {source === "public" &&
+        live?.notices?.map((notice) => <Message key={notice} text={notice} error />)}
       <div className={`opportunity-layout opp-kind-${kind}`}>
         <div className="opportunity-list">
           {results.length === 0 && (
