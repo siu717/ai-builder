@@ -10,7 +10,7 @@ test("manual event creation saves a precise reminder and completion cancels it",
   let eventId: string | undefined;
   try {
     await page.goto("/");
-    await page.getByRole("button", { name: "일정 추가", exact: true }).click();
+    await page.locator(".heading-actions").getByRole("button", { name: "일정 추가", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "새 일정" });
     await dialog.getByLabel("일정 제목", { exact: true }).fill(title);
     await dialog.getByLabel("날짜", { exact: true }).fill(tomorrow);
