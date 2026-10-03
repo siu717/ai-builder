@@ -102,10 +102,10 @@ main { max-width: 1530px; margin: 0 auto; padding: 34px 36px 0; }
 .event-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; color: #75828a; }
 .kind-badge { display: inline-flex; gap: 4px; align-items: center; font-size: 10px; line-height: 18px; }
 .kind-dot, .calendar-dot { display: inline-block; height: 5px; width: 5px; min-width: 5px; border-radius: 50%; background: #9aa49b; }
-.kind-scholarship { color: #9778b8; }.kind-scholarship .kind-dot, .dot-scholarship { background: #a180c5; }
-.kind-job, .kind-interview { color: #599bab; }.kind-job .kind-dot, .kind-interview .kind-dot, .dot-job, .dot-interview { background: #7ab4c0; }
-.kind-career { color: #779684; }.kind-career .kind-dot, .dot-career { background: #7b9e88; }
-.kind-assignment { color: #b99452; }.kind-assignment .kind-dot, .dot-assignment { background: #caa465; }
+.kind-scholarship { color: #8059a4; }.kind-scholarship .kind-dot, .dot-scholarship { background: #a180c5; }
+.kind-job, .kind-interview { color: #347f94; }.kind-job .kind-dot, .kind-interview .kind-dot, .dot-job, .dot-interview { background: #7ab4c0; }
+.kind-career { color: #5e8469; }.kind-career .kind-dot, .dot-career { background: #7b9e88; }
+.kind-assignment { color: #987127; }.kind-assignment .kind-dot, .dot-assignment { background: #caa465; }
 .event-date { background: transparent; padding: 0; text-align: left; font-size: 11px; color: #75828a; }
 .event-date small { display: block; font-size: 9px; color: #75828a; margin-top: 2px; }
 .deadline { font-size: 10px; color: #809081; background: #f0f5ef; padding: 3px 6px; border-radius: 4px; text-align: center; white-space: nowrap; }
@@ -194,8 +194,8 @@ textarea { resize: vertical; line-height: 1.75; }
 .search-field input { border: 0; box-shadow: none; padding: 7px 0; font-size: 12px; }
 .view-toolbar > .button:last-child { margin-left: auto; }
 .catalog-caption { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #75828a; margin-bottom: 14px; }
-.sample-tag, .ai-tag { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; color: #afa47f; background: #f8f5ea; font-size: 9px; line-height: 1.6; font-weight: 500; }
-.ai-tag { color: #81a26a; background: #f1f6ea; }
+.sample-tag, .ai-tag { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; color: #9a7936; background: #f8f5ea; font-size: 9px; line-height: 1.6; font-weight: 500; }
+.ai-tag { color: #4d875e; background: #f1f6ea; }
 .opportunity-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 30px; }
 .opportunity-list { display: flex; flex-direction: column; gap: 13px; min-width: 0; }
 .opportunity-card { border: 1px solid #e8edde; border-radius: 7px; padding: 18px; text-align: left; background: #fff; color: #75828a; width: 100%; }
@@ -210,7 +210,7 @@ textarea { resize: vertical; line-height: 1.75; }
 .opportunity-card-bottom { display: flex; justify-content: space-between; gap: 10px; align-items: center; border-top: 1px solid #eff2e5; margin-top: 15px; padding-top: 11px; font-size: 10px; }
 .opportunity-card-bottom strong { margin-left: 7px; color: #465459; font-weight: 500; }
 .condition-summary { font-size: 10px; }
-.status-met { color: #69904c; }.status-unmet { color: #bd8773; }.status-unknown { color: #b39e69; }
+.status-met { color: #3f805b; }.status-unmet { color: #b45552; }.status-unknown { color: #987127; }
 .opportunity-detail { padding: 4px 0 0 26px; border-left: 1px solid #edf1e1; min-width: 0; }
 .detail-eyebrow { display: flex; align-items: center; justify-content: space-between; color: #75828a; font-size: 11px; }
 .opportunity-detail h2 { font-size: 21px; color: #465459; font-weight: 650; margin-top: 8px; overflow-wrap: anywhere; }
@@ -245,9 +245,9 @@ textarea { resize: vertical; line-height: 1.75; }
 .optional { font-weight: 400; color: #75828a; display: contents; }
 .field-note { font-size: 10px; color: #465459; margin-top: -10px; margin-bottom: 16px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
-.connection-label { display: inline-flex; align-items: center; gap: 5px; color: #b5bf9f; font-size: 10px; white-space: nowrap; }
+.connection-label { display: inline-flex; align-items: center; gap: 5px; color: #78858c; font-size: 10px; white-space: nowrap; }
 .connection-label > span { height: 4px; width: 4px; border-radius: 50%; background: #b8c2a8; }
-.connection-label.connected { color: #a7bb83; }.connection-label.connected > span { background: #91ad62; }
+.connection-label.connected { color: #518b68; }.connection-label.connected > span { background: #91ad62; }
 .coaching-summary { color: #75828a; font-size: 12px; line-height: 1.8; border-bottom: 1px solid #edf1df; padding-bottom: 18px; }
 .feedback-item { border-bottom: 1px solid #eff2e5; padding: 13px 0; }
 .feedback-item blockquote { margin: 0 0 7px; border-left: 2px solid #d8e3c2; padding-left: 10px; color: #75828a; font-size: 10px; }
