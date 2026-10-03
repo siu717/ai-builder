@@ -519,16 +519,6 @@ export default function CampusApp() {
           <div className="topbar-actions">
             <button
               type="button"
-              className="icon-button notification-button"
-              title="알림함"
-              aria-label={`알림함, 읽지 않은 알림 ${unread}개`}
-              onClick={() => setView("notifications")}
-            >
-              <Bell size={20} />
-              {unread > 0 && <span className="notification-dot" />}
-            </button>
-            <button
-              type="button"
               className="avatar topbar-avatar"
               title="내 프로필"
               aria-label="내 프로필"

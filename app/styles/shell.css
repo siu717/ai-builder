@@ -67,8 +67,6 @@
 .topbar-actions { display: flex; align-items: center; gap: 4px; }
 .site-header .icon-button { color: var(--surface); }
 .site-header .icon-button:hover { background: var(--kmu-blue-dark); color: var(--surface); }
-.notification-button { position: relative; }
-.notification-dot { position: absolute; right: 10px; top: 9px; width: 9px; height: 9px; background: var(--kmu-yellow); border: 2px solid var(--kmu-blue); border-radius: 50%; }
 
 .avatar {
   display: inline-flex;
