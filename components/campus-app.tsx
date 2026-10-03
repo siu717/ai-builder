@@ -297,7 +297,7 @@ export default function CampusApp() {
           ) {
             try {
               const notification = new Notification(
-                `참십 Campus · ${KIND_LABELS[item.kind]}`,
+                `참십 · ${KIND_LABELS[item.kind]}`,
                 { body: item.title, tag: item.id },
               );
               notification.onclick = () => {
@@ -390,7 +390,7 @@ export default function CampusApp() {
             date: format(addDays(parseISO(today), item.offset), "yyyy-MM-dd"),
             time: null,
             notes: item.notes,
-            source: "참십 Campus 샘플",
+            source: "참십 샘플",
             isSample: true,
             reminders: [],
             idempotencyKey: `campus-sample-${today}-${item.kind}`,
@@ -431,8 +431,8 @@ export default function CampusApp() {
     return (
       <div className="initial-screen">
         <div className="brand">
-          <img src="/brand/kmu80-shield-blue.svg" alt="" />
-          <span className="brand-wordmark">참십 Campus</span>
+          <img src="/brand/chamsip-mark-face.svg" alt="" />
+          <span className="brand-wordmark">참십</span>
         </div>
         {initialError ? (
           <>
@@ -491,8 +491,11 @@ export default function CampusApp() {
             title="오늘의 캠퍼스"
             onClick={() => setView("today")}
           >
-            <span className="brand-wordmark">참십 Campus</span>
-            <span className="brand-sub">국민대학교 AI 대학생활 비서</span>
+            <img className="brand-mark" src="/brand/chamsip-mark.svg" alt="" />
+            <span className="brand-text">
+              <span className="brand-wordmark">참십</span>
+              <span className="brand-sub">캠퍼스 생활, 참 쉽다</span>
+            </span>
           </button>
           <nav className="main-nav" aria-label="주 메뉴">
             {NAV.map(({ id, label }) => (
@@ -702,7 +705,7 @@ export default function CampusApp() {
                 <img src="/campus.jpg" alt="졸업을 기념하는 학생들" />
               </div>
               <div className="footer-brand-text">
-                <span className="footer-wordmark">참십 Campus</span>
+                <span className="footer-wordmark">참십</span>
                 <span className="footer-slogan">Make the Rule, Break the Rule</span>
                 <span className="footer-note">국민대학교 AI 대학생활 비서 · 개교 80주년 1946–2026</span>
               </div>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="122 60 156 178" role="img" aria-label="참십">
+<defs>
+    <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D4EEFC"/><stop offset="1" stop-color="#A1DAF8"/></linearGradient>
+    <linearGradient id="g-orange" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBC995"/><stop offset="1" stop-color="#F3953F"/></linearGradient>
+    <linearGradient id="g-green" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FD8B5"/><stop offset="1" stop-color="#21AF7E"/></linearGradient>
+    <linearGradient id="g-lgreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE59A"/><stop offset="1" stop-color="#95C23D"/></linearGradient>
+    <linearGradient id="g-yellow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE69A"/><stop offset="1" stop-color="#FFC52E"/></linearGradient>
+    <linearGradient id="g-leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B5D86A"/><stop offset="1" stop-color="#3FA56F"/></linearGradient>
+    <linearGradient id="g-leaf2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B5D86A"/><stop offset="1" stop-color="#3FA56F"/></linearGradient>
+    <linearGradient id="g-mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9DDF2"/><stop offset="1" stop-color="#E9F1FA"/></linearGradient>
+    <linearGradient id="g-mtn2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE9F6"/><stop offset="1" stop-color="#F4F8FC"/></linearGradient>
+    <radialGradient id="g-halo" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#F5F9FD"/><stop offset="1" stop-color="#E8F0F9"/></radialGradient>
+    <linearGradient id="g-cover" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A5DB3"/><stop offset="1" stop-color="#003A75"/></linearGradient>
+    <clipPath id="c-disc"><circle cx="200" cy="205" r="168"/></clipPath>
+
+    <!-- 꽃잎: 끝이 중심(0,0)을 향하는 물방울 -->
+    <path id="petal" d="M0 0 C-31 -15 -35 -57 0 -65 C35 -57 31 -15 0 0Z"/>
+    <path id="spark" d="M0 -10 Q1.4 -1.4 10 0 Q1.4 1.4 0 10 Q-1.4 1.4 -10 0 Q-1.4 -1.4 0 -10Z"/>
+
+    <!-- 꽃머리: 十 모양 네 꽃잎 = 과제·채용·취업 준비·장학금 -->
+    <g id="petals">
+      <use href="#petal" fill="url(#g-sky)" transform="translate(200 160) translate(0 -6)"/>
+      <use href="#petal" fill="url(#g-orange)" transform="translate(200 160) rotate(90) translate(0 -6)"/>
+      <use href="#petal" fill="url(#g-green)" transform="translate(200 160) rotate(180) translate(0 -6)"/>
+      <use href="#petal" fill="url(#g-lgreen)" transform="translate(200 160) rotate(270) translate(0 -6)"/>
+    </g>
+    <g id="faces" fill="none" stroke="#24313A" stroke-width="2.6" stroke-linecap="round">
+      <!-- top: 웃는 눈 -->
+      <path d="M189 125 q4 -5 8 0 M203 125 q4 -5 8 0 M195 132 q5 5 10 0"/>
+      <!-- right: 윙크 -->
+      <path d="M232 160 q4 -5 8 0 M247 158 v4 M237 167 q5 5 10 0"/>
+      <!-- bottom: 감은 눈 -->
+      <path d="M189 197 q4 4 8 0 M203 197 q4 4 8 0 M196 205 q4 3.5 8 0"/>
+      <!-- left: 동그란 눈 -->
+      <path d="M154 159.5 v2.5 M166 159.5 v2.5 M155 167 q5 5 10 0"/>
+      <g fill="#F28B82" stroke="none" opacity=".45">
+        <circle cx="185" cy="131" r="3.6"/><circle cx="215" cy="131" r="3.6"/>
+        <circle cx="228" cy="166" r="3.6"/><circle cx="256" cy="166" r="3.6"/>
+        <circle cx="186" cy="203" r="3.6"/><circle cx="214" cy="203" r="3.6"/>
+        <circle cx="146" cy="166" r="3.6"/><circle cx="174" cy="166" r="3.6"/>
+      </g>
+    </g>
+    <g id="core">
+      <circle cx="200" cy="160" r="19" fill="url(#g-yellow)" stroke="#fff" stroke-width="3.5"/>
+      <path d="M191.5 160.5 L197.5 166.5 L209 154.5" fill="none" stroke="#004F9F" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- 학사모 -->
+    <g id="cap" transform="translate(200 84) rotate(-9)">
+      <path d="M-20 1 L-20 11 Q0 21 20 11 L20 1 L0 8Z" fill="#003A75" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M0 -15 L36 -3 L0 9 L-36 -3Z" fill="#004F9F"/>
+      <path d="M0 -15 L36 -3 L0 9 L-36 -3Z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M0 -3 L27 1 L27 15" fill="none" stroke="#FFCE44" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="0" cy="-3" r="2.6" fill="#FFCE44"/>
+      <path d="M24 14 h6 l1.5 9 h-9Z" fill="#FFCE44"/>
+    </g>
+
+    <!-- 전체 엠블럼 -->
+    </defs>
+      <use href="#petals"/>
+      <use href="#core"/>
+      <use href="#cap"/>
+    
+</svg>

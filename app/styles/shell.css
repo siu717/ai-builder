@@ -16,8 +16,8 @@
 }
 .brand {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   min-height: 44px;
   padding: 0;
   background: transparent;
@@ -25,8 +25,10 @@
   white-space: nowrap;
   text-align: left;
 }
-.brand-wordmark { font-family: var(--font-brand); font-size: 23px; line-height: 1.2; letter-spacing: -0.01em; }
-.brand-sub { font-size: var(--text-xs); font-weight: 500; }
+.brand-mark { height: 50px; width: auto; }
+.brand-text { display: flex; flex-direction: column; gap: 3px; }
+.brand-wordmark { font-family: var(--font-brand); font-size: 23px; line-height: 1.1; letter-spacing: -0.01em; }
+.brand-sub { font-family: var(--font-brand); font-size: var(--text-xs); line-height: 1.2; }
 .site-header .brand:focus-visible,
 .site-header .nav-item:focus-visible,
 .site-header .icon-button:focus-visible,
@@ -194,6 +196,7 @@ main { width: 100%; max-width: var(--x-shell-max); margin: 0 auto; padding: 36px
   :root { --x-shell-pad: 16px; }
   .site-header-inner { padding-top: 6px; gap: 0 8px; }
   .brand-wordmark { font-size: 20px; }
+  .brand-mark { height: 40px; }
   .header-emblem { height: 36px; }
   .topbar { min-height: 44px; }
   .topbar-date { font-size: var(--text-md); }
