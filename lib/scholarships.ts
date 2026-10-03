@@ -4,7 +4,8 @@ import { load } from "cheerio";
 import robotsParser from "robots-parser";
 import { getDatabase, getSharedDatabase } from "./db";
 import { createEvent, getState, updateEvent } from "./store";
-import type { EventInput } from "./contracts";
+import type { AnalysisResult, EventInput, Profile } from "./contracts";
+import { AIInputError, analyzeText } from "./ai";
 import { z } from "zod";
 import { RouteError } from "./http";
 
@@ -206,13 +207,41 @@ export function automaticReminders(deadline: string, boundary: Date, now: Date):
     .map((at) => ({ at, channel: "telegram" as const }));
 }
 
-export async function syncScholarshipEvents(notices: ScholarshipNotice[], database?: Client, now = new Date()) {
+// 새로 등록하는 공지는 Claude가 학생 프로필과 비교해 요약·지원 조건·제출 서류를 분석한다.
+// 마감 날짜는 본문 규칙으로 정한 값을 그대로 쓰고, AI 결과로 바꾸지 않는다.
+export type NoticeAnalyzer = (notice: ScholarshipNotice, profile: Profile, db: Client, now: Date) => Promise<AnalysisResult>;
+// 한 번의 동기화에서 분석하는 새 공지 수. 나머지는 다음 동기화(1분 뒤)로 미뤄 알림 처리가 오래 멈추지 않게 한다.
+export const MAX_ANALYSES_PER_SYNC = 3;
+
+const analyzeNotice: NoticeAnalyzer = (notice, profile, db, now) => analyzeText({
+  text: `${notice.title}\n\n${notice.body}`.slice(0, 50000),
+  kind: "scholarship",
+  referenceDate: notice.publishedAt,
+  classTime: null,
+  sample: false,
+}, profile, now, db);
+
+const STATUS_MARKS = { met: "충족", unmet: "불충족", unknown: "확인 필요" } as const;
+
+export function analysisNotes(analysis: AnalysisResult): string {
+  const lines = [`[AI 분석] ${analysis.summary}`];
+  if (analysis.conditions.length) {
+    lines.push(`지원 조건: ${analysis.conditions.slice(0, 6).map((entry) => `${entry.label.replace(/^(필수|우대):\s*/, "")} ${STATUS_MARKS[entry.status]}`).join(" · ")}`);
+  }
+  if (analysis.documents.length) lines.push(`제출 서류: ${analysis.documents.slice(0, 8).join(", ")}`);
+  if (analysis.missing.length) lines.push(`확인 필요: ${analysis.missing.slice(0, 3).join(" / ")}`);
+  return lines.join("\n");
+}
+
+export async function syncScholarshipEvents(notices: ScholarshipNotice[], database?: Client, now = new Date(), analyze: NoticeAnalyzer = analyzeNotice) {
   const db = database || await getDatabase();
   const preferences = await getScholarshipPreferences(db);
   if (!preferences.enabled) return { created: 0, updated: 0 };
   const keywords = preferences.keywords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
   const state = await getState(db);
   const result = { created: 0, updated: 0 };
+  let analyses = 0;
+  let profile: Profile | undefined;
   const reviewNote = "[원문 변경 확인 필요] 신청 마감을 다시 확인해주세요. 예약 알림을 중지했습니다.\n";
   for (const notice of notices) {
     const { rows } = await db.execute({ sql: "SELECT * FROM scholarship_imports WHERE notice_id = ?", args: [notice.id] });
@@ -226,12 +255,28 @@ export async function syncScholarshipEvents(notices: ScholarshipNotice[], databa
     if (needsReview && !existing) continue;
     const boundary = new Date(`${notice.deadline || existing!.date}T${notice.time || "23:59"}:00+09:00`);
     if (!existing && (boundary <= now || (keywords.length && !keywords.some((word) => `${notice.title} ${notice.body}`.toLowerCase().includes(word))))) continue;
-    const notes = existing?.notes.replace(reviewNote, "") ?? "국민대 공지에서 자동 등록했습니다. 지원 자격과 제출 서류는 원문을 확인해주세요.";
+    let analysis: AnalysisResult | null = null;
+    let analysisNote = "";
+    if (!existing) {
+      if (analyses >= MAX_ANALYSES_PER_SYNC) continue;
+      analyses++;
+      profile ??= state.profile;
+      try {
+        analysis = await analyze(notice, profile, db, now);
+      } catch (error) {
+        // AI가 실패해도 마감 일정과 알림은 등록한다.
+        analysisNote = error instanceof AIInputError && error.status === 503
+          ? "[AI 분석] Anthropic API 키가 없어 분석하지 못했습니다."
+          : "[AI 분석] 분석에 실패했습니다. 원문을 직접 확인해주세요.";
+      }
+    }
+    const autoNote = "국민대 공지에서 자동 등록했습니다. 지원 자격과 제출 서류는 원문을 확인해주세요.";
+    const notes = existing?.notes.replace(reviewNote, "") ?? (analysis ? `${analysisNotes(analysis)}\n${autoNote}` : analysisNote ? `${analysisNote}\n${autoNote}` : autoNote);
     const input: EventInput = {
       title: notice.title, kind: "scholarship", date: needsReview ? existing!.date : notice.deadline!, time: needsReview ? existing!.time : notice.time,
       notes: needsReview ? reviewNote + notes : notes,
       source: notice.url, isSample: false,
-      checklist: existing?.checklist ?? notice.documents.map((text) => ({ id: randomUUID(), text, completed: false })),
+      checklist: existing?.checklist ?? (notice.documents.length ? notice.documents : analysis?.documents ?? []).slice(0, 30).map((text) => ({ id: randomUUID(), text: text.slice(0, 200), completed: false })),
       reminders: needsReview ? [] : existing?.reminders.filter((reminder) => new Date(reminder.at) > now && new Date(reminder.at) <= boundary)
         ?? automaticReminders(notice.deadline!, boundary, now),
       idempotencyKey: notice.id,
