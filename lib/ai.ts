@@ -8,7 +8,7 @@ import {
   COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE, TASK_SAMPLE,
   type AnalysisResult, type CoachingResult, type Profile,
 } from "./contracts";
-import { getAnthropicApiKey } from "./store";
+import { getAIKey } from "./store";
 
 export { TASK_SAMPLE, COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE } from "./contracts";
 
@@ -108,14 +108,6 @@ tasks는 사용자가 검토할 준비 할 일입니다. 할 일마다 목적을
 export type AIProvider = "anthropic" | "openai";
 const PROVIDER_LABELS: Record<AIProvider, string> = { anthropic: "Anthropic", openai: "OpenAI" };
 
-// 저장된 키의 앞부분으로 공급자를 고른다: sk-ant-는 Anthropic, 그 밖의 sk-는 OpenAI.
-export function aiProvider(key: string): AIProvider | null {
-  const trimmed = key.trim();
-  if (trimmed.startsWith("sk-ant-")) return "anthropic";
-  if (trimmed.startsWith("sk-")) return "openai";
-  return null;
-}
-
 class ProviderStatusError extends Error {
   constructor(public readonly status: number) {
     super(`HTTP ${status}`);
@@ -163,11 +155,11 @@ async function openaiJson(apiKey: string, system: string, content: string, schem
 
 // 설정된 키의 공급자로 구조화된 JSON을 생성하고, finish에서 검증한다. 오류는 공급자별 원인으로 바꾼다.
 async function generate<T>(database: Client | undefined, action: string, system: string, content: string, schema: OutputSchema, finish: (output: unknown) => T): Promise<T> {
-  const apiKey = await getAnthropicApiKey(database);
-  if (!apiKey) {
-    throw new AIInputError(503, "AI 분석을 사용하려면 설정 화면에서 Anthropic 또는 OpenAI API 키를 저장해 주세요. 서버 환경변수 ANTHROPIC_API_KEY로도 설정할 수 있습니다. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
+  const configured = await getAIKey(database);
+  if (!configured) {
+    throw new AIInputError(503, "AI 분석을 사용하려면 설정 화면에서 Claude 또는 OpenAI API 키를 저장해 주세요. 서버 환경변수 ANTHROPIC_API_KEY·OPENAI_API_KEY로도 설정할 수 있습니다. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
   }
-  const provider = aiProvider(apiKey) ?? "anthropic";
+  const { provider, key: apiKey } = configured;
   try {
     if (provider === "openai") return finish(await openaiJson(apiKey, system, content, schema));
     const client = new Anthropic({ apiKey, timeout: 45000, maxRetries: 1, logLevel: "off" });

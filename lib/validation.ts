@@ -93,9 +93,13 @@ const apiKeySchema = z.string().trim()
   .max(4096, "API 키는 4096자 이내로 입력해주세요.")
   .refine((key) => !/[\s\p{Cc}]/u.test(key), "API 키에 공백이나 제어 문자를 사용할 수 없습니다.");
 
-// AI 키는 Anthropic(sk-ant-…) 또는 OpenAI(sk-…)만 받는다. 키 앞부분으로 공급자를 고른다.
+// Claude(Anthropic) 키는 sk-ant-, OpenAI 키는 그 밖의 sk-로 시작한다. 칸을 바꿔 넣으면 AI 분석이 매번 인증 오류로 실패한다.
 export const aiSettingsSchema = z.object({
-  apiKey: apiKeySchema.refine((key) => key.startsWith("sk-"), "Anthropic(sk-ant-…) 또는 OpenAI(sk-…) API 키를 입력해주세요."),
+  apiKey: apiKeySchema.refine((key) => key.startsWith("sk-ant-"), "Claude(Anthropic) API 키는 sk-ant-로 시작합니다. OpenAI 키는 아래 OpenAI 칸에 입력해주세요."),
+}).strict();
+
+export const openAiSettingsSchema = z.object({
+  apiKey: apiKeySchema.refine((key) => key.startsWith("sk-") && !key.startsWith("sk-ant-"), "OpenAI API 키는 sk-로 시작합니다. Claude 키(sk-ant-)는 위 Claude 칸에 입력해주세요."),
 }).strict();
 
 const dataProviderSchema = z.enum(["dataGoKr", "saramin"]);

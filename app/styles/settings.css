@@ -142,3 +142,4 @@
   .stored-data-list dt { width: auto; }
   .stored-backups .setting-inline { flex-wrap: wrap; }
 }
+.openai-key-form { margin-top: 24px; padding-top: 4px; border-top: 1px solid var(--line); }

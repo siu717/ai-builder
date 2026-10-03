@@ -31,7 +31,7 @@ test("AI keys can be saved, replaced and removed without appearing in public sta
       .getByRole("button", { name: "설정", exact: true })
       .click();
     const section = page.getByRole("region", { name: "AI 분석 설정" });
-    const input = section.getByLabel("AI API 키 (Anthropic · OpenAI)", { exact: true });
+    const input = section.getByLabel("Claude API 키 (sk-ant-…)", { exact: true });
     const save = section.getByRole("button", {
       name: "API 키 저장",
       exact: true,
@@ -58,7 +58,7 @@ test("AI keys can be saved, replaced and removed without appearing in public sta
     expect(state.settings).not.toHaveProperty("apiKey");
     expect(state.settings).not.toHaveProperty("anthropicApiKey");
     await expect(input).toHaveValue("");
-    await expect(section.getByText("설정됨", { exact: true })).toBeVisible();
+    await expect(section.getByText("Claude 사용 중", { exact: true })).toBeVisible();
     await section.screenshot({ path: testInfo.outputPath("ai-settings.png") });
     expect(
       await page.evaluate(
@@ -76,7 +76,7 @@ test("AI keys can be saved, replaced and removed without appearing in public sta
       .getByRole("button", { name: "설정", exact: true })
       .click();
     await expect(input).toHaveValue("");
-    await expect(section.getByText("설정됨", { exact: true })).toBeVisible();
+    await expect(section.getByText("Claude 사용 중", { exact: true })).toBeVisible();
     await input.fill("   ");
     await expect(save).toBeDisabled();
     const blank = await request.put("/api/settings/ai", {
@@ -132,7 +132,7 @@ test("AI keys can be saved, replaced and removed without appearing in public sta
     await expect(
       section.getByText(
         baseline.settings.aiKeySource === "environment"
-          ? "환경변수 사용"
+          ? "Claude 사용 중"
           : "키 미설정",
         { exact: true },
       ),
@@ -173,7 +173,7 @@ test("an API key save failure preserves the draft and shows the error", async ({
     .getByRole("button", { name: "설정", exact: true })
     .click();
   const section = page.getByRole("region", { name: "AI 분석 설정" });
-  const input = section.getByLabel("AI API 키 (Anthropic · OpenAI)", { exact: true });
+  const input = section.getByLabel("Claude API 키 (sk-ant-…)", { exact: true });
   const fakeKey = `sk-ant-api03-e2e-retry-${randomUUID()}`;
   await page.route("**/api/settings/ai", (route) =>
     route.fulfill({

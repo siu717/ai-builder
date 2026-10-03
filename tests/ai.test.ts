@@ -11,7 +11,7 @@ import {
 import { getCatalog } from "../lib/catalog";
 import { COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE, DEFAULT_PROFILE, TASK_SAMPLE } from "../lib/contracts";
 import { createDatabase } from "../lib/db";
-import { deleteAnthropicApiKey, saveAnthropicApiKey } from "../lib/store";
+import { deleteAnthropicApiKey, saveAnthropicApiKey, saveOpenAIApiKey } from "../lib/store";
 
 async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "campus-ai-"));
@@ -208,7 +208,7 @@ test("OpenAI keys are routed to the OpenAI API with a JSON response and the same
   const database = await fixture(t);
   const previousFetch = globalThis.fetch;
   const key = "sk-proj-test-openai-key";
-  await saveAnthropicApiKey({ apiKey: key }, database);
+  await saveOpenAIApiKey({ apiKey: key }, database);
   const requests: { url: string; headers: Headers; body: { model: string; response_format: unknown; messages: { role: string; content: string }[] } }[] = [];
   globalThis.fetch = async (input: string | URL | Request, init?: RequestInit) => {
     requests.push({ url: String(input), headers: new Headers(init?.headers), body: JSON.parse(String(init?.body)) });

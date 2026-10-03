@@ -7,7 +7,7 @@ import { RouteError } from "./http";
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS campus_profile (id INTEGER PRIMARY KEY CHECK(id = 1), value TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS campus_settings (id INTEGER PRIMARY KEY CHECK(id = 1), token TEXT NOT NULL DEFAULT '', chat_id TEXT NOT NULL DEFAULT '', enabled INTEGER NOT NULL DEFAULT 0, bot_username TEXT, worker_last_seen TEXT, anthropic_api_key TEXT NOT NULL DEFAULT '', data_go_kr_api_key TEXT NOT NULL DEFAULT '', saramin_api_key TEXT NOT NULL DEFAULT '')`,
+  `CREATE TABLE IF NOT EXISTS campus_settings (id INTEGER PRIMARY KEY CHECK(id = 1), token TEXT NOT NULL DEFAULT '', chat_id TEXT NOT NULL DEFAULT '', enabled INTEGER NOT NULL DEFAULT 0, bot_username TEXT, worker_last_seen TEXT, anthropic_api_key TEXT NOT NULL DEFAULT '', openai_api_key TEXT NOT NULL DEFAULT '', data_go_kr_api_key TEXT NOT NULL DEFAULT '', saramin_api_key TEXT NOT NULL DEFAULT '')`,
   `CREATE TABLE IF NOT EXISTS campus_events (id TEXT PRIMARY KEY, value TEXT NOT NULL, completed INTEGER NOT NULL DEFAULT 0, revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, idempotency_key TEXT UNIQUE)`,
   `CREATE TABLE IF NOT EXISTS campus_reminders (id TEXT PRIMARY KEY, event_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, scheduled_at TEXT NOT NULL, channel TEXT NOT NULL, revision INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', attempts INTEGER NOT NULL DEFAULT 0, error TEXT, sent_at TEXT, is_read INTEGER NOT NULL DEFAULT 0, next_attempt_at TEXT, lease_until TEXT, claimed_by TEXT)`,
   `CREATE INDEX IF NOT EXISTS campus_reminders_due ON campus_reminders(status, scheduled_at, next_attempt_at)`,
@@ -57,11 +57,13 @@ export async function createDatabase(databaseUrl: string): Promise<Client> {
     const migration = await client.transaction("write");
     try {
       const columns = await migration.execute("PRAGMA table_info(campus_settings)");
-      for (const name of ["anthropic_api_key", "data_go_kr_api_key", "saramin_api_key"]) {
+      for (const name of ["anthropic_api_key", "openai_api_key", "data_go_kr_api_key", "saramin_api_key"]) {
         if (!columns.rows.some((column) => column.name === name)) {
           await migration.execute(`ALTER TABLE campus_settings ADD COLUMN ${name} TEXT NOT NULL DEFAULT ''`);
         }
       }
+      // OpenAI 칸이 생기기 전에는 OpenAI 키(sk-…)를 Claude 칸에 저장했다. 비어 있는 OpenAI 칸으로 옮긴다.
+      await migration.execute("UPDATE campus_settings SET openai_api_key = anthropic_api_key, anthropic_api_key = '' WHERE openai_api_key = '' AND anthropic_api_key LIKE 'sk-%' AND anthropic_api_key NOT LIKE 'sk-ant-%'");
       await migration.commit();
     } finally {
       migration.close();
