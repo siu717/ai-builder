@@ -1,0 +1,26 @@
+# 인증서는 Caddy 가 Let's Encrypt 로 자동 발급·갱신한다.
+# 전제: knowverse.net / www.knowverse.net 의 A 레코드가 이 서버를 가리키고 80·443 이 열려 있을 것.
+
+www.knowverse.net {
+	redir https://knowverse.net{uri} permanent
+}
+
+knowverse.net {
+	encode zstd gzip
+
+	# 앱에 로그인이 없어 접속자 전원이 같은 프로필·일정·텔레그램 설정을 공유하고
+	# AI 호출 비용도 발생시킬 수 있다. 데모 동안 사이트 전체를 비밀번호로 막는다.
+	# 공개해야 할 때는 이 블록만 지우고 `docker compose restart caddy`.
+	basic_auth {
+		{$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+	}
+
+	reverse_proxy web:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
