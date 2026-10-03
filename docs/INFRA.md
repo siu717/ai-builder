@@ -50,6 +50,8 @@ BASIC_AUTH_HASH='<아래 명령으로 만든 해시>'
 docker run --rm caddy:2 caddy hash-password --plaintext '데모비밀번호'
 ```
 
+`APP_URL`은 반드시 `https://knowverse.net`이어야 합니다. 앱의 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 정확히 일치하는 요청만 받으므로, 이 값이 틀리면 화면은 떠도 일정·프로필 저장과 AI 분석이 모두 403으로 실패합니다.
+
 `DATABASE_URL`은 compose가 `file:/app/data/campus.db`로 덮어쓰므로 `.env` 값은 무시됩니다.
 
 실행:

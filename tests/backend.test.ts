@@ -108,6 +108,23 @@ test("mutations reject foreign and null browser origins", () => {
   assert.doesNotThrow(() => assertSameOrigin(new Request("http://127.0.0.1:3000/api/events", { headers: { origin: "http://127.0.0.1:3000" } })));
 });
 
+test("same-origin checks accept the APP_URL host behind a proxy and nothing else", (t) => {
+  const previous = process.env.APP_URL;
+  t.after(() => { if (previous === undefined) delete process.env.APP_URL; else process.env.APP_URL = previous; });
+  const internal = "http://0.0.0.0:3000/api/events";
+  delete process.env.APP_URL;
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net", origin: "https://knowverse.net" } })));
+  process.env.APP_URL = "https://knowverse.net";
+  assert.doesNotThrow(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net", origin: "https://knowverse.net", "sec-fetch-site": "same-origin" } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request(internal, { headers: { host: "KnowVerse.net", origin: "https://knowverse.net" } })));
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net", origin: "http://knowverse.net" } })));
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net", origin: "https://foreign.example" } })));
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net", "sec-fetch-site": "cross-site" } })));
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "knowverse.net.foreign.example", origin: "https://knowverse.net.foreign.example" } })));
+  assert.throws(() => assertSameOrigin(new Request(internal, { headers: { host: "foreign@knowverse.net", origin: "https://knowverse.net" } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3000" } })));
+});
+
 test("same-origin checks use the received loopback Host when Next rewrites its internal URL", () => {
   assert.doesNotThrow(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3000", "sec-fetch-site": "same-origin" } })));
   assert.doesNotThrow(() => assertSameOrigin(new Request("http://127.0.0.1:3000/api/events", { headers: { host: "localhost:3000", origin: "http://localhost:3000" } })));

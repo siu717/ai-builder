@@ -7,11 +7,29 @@ export class RouteError extends Error {
   }
 }
 
+// Deployed address. Behind a TLS proxy Request.url is plain http, so compare against this origin instead.
+function deployedOrigin(): URL | null {
+  if (!process.env.APP_URL) return null;
+  try {
+    const parsed = new URL(process.env.APP_URL);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
   const site = request.headers.get("sec-fetch-site");
   const url = new URL(request.url);
   const receivedHost = request.headers.get("host") || url.host;
+  const deployed = deployedOrigin();
+  if (deployed && receivedHost.toLowerCase() === deployed.host) {
+    if ((origin && origin !== deployed.origin) || (site && !["same-origin", "none"].includes(site))) {
+      throw new RouteError(403, "같은 앱에서 보낸 요청만 허용됩니다.");
+    }
+    return;
+  }
   if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/i.test(receivedHost) || !["http:", "https:"].includes(url.protocol)) {
     throw new RouteError(403, "같은 앱에서 보낸 요청만 허용됩니다.");
   }
