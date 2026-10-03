@@ -12,8 +12,15 @@ import {
   KeyRound,
   Sparkles,
   Trash2,
+  Database,
 } from "lucide-react";
-import type { AppState, Profile, PublicSettings } from "@/lib/contracts";
+import {
+  DATA_PROVIDERS,
+  type AppState,
+  type DataProvider,
+  type Profile,
+  type PublicSettings,
+} from "@/lib/contracts";
 import { Busy, Message, request } from "./ui";
 
 export default function Settings({
@@ -471,6 +478,27 @@ export default function Settings({
           {aiMessage && <Message text={aiMessage} />}
         </form>
       </section>
+      <section
+        className="settings-section browser-section"
+        aria-label="외부 데이터 API"
+      >
+        <div className="section-heading">
+          <h2>
+            <Database size={19} />
+            외부 데이터 API
+          </h2>
+        </div>
+        {DATA_PROVIDERS.map((provider) => (
+          <DataKeyForm
+            key={provider}
+            provider={provider}
+            settings={settings}
+            busy={busy}
+            setBusy={setBusy}
+            onSave={onSave}
+          />
+        ))}
+      </section>
       <section className="settings-section browser-section">
         <div className="section-heading">
           <h2>
@@ -516,5 +544,189 @@ export default function Settings({
         </div>
       </section>
     </div>
+  );
+}
+
+const DATA_KEY_INFO: Record<
+  DataProvider,
+  { title: string; label: string; hint: string; link: string; linkLabel: string }
+> = {
+  dataGoKr: {
+    title: "공공데이터포털",
+    label: "DATA_GO_KR_API_KEY",
+    hint: "공공기관 채용정보, 큐넷 시험일정, 장학금 데이터를 각각 활용신청한 뒤 마이페이지의 일반 인증키를 입력하세요. 하나의 키로 승인된 데이터를 모두 사용하며, Encoding·Decoding 키 중 어느 것을 입력해도 됩니다.",
+    link: "https://www.data.go.kr",
+    linkLabel: "data.go.kr",
+  },
+  saramin: {
+    title: "사람인",
+    label: "SARAMIN_API_KEY",
+    hint: "사람인 오픈 API 승인 후 발급되는 access-key를 입력하세요.",
+    link: "https://oapi.saramin.co.kr",
+    linkLabel: "oapi.saramin.co.kr",
+  },
+};
+
+function DataKeyForm({
+  provider,
+  settings,
+  busy,
+  setBusy,
+  onSave,
+}: {
+  provider: DataProvider;
+  settings: PublicSettings;
+  busy: string | null;
+  setBusy: (busy: string | null) => void;
+  onSave: (state: AppState) => void;
+}) {
+  const info = DATA_KEY_INFO[provider];
+  const source = settings.dataKeys[provider];
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    if (!apiKey.trim() || busy !== null) return;
+    setBusy(`${provider}-save`);
+    setError("");
+    setMessage("");
+    try {
+      const state = await request<AppState>("/api/settings/data-keys", "PUT", {
+        provider,
+        apiKey: apiKey.trim(),
+      });
+      setApiKey("");
+      setConfirmDelete(false);
+      onSave(state);
+      setMessage(`${info.title} API 키를 저장했습니다.`);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "API 키를 저장하지 못했습니다.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+  async function remove() {
+    if (busy !== null) return;
+    setBusy(`${provider}-delete`);
+    setError("");
+    setMessage("");
+    try {
+      const state = await request<AppState>("/api/settings/data-keys", "DELETE", {
+        provider,
+      });
+      setApiKey("");
+      setConfirmDelete(false);
+      onSave(state);
+      setMessage(`저장된 ${info.title} API 키를 삭제했습니다.`);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "API 키를 삭제하지 못했습니다.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+  return (
+    <form
+      onSubmit={save}
+      className="ai-key-form data-key-form"
+      aria-label={`${info.title} API 키`}
+    >
+      <div className="setting-inline">
+        <span>{info.title}</span>
+        <span
+          className={`status-text ${source ? "status-met" : "status-unknown"}`}
+        >
+          {source === "saved"
+            ? "설정됨"
+            : source === "environment"
+              ? "환경변수 사용"
+              : "키 미설정"}
+        </span>
+        <a
+          className="text-button"
+          href={info.link}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {info.linkLabel} <ExternalLink size={13} />
+        </a>
+      </div>
+      <p className="data-key-hint">{info.hint}</p>
+      <label className="field">
+        {info.label}
+        <input
+          type="password"
+          autoComplete="new-password"
+          value={apiKey}
+          disabled={busy !== null}
+          onChange={(event) => setApiKey(event.target.value)}
+          placeholder={source === "saved" ? "새 API 키 입력" : "API 키 입력"}
+        />
+      </label>
+      <div className="inline-actions">
+        <button
+          type="submit"
+          className="button primary"
+          disabled={busy !== null || !apiKey.trim()}
+        >
+          {busy === `${provider}-save` ? (
+            <Busy label="저장 중" />
+          ) : (
+            <>
+              <Save size={16} />
+              API 키 저장
+            </>
+          )}
+        </button>
+        {source === "saved" && (
+          <button
+            type="button"
+            className="icon-button danger-text"
+            title={`저장된 ${info.title} API 키 삭제`}
+            aria-label={`저장된 ${info.title} API 키 삭제`}
+            disabled={busy !== null}
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
+      {confirmDelete && source === "saved" && (
+        <div
+          className="delete-confirm"
+          role="group"
+          aria-label={`${info.title} API 키 삭제 확인`}
+        >
+          <span>저장된 {info.title} API 키를 삭제할까요?</span>
+          <button
+            type="button"
+            className="button danger"
+            disabled={busy !== null}
+            onClick={remove}
+          >
+            {busy === `${provider}-delete` ? (
+              <Busy label="삭제 중" />
+            ) : (
+              "API 키 삭제"
+            )}
+          </button>
+          <button
+            type="button"
+            className="text-button"
+            disabled={busy !== null}
+            onClick={() => setConfirmDelete(false)}
+          >
+            취소
+          </button>
+        </div>
+      )}
+      {error && <Message text={error} error />}
+      {message && <Message text={message} />}
+    </form>
   );
 }

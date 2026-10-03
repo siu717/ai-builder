@@ -1,0 +1,6109 @@
+{
+  "jobs": {
+    "count": 100,
+    "start": 0,
+    "total": "100",
+    "job": [
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000001",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000001",
+            "name": "하람모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프로덕트 디자인 신입 공채",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101150",
+            "name": "서울 &gt; 서초구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "151",
+            "name": "프로덕트디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "프로덕트디자인,인터랙션,모바일UI,Figma",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000001",
+        "posting-timestamp": "1790920800",
+        "posting-date": "2026-10-02T15:00:00+0900",
+        "modification-timestamp": "1791007200",
+        "opening-timestamp": "1790920800",
+        "expiration-timestamp": "1791989999",
+        "expiration-date": "2026-10-14T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3197",
+        "apply-cnt": "21"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000002",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000002",
+            "name": "가람클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 클라우드·DevOps 엔지니어 체험형 인턴 모집",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "91,2246",
+            "name": "DevOps,클라우드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "DevOps,클라우드,AWS,Terraform,Docker",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000002",
+        "posting-timestamp": "1788678000",
+        "posting-date": "2026-09-06T16:00:00+0900",
+        "modification-timestamp": "1788678000",
+        "opening-timestamp": "1788678000",
+        "expiration-timestamp": "1793026799",
+        "expiration-date": "2026-10-26T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2561",
+        "apply-cnt": "85"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000003",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000003",
+            "name": "가람스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 해외영업 체험형 인턴 모집",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "18",
+            "name": "영업·판매·무역"
+          },
+          "job-code": {
+            "code": "181",
+            "name": "해외영업"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "해외영업,영어,무역,B2B영업,중국어",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000003",
+        "posting-timestamp": "1790233200",
+        "posting-date": "2026-09-24T16:00:00+0900",
+        "modification-timestamp": "1790665200",
+        "opening-timestamp": "1790233200",
+        "expiration-timestamp": "1796309999",
+        "expiration-date": "2026-12-03T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "829",
+        "apply-cnt": "11"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000004",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000004",
+            "name": "나래데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "풀스택 개발 신입/경력 채용",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84,92",
+            "name": "백엔드/서버개발,프론트엔드"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 3,
+            "name": "신입·경력 3년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,프론트엔드,PostgreSQL,TypeScript,Node.js,Docker",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000004",
+        "posting-timestamp": "1790823600",
+        "posting-date": "2026-10-01T12:00:00+0900",
+        "modification-timestamp": "1790910000",
+        "opening-timestamp": "1790823600",
+        "expiration-timestamp": "1793890799",
+        "expiration-date": "2026-11-05T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3905",
+        "apply-cnt": "0"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000005",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000005",
+            "name": "이음핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "사업기획 신입/경력 채용",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101150",
+            "name": "서울 &gt; 서초구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "165",
+            "name": "사업기획"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 3,
+            "name": "신입·경력 3년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "사업기획,PPT,엑셀,시장조사,사업기획",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000005",
+        "posting-timestamp": "1788501600",
+        "posting-date": "2026-09-04T15:00:00+0900",
+        "modification-timestamp": "1788847200",
+        "opening-timestamp": "1788501600",
+        "expiration-timestamp": "1794063599",
+        "expiration-date": "2026-11-07T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "2446",
+        "apply-cnt": "11"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000006",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000006",
+            "name": "푸른결소프트 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 서비스 기획 신입 공채",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "서비스기획,UX,서비스기획,Figma,데이터분석",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000006",
+        "posting-timestamp": "1788912000",
+        "posting-date": "2026-09-09T09:00:00+0900",
+        "modification-timestamp": "1789344000",
+        "opening-timestamp": "1788912000",
+        "expiration-timestamp": "1794063599",
+        "expiration-date": "2026-11-07T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3618",
+        "apply-cnt": "124"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000007",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000007",
+            "name": "해든에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 자율주행 SW 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "88,2232",
+            "name": "임베디드,AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "임베디드,AI/ML,C++,Linux,자율주행,ROS,Python",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000007",
+        "posting-timestamp": "1790647200",
+        "posting-date": "2026-09-29T11:00:00+0900",
+        "modification-timestamp": "1790992800",
+        "opening-timestamp": "1790647200",
+        "expiration-timestamp": "1792162799",
+        "expiration-date": "2026-10-16T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3953",
+        "apply-cnt": "88"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000008",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000008",
+            "name": "새봄헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 데이터 엔지니어 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2234",
+            "name": "데이터엔지니어"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "데이터엔지니어,Python,SQL,BigQuery",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000008",
+        "posting-timestamp": "1789704000",
+        "posting-date": "2026-09-18T13:00:00+0900",
+        "modification-timestamp": "1789963200",
+        "opening-timestamp": "1789704000",
+        "expiration-timestamp": "1793804399",
+        "expiration-date": "2026-11-04T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "262",
+        "apply-cnt": "160"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000009",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000009",
+            "name": "미르에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] LLM 서비스 개발 신입 공채",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101210",
+            "name": "서울 &gt; 용산구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232,84",
+            "name": "AI/ML,백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "AI/ML,백엔드/서버개발,LLM,프롬프트엔지니어링,Python",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000009",
+        "posting-timestamp": "1789603200",
+        "posting-date": "2026-09-17T09:00:00+0900",
+        "modification-timestamp": "1789603200",
+        "opening-timestamp": "1789603200",
+        "expiration-timestamp": "1793631599",
+        "expiration-date": "2026-11-02T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1435",
+        "apply-cnt": "0"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000010",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000010",
+            "name": "가람게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "풀스택 개발 신입/경력 채용",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84,92",
+            "name": "백엔드/서버개발,프론트엔드"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,프론트엔드,TypeScript,React,Node.js",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000010",
+        "posting-timestamp": "1789624800",
+        "posting-date": "2026-09-17T15:00:00+0900",
+        "modification-timestamp": "1789884000",
+        "opening-timestamp": "1789624800",
+        "expiration-timestamp": "1793372399",
+        "expiration-date": "2026-10-30T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "221",
+        "apply-cnt": "175"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000011",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000011",
+            "name": "시루커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 클라우드·DevOps 엔지니어 신입 공채",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "91,2246",
+            "name": "DevOps,클라우드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "DevOps,클라우드,AWS,Terraform,Kubernetes",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000011",
+        "posting-timestamp": "1789362000",
+        "posting-date": "2026-09-14T14:00:00+0900",
+        "modification-timestamp": "1789448400",
+        "opening-timestamp": "1789362000",
+        "expiration-timestamp": "1794754799",
+        "expiration-date": "2026-11-15T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1901",
+        "apply-cnt": "115"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000012",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000012",
+            "name": "푸른결테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 데이터 분석 체험형 인턴 모집",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2236",
+            "name": "데이터분석가"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "데이터분석가,A/B 테스트,Tableau,Python,SQL",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000012",
+        "posting-timestamp": "1790910000",
+        "posting-date": "2026-10-02T12:00:00+0900",
+        "modification-timestamp": "1791342000",
+        "opening-timestamp": "1790910000",
+        "expiration-timestamp": "1794236399",
+        "expiration-date": "2026-11-09T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3960",
+        "apply-cnt": "83"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000013",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000013",
+            "name": "로아파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 데이터 분석 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2236",
+            "name": "데이터분석가"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터분석가,SQL,Tableau,통계",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000013",
+        "posting-timestamp": "1789016400",
+        "posting-date": "2026-09-10T14:00:00+0900",
+        "modification-timestamp": "1789189200",
+        "opening-timestamp": "1789016400",
+        "expiration-timestamp": "1794927599",
+        "expiration-date": "2026-11-17T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3750",
+        "apply-cnt": "27"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000014",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000014",
+            "name": "온새커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "게임 클라이언트 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "314",
+            "name": "게임·애니메이션"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "90",
+            "name": "게임개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "게임개발,Unity,Unreal,C#,C++",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000014",
+        "posting-timestamp": "1789794000",
+        "posting-date": "2026-09-19T14:00:00+0900",
+        "modification-timestamp": "1789794000",
+        "opening-timestamp": "1789794000",
+        "expiration-timestamp": "1794581999",
+        "expiration-date": "2026-11-13T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1030",
+        "apply-cnt": "0"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000015",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000015",
+            "name": "가람네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "클라우드·DevOps 엔지니어 체험형 인턴 모집",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "91,2246",
+            "name": "DevOps,클라우드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "DevOps,클라우드,CI/CD,Kubernetes,Docker",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000015",
+        "posting-timestamp": "1790733600",
+        "posting-date": "2026-09-30T11:00:00+0900",
+        "modification-timestamp": "1791079200",
+        "opening-timestamp": "1790733600",
+        "expiration-timestamp": "1794927599",
+        "expiration-date": "2026-11-17T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1309",
+        "apply-cnt": "177"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000016",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000016",
+            "name": "솔빛게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] UX/UI 디자인 신입 공채",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101150",
+            "name": "서울 &gt; 서초구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "150",
+            "name": "UI/UX디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "UI/UX디자인,Figma,UX리서치,프로토타이핑,디자인시스템",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000016",
+        "posting-timestamp": "1791000000",
+        "posting-date": "2026-10-03T13:00:00+0900",
+        "modification-timestamp": "1791345600",
+        "opening-timestamp": "1791000000",
+        "expiration-timestamp": "1798383599",
+        "expiration-date": "2026-12-27T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "2774",
+        "apply-cnt": "54"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000017",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000017",
+            "name": "단비데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 데이터 엔지니어 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2234",
+            "name": "데이터엔지니어"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터엔지니어,Kafka,Spark,BigQuery",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000017",
+        "posting-timestamp": "1790298000",
+        "posting-date": "2026-09-25T10:00:00+0900",
+        "modification-timestamp": "1790643600",
+        "opening-timestamp": "1790298000",
+        "expiration-timestamp": "1793372399",
+        "expiration-date": "2026-10-30T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "649",
+        "apply-cnt": "111"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000018",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000018",
+            "name": "하람에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "인사(HR) 신입/경력 채용",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "5",
+            "name": "인사·노무·HRD"
+          },
+          "job-code": {
+            "code": "51",
+            "name": "인사담당자"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "인사담당자,HRD,채용,노무",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000018",
+        "posting-timestamp": "1788753600",
+        "posting-date": "2026-09-07T13:00:00+0900",
+        "modification-timestamp": "1788926400",
+        "opening-timestamp": "1788753600",
+        "expiration-timestamp": "1792594799",
+        "expiration-date": "2026-10-21T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2066",
+        "apply-cnt": "62"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000019",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000019",
+            "name": "푸른결데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 신입/경력 채용",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 5,
+            "name": "신입·경력 5년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,Kotlin,Redis,MySQL,Spring Boot",
+        "salary": {
+          "code": "13",
+          "name": "3,400~3,600만원"
+        },
+        "id": "990000019",
+        "posting-timestamp": "1790128800",
+        "posting-date": "2026-09-23T11:00:00+0900",
+        "modification-timestamp": "1790474400",
+        "opening-timestamp": "1790128800",
+        "expiration-timestamp": "1796914799",
+        "expiration-date": "2026-12-10T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "4009",
+        "apply-cnt": "180"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000020",
+        "active": 0,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000020",
+            "name": "별하헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "콘텐츠 마케팅 체험형 인턴 모집",
+          "industry": {
+            "code": "314",
+            "name": "게임·애니메이션"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "141",
+            "name": "콘텐츠마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "콘텐츠마케팅,SNS,카피라이팅,영상편집",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000020",
+        "posting-timestamp": "1787461200",
+        "posting-date": "2026-08-23T14:00:00+0900",
+        "modification-timestamp": "1787720400",
+        "opening-timestamp": "1787461200",
+        "expiration-timestamp": "1790521199",
+        "expiration-date": "2026-09-27T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2330",
+        "apply-cnt": "107"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000021",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000021",
+            "name": "로아스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] BX 디자인 체험형 인턴 모집",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "152",
+            "name": "브랜드디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "브랜드디자인,브랜딩,Illustrator,Photoshop",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000021",
+        "posting-timestamp": "1790499600",
+        "posting-date": "2026-09-27T18:00:00+0900",
+        "modification-timestamp": "1790931600",
+        "opening-timestamp": "1790499600",
+        "expiration-timestamp": "1797605999",
+        "expiration-date": "2026-12-18T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "4140",
+        "apply-cnt": "167"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000022",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000022",
+            "name": "라온네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "정보보안 엔지니어 신입 공채",
+          "industry": {
+            "code": "308",
+            "name": "정보보안·백신"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "95",
+            "name": "보안"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "보안,정보보안,모의해킹,Linux",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000022",
+        "posting-timestamp": "1788393600",
+        "posting-date": "2026-09-03T09:00:00+0900",
+        "modification-timestamp": "1788739200",
+        "opening-timestamp": "1788393600",
+        "expiration-timestamp": "1794149999",
+        "expiration-date": "2026-11-08T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "606",
+        "apply-cnt": "166"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000023",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000023",
+            "name": "도담스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "그로스 마케팅 신입 공채",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "142",
+            "name": "그로스해킹"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "그로스해킹,그로스해킹,A/B 테스트,SQL,Amplitude",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000023",
+        "posting-timestamp": "1789257600",
+        "posting-date": "2026-09-13T09:00:00+0900",
+        "modification-timestamp": "1789430400",
+        "opening-timestamp": "1789257600",
+        "expiration-timestamp": "1791817199",
+        "expiration-date": "2026-10-12T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1576",
+        "apply-cnt": "96"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000024",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000024",
+            "name": "푸른결스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "데이터 분석 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2236",
+            "name": "데이터분석가"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터분석가,A/B 테스트,SQL,Python",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000024",
+        "posting-timestamp": "1790578800",
+        "posting-date": "2026-09-28T16:00:00+0900",
+        "modification-timestamp": "1790924400",
+        "opening-timestamp": "1790578800",
+        "expiration-timestamp": "1795877999",
+        "expiration-date": "2026-11-28T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "246",
+        "apply-cnt": "111"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000025",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000025",
+            "name": "로아핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "LLM 서비스 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232,84",
+            "name": "AI/ML,백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "AI/ML,백엔드/서버개발,FastAPI,RAG,Python",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000025",
+        "posting-timestamp": "1789351200",
+        "posting-date": "2026-09-14T11:00:00+0900",
+        "modification-timestamp": "1789437600",
+        "opening-timestamp": "1789351200",
+        "expiration-timestamp": "1794581999",
+        "expiration-date": "2026-11-13T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "3612",
+        "apply-cnt": "61"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000026",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000026",
+            "name": "솔빛스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프로덕트 매니저(PM) 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "171",
+            "name": "PM/PO"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "PM/PO,SQL,Jira,애자일",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000026",
+        "posting-timestamp": "1788566400",
+        "posting-date": "2026-09-05T09:00:00+0900",
+        "modification-timestamp": "1788998400",
+        "opening-timestamp": "1788566400",
+        "expiration-timestamp": "1794841199",
+        "expiration-date": "2026-11-16T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3134",
+        "apply-cnt": "114"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000027",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000027",
+            "name": "별하시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "정보보안 엔지니어 신입 공채",
+          "industry": {
+            "code": "308",
+            "name": "정보보안·백신"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "20",
+            "name": "전문연구요원"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "95",
+            "name": "보안"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "보안,모의해킹,정보보안,네트워크,Linux",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000027",
+        "posting-timestamp": "1790668800",
+        "posting-date": "2026-09-29T17:00:00+0900",
+        "modification-timestamp": "1790668800",
+        "opening-timestamp": "1790668800",
+        "expiration-timestamp": "1798297199",
+        "expiration-date": "2026-12-26T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "2998",
+        "apply-cnt": "123"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000028",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000028",
+            "name": "이음테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "서비스 기획 신입/경력 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "서비스기획,UX,데이터분석,Figma,서비스기획",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000028",
+        "posting-timestamp": "1790038800",
+        "posting-date": "2026-09-22T10:00:00+0900",
+        "modification-timestamp": "1790211600",
+        "opening-timestamp": "1790038800",
+        "expiration-timestamp": "1796569199",
+        "expiration-date": "2026-12-06T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "3743",
+        "apply-cnt": "141"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000029",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000029",
+            "name": "새봄데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "클라우드·DevOps 엔지니어 신입 공채",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101150",
+            "name": "서울 &gt; 서초구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "91,2246",
+            "name": "DevOps,클라우드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "DevOps,클라우드,Linux,Terraform,Docker,Kubernetes",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000029",
+        "posting-timestamp": "1790319600",
+        "posting-date": "2026-09-25T16:00:00+0900",
+        "modification-timestamp": "1790319600",
+        "opening-timestamp": "1790319600",
+        "expiration-timestamp": "1796655599",
+        "expiration-date": "2026-12-07T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "3264",
+        "apply-cnt": "3"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000030",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000030",
+            "name": "로아게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] Android 앱 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,229",
+            "name": "앱개발,Android"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "앱개발,Android,Git,Jetpack Compose,Android,Kotlin",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000030",
+        "posting-timestamp": "1788588000",
+        "posting-date": "2026-09-05T15:00:00+0900",
+        "modification-timestamp": "1788933600",
+        "opening-timestamp": "1788588000",
+        "expiration-timestamp": "1796309999",
+        "expiration-date": "2026-12-03T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "454",
+        "apply-cnt": "173"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000031",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000031",
+            "name": "가람테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,JPA,Kotlin,Spring Boot,Node.js,Redis",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000031",
+        "posting-timestamp": "1790121600",
+        "posting-date": "2026-09-23T09:00:00+0900",
+        "modification-timestamp": "1790553600",
+        "opening-timestamp": "1790121600",
+        "expiration-timestamp": "1795705199",
+        "expiration-date": "2026-11-26T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3296",
+        "apply-cnt": "28"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000032",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000032",
+            "name": "별하스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프론트엔드 개발 신입 공채",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "20",
+            "name": "전문연구요원"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,React,TypeScript,웹접근성",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000032",
+        "posting-timestamp": "1788490800",
+        "posting-date": "2026-09-04T12:00:00+0900",
+        "modification-timestamp": "1788577200",
+        "opening-timestamp": "1788490800",
+        "expiration-timestamp": "1796050799",
+        "expiration-date": "2026-11-30T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "1240",
+        "apply-cnt": "86"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000033",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000033",
+            "name": "푸른결커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프론트엔드 개발 경력직 채용",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "2",
+            "name": "계약직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 4,
+            "max": 8,
+            "name": "경력 4년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,TypeScript,웹접근성,JavaScript,React",
+        "salary": {
+          "code": "16",
+          "name": "4,000~5,000만원"
+        },
+        "id": "990000033",
+        "posting-timestamp": "1789430400",
+        "posting-date": "2026-09-15T09:00:00+0900",
+        "modification-timestamp": "1789516800",
+        "opening-timestamp": "1789430400",
+        "expiration-timestamp": "1795877999",
+        "expiration-date": "2026-11-28T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "648",
+        "apply-cnt": "56"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000034",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000034",
+            "name": "하람핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 게임 클라이언트 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "314",
+            "name": "게임·애니메이션"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "90",
+            "name": "게임개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "게임개발,Unreal,C#,C++,Unity",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000034",
+        "posting-timestamp": "1790316000",
+        "posting-date": "2026-09-25T15:00:00+0900",
+        "modification-timestamp": "1790748000",
+        "opening-timestamp": "1790316000",
+        "expiration-timestamp": "1796396399",
+        "expiration-date": "2026-12-04T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "2765",
+        "apply-cnt": "70"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000035",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000035",
+            "name": "미르스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] UX/UI 디자인 신입 공채",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "150",
+            "name": "UI/UX디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "UI/UX디자인,프로토타이핑,Figma,UX리서치",
+        "salary": {
+          "code": "13",
+          "name": "3,400~3,600만원"
+        },
+        "id": "990000035",
+        "posting-timestamp": "1790985600",
+        "posting-date": "2026-10-03T09:00:00+0900",
+        "modification-timestamp": "1791072000",
+        "opening-timestamp": "1790985600",
+        "expiration-timestamp": "1793026799",
+        "expiration-date": "2026-10-26T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3523",
+        "apply-cnt": "111"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000036",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000036",
+            "name": "하람네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "데이터 엔지니어 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2234",
+            "name": "데이터엔지니어"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터엔지니어,Spark,BigQuery,Airflow",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000036",
+        "posting-timestamp": "1789952400",
+        "posting-date": "2026-09-21T10:00:00+0900",
+        "modification-timestamp": "1789952400",
+        "opening-timestamp": "1789952400",
+        "expiration-timestamp": "1796223599",
+        "expiration-date": "2026-12-02T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "3292",
+        "apply-cnt": "103"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000037",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000037",
+            "name": "온새데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프론트엔드 개발 신입/경력 채용",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 3,
+            "name": "신입·경력 3년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,React,웹접근성,TypeScript",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000037",
+        "posting-timestamp": "1789524000",
+        "posting-date": "2026-09-16T11:00:00+0900",
+        "modification-timestamp": "1789783200",
+        "opening-timestamp": "1789524000",
+        "expiration-timestamp": "1795791599",
+        "expiration-date": "2026-11-27T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "429",
+        "apply-cnt": "79"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000038",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000038",
+            "name": "시루소프트 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 해외영업 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "18",
+            "name": "영업·판매·무역"
+          },
+          "job-code": {
+            "code": "181",
+            "name": "해외영업"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "해외영업,B2B영업,중국어,영어,무역",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000038",
+        "posting-timestamp": "1790823600",
+        "posting-date": "2026-10-01T12:00:00+0900",
+        "modification-timestamp": "1791169200",
+        "opening-timestamp": "1790823600",
+        "expiration-timestamp": "1792421999",
+        "expiration-date": "2026-10-19T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "579",
+        "apply-cnt": "171"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000039",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000039",
+            "name": "다온네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 재무회계 체험형 인턴 모집",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "4",
+            "name": "회계·세무·재무"
+          },
+          "job-code": {
+            "code": "31",
+            "name": "재무회계"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "재무회계,회계,전산회계,엑셀",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000039",
+        "posting-timestamp": "1790121600",
+        "posting-date": "2026-09-23T09:00:00+0900",
+        "modification-timestamp": "1790553600",
+        "opening-timestamp": "1790121600",
+        "expiration-timestamp": "1792940399",
+        "expiration-date": "2026-10-25T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3703",
+        "apply-cnt": "82"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000040",
+        "active": 0,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000040",
+            "name": "온새소프트 (샘플)"
+          }
+        },
+        "position": {
+          "title": "UX/UI 디자인 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "150",
+            "name": "UI/UX디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "UI/UX디자인,UX리서치,디자인시스템,프로토타이핑,Figma",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000040",
+        "posting-timestamp": "1785978000",
+        "posting-date": "2026-08-06T10:00:00+0900",
+        "modification-timestamp": "1786323600",
+        "opening-timestamp": "1785978000",
+        "expiration-timestamp": "1790693999",
+        "expiration-date": "2026-09-29T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2236",
+        "apply-cnt": "85"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000041",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000041",
+            "name": "시루랩스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 경력직 채용",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "2",
+            "name": "계약직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 3,
+            "max": 8,
+            "name": "경력 3년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,Java,Spring Boot,AWS,Redis,MySQL",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000041",
+        "posting-timestamp": "1789966800",
+        "posting-date": "2026-09-21T14:00:00+0900",
+        "modification-timestamp": "1790053200",
+        "opening-timestamp": "1789966800",
+        "expiration-timestamp": "1795964399",
+        "expiration-date": "2026-11-29T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "1931",
+        "apply-cnt": "117"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000042",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000042",
+            "name": "하람스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 머신러닝 엔지니어 체험형 인턴 모집",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232",
+            "name": "AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "AI/ML,Python,PyTorch,MLOps,머신러닝",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000042",
+        "posting-timestamp": "1788573600",
+        "posting-date": "2026-09-05T11:00:00+0900",
+        "modification-timestamp": "1788660000",
+        "opening-timestamp": "1788573600",
+        "expiration-timestamp": "1795100399",
+        "expiration-date": "2026-11-19T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3577",
+        "apply-cnt": "127"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000043",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000043",
+            "name": "마루클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "UX/UI 디자인 신입/경력 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "150",
+            "name": "UI/UX디자인"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "UI/UX디자인,프로토타이핑,디자인시스템,UX리서치",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000043",
+        "posting-timestamp": "1788670800",
+        "posting-date": "2026-09-06T14:00:00+0900",
+        "modification-timestamp": "1788670800",
+        "opening-timestamp": "1788670800",
+        "expiration-timestamp": "1796482799",
+        "expiration-date": "2026-12-05T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "489",
+        "apply-cnt": "158"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000044",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000044",
+            "name": "윤슬에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 경력직 채용",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 5,
+            "max": 9,
+            "name": "경력 5년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,AWS,JPA,Redis,MySQL",
+        "salary": {
+          "code": "16",
+          "name": "4,000~5,000만원"
+        },
+        "id": "990000044",
+        "posting-timestamp": "1789203600",
+        "posting-date": "2026-09-12T18:00:00+0900",
+        "modification-timestamp": "1789203600",
+        "opening-timestamp": "1789203600",
+        "expiration-timestamp": "1795359599",
+        "expiration-date": "2026-11-22T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3277",
+        "apply-cnt": "169"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000045",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000045",
+            "name": "마루파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 자율주행 SW 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "88,2232",
+            "name": "임베디드,AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "임베디드,AI/ML,C++,Python,Linux,ROS",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000045",
+        "posting-timestamp": "1790470800",
+        "posting-date": "2026-09-27T10:00:00+0900",
+        "modification-timestamp": "1790902800",
+        "opening-timestamp": "1790470800",
+        "expiration-timestamp": "1792594799",
+        "expiration-date": "2026-10-21T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3191",
+        "apply-cnt": "88"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000046",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000046",
+            "name": "라온클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 백엔드 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,AWS,Spring Boot,Kotlin,Node.js",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000046",
+        "posting-timestamp": "1790323200",
+        "posting-date": "2026-09-25T17:00:00+0900",
+        "modification-timestamp": "1790755200",
+        "opening-timestamp": "1790323200",
+        "expiration-timestamp": "1796914799",
+        "expiration-date": "2026-12-10T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "3171",
+        "apply-cnt": "152"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000047",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000047",
+            "name": "해든시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 데이터 분석 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2236",
+            "name": "데이터분석가"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터분석가,A/B 테스트,통계,Tableau,Python",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000047",
+        "posting-timestamp": "1789444800",
+        "posting-date": "2026-09-15T13:00:00+0900",
+        "modification-timestamp": "1789876800",
+        "opening-timestamp": "1789444800",
+        "expiration-timestamp": "1791212399",
+        "expiration-date": "2026-10-05T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1802",
+        "apply-cnt": "35"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000048",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000048",
+            "name": "새봄핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "UX/UI 디자인 신입/경력 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "150",
+            "name": "UI/UX디자인"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 3,
+            "name": "신입·경력 3년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "UI/UX디자인,Figma,UX리서치,디자인시스템",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000048",
+        "posting-timestamp": "1789610400",
+        "posting-date": "2026-09-17T11:00:00+0900",
+        "modification-timestamp": "1789783200",
+        "opening-timestamp": "1789610400",
+        "expiration-timestamp": "1793717999",
+        "expiration-date": "2026-11-03T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1362",
+        "apply-cnt": "99"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000049",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000049",
+            "name": "해든파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 신입/경력 채용",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,Spring Boot,MySQL,JPA,Kotlin,Node.js",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000049",
+        "posting-timestamp": "1788494400",
+        "posting-date": "2026-09-04T13:00:00+0900",
+        "modification-timestamp": "1788926400",
+        "opening-timestamp": "1788494400",
+        "expiration-timestamp": "1793977199",
+        "expiration-date": "2026-11-06T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "1755",
+        "apply-cnt": "19"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000050",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000050",
+            "name": "단비모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 경력직 채용",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "2",
+            "name": "계약직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 3,
+            "max": 8,
+            "name": "경력 3년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,AWS,JPA,Node.js",
+        "salary": {
+          "code": "15",
+          "name": "3,800~4,000만원"
+        },
+        "id": "990000050",
+        "posting-timestamp": "1791014400",
+        "posting-date": "2026-10-03T17:00:00+0900",
+        "modification-timestamp": "1791446400",
+        "opening-timestamp": "1791014400",
+        "expiration-timestamp": "1798383599",
+        "expiration-date": "2026-12-27T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "3849",
+        "apply-cnt": "114"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000051",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000051",
+            "name": "푸른결핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 백엔드 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "백엔드/서버개발,Node.js,Spring Boot,AWS,Kotlin",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000051",
+        "posting-timestamp": "1789106400",
+        "posting-date": "2026-09-11T15:00:00+0900",
+        "modification-timestamp": "1789538400",
+        "opening-timestamp": "1789106400",
+        "expiration-timestamp": "1791212399",
+        "expiration-date": "2026-10-05T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1862",
+        "apply-cnt": "16"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000052",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000052",
+            "name": "로아헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "머신러닝 엔지니어 신입/경력 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101230",
+            "name": "서울 &gt; 종로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232",
+            "name": "AI/ML"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "AI/ML,PyTorch,머신러닝,MLOps,딥러닝",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000052",
+        "posting-timestamp": "1790236800",
+        "posting-date": "2026-09-24T17:00:00+0900",
+        "modification-timestamp": "1790409600",
+        "opening-timestamp": "1790236800",
+        "expiration-timestamp": "1796914799",
+        "expiration-date": "2026-12-10T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "1401",
+        "apply-cnt": "11"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000053",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000053",
+            "name": "별하커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 인사(HR) 신입 공채",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "5",
+            "name": "인사·노무·HRD"
+          },
+          "job-code": {
+            "code": "51",
+            "name": "인사담당자"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "인사담당자,채용,노무,HRD",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000053",
+        "posting-timestamp": "1790906400",
+        "posting-date": "2026-10-02T11:00:00+0900",
+        "modification-timestamp": "1791165600",
+        "opening-timestamp": "1790906400",
+        "expiration-timestamp": "1797605999",
+        "expiration-date": "2026-12-18T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "121",
+        "apply-cnt": "89"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000054",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000054",
+            "name": "해든랩스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "Android 앱 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "306",
+            "name": "네트워크·통신·모바일"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,229",
+            "name": "앱개발,Android"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "앱개발,Android,Git,Jetpack Compose,Android,Kotlin",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000054",
+        "posting-timestamp": "1788411600",
+        "posting-date": "2026-09-03T14:00:00+0900",
+        "modification-timestamp": "1788584400",
+        "opening-timestamp": "1788411600",
+        "expiration-timestamp": "1794063599",
+        "expiration-date": "2026-11-07T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1270",
+        "apply-cnt": "21"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000055",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000055",
+            "name": "도담커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "LLM 서비스 개발 경력직 채용",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232,84",
+            "name": "AI/ML,백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 2,
+            "max": 4,
+            "name": "경력 2년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "AI/ML,백엔드/서버개발,RAG,Python,프롬프트엔지니어링",
+        "salary": {
+          "code": "16",
+          "name": "4,000~5,000만원"
+        },
+        "id": "990000055",
+        "posting-timestamp": "1790308800",
+        "posting-date": "2026-09-25T13:00:00+0900",
+        "modification-timestamp": "1790654400",
+        "opening-timestamp": "1790308800",
+        "expiration-timestamp": "1794668399",
+        "expiration-date": "2026-11-14T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3931",
+        "apply-cnt": "71"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000056",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000056",
+            "name": "해든소프트 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프론트엔드 개발 신입/경력 채용",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 5,
+            "name": "신입·경력 5년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,Next.js,웹접근성,Vue.js",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000056",
+        "posting-timestamp": "1789948800",
+        "posting-date": "2026-09-21T09:00:00+0900",
+        "modification-timestamp": "1789948800",
+        "opening-timestamp": "1789948800",
+        "expiration-timestamp": "1796828399",
+        "expiration-date": "2026-12-09T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "2504",
+        "apply-cnt": "165"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000057",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000057",
+            "name": "로아모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101210",
+            "name": "서울 &gt; 용산구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,MySQL,Java,Spring Boot,Kotlin",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000057",
+        "posting-timestamp": "1789959600",
+        "posting-date": "2026-09-21T12:00:00+0900",
+        "modification-timestamp": "1790305200",
+        "opening-timestamp": "1789959600",
+        "expiration-timestamp": "1795186799",
+        "expiration-date": "2026-11-20T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "771",
+        "apply-cnt": "40"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000058",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000058",
+            "name": "도담클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] iOS 앱 개발 신입 공채",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,230",
+            "name": "앱개발,iOS"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "앱개발,iOS,SwiftUI,Git,Swift,iOS",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000058",
+        "posting-timestamp": "1788588000",
+        "posting-date": "2026-09-05T15:00:00+0900",
+        "modification-timestamp": "1788588000",
+        "opening-timestamp": "1788588000",
+        "expiration-timestamp": "1794668399",
+        "expiration-date": "2026-11-14T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "887",
+        "apply-cnt": "96"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000059",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000059",
+            "name": "해든헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "데이터 분석 경력직 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2236",
+            "name": "데이터분석가"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 2,
+            "max": 6,
+            "name": "경력 2년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터분석가,Tableau,Python,A/B 테스트,SQL",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000059",
+        "posting-timestamp": "1790406000",
+        "posting-date": "2026-09-26T16:00:00+0900",
+        "modification-timestamp": "1790665200",
+        "opening-timestamp": "1790406000",
+        "expiration-timestamp": "1793717999",
+        "expiration-date": "2026-11-03T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3633",
+        "apply-cnt": "76"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000060",
+        "active": 0,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000060",
+            "name": "새봄시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 풀스택 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84,92",
+            "name": "백엔드/서버개발,프론트엔드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,프론트엔드,Node.js,Docker,TypeScript,PostgreSQL,React",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000060",
+        "posting-timestamp": "1786665600",
+        "posting-date": "2026-08-14T09:00:00+0900",
+        "modification-timestamp": "1787011200",
+        "opening-timestamp": "1786665600",
+        "expiration-timestamp": "1790866799",
+        "expiration-date": "2026-10-01T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3015",
+        "apply-cnt": "106"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000061",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000061",
+            "name": "마루소프트 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 프론트엔드 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "302",
+            "name": "웹에이전시"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,웹접근성,Next.js,React",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000061",
+        "posting-timestamp": "1790834400",
+        "posting-date": "2026-10-01T15:00:00+0900",
+        "modification-timestamp": "1791266400",
+        "opening-timestamp": "1790834400",
+        "expiration-timestamp": "1791471599",
+        "expiration-date": "2026-10-08T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1575",
+        "apply-cnt": "130"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000062",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000062",
+            "name": "시루클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "QA 엔지니어 신입 공채",
+          "industry": {
+            "code": "314",
+            "name": "게임·애니메이션"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "94",
+            "name": "QA/테스터"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "QA/테스터,Selenium,테스트자동화,Python,Jira",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000062",
+        "posting-timestamp": "1790067600",
+        "posting-date": "2026-09-22T18:00:00+0900",
+        "modification-timestamp": "1790067600",
+        "opening-timestamp": "1790067600",
+        "expiration-timestamp": "1795705199",
+        "expiration-date": "2026-11-26T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "875",
+        "apply-cnt": "143"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000063",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000063",
+            "name": "윤슬파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "백엔드 개발 신입/경력 채용",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "백엔드/서버개발,Spring Boot,JPA,MySQL",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000063",
+        "posting-timestamp": "1790758800",
+        "posting-date": "2026-09-30T18:00:00+0900",
+        "modification-timestamp": "1791190800",
+        "opening-timestamp": "1790758800",
+        "expiration-timestamp": "1797433199",
+        "expiration-date": "2026-12-16T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "2383",
+        "apply-cnt": "179"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000064",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000064",
+            "name": "푸른결파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "데이터 엔지니어 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2234",
+            "name": "데이터엔지니어"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "데이터엔지니어,Airflow,Python,BigQuery",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000064",
+        "posting-timestamp": "1789369200",
+        "posting-date": "2026-09-14T16:00:00+0900",
+        "modification-timestamp": "1789369200",
+        "opening-timestamp": "1789369200",
+        "expiration-timestamp": "1794322799",
+        "expiration-date": "2026-11-10T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2625",
+        "apply-cnt": "159"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000065",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000065",
+            "name": "해든핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "iOS 앱 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101230",
+            "name": "서울 &gt; 종로구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,230",
+            "name": "앱개발,iOS"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "앱개발,iOS,Swift,SwiftUI,Git,iOS",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000065",
+        "posting-timestamp": "1789880400",
+        "posting-date": "2026-09-20T14:00:00+0900",
+        "modification-timestamp": "1790312400",
+        "opening-timestamp": "1789880400",
+        "expiration-timestamp": "1792681199",
+        "expiration-date": "2026-10-22T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2201",
+        "apply-cnt": "84"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000066",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000066",
+            "name": "윤슬모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "iOS 앱 개발 신입/경력 채용",
+          "industry": {
+            "code": "306",
+            "name": "네트워크·통신·모바일"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,230",
+            "name": "앱개발,iOS"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 5,
+            "name": "신입·경력 5년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "앱개발,iOS,Git,iOS,SwiftUI",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000066",
+        "posting-timestamp": "1788832800",
+        "posting-date": "2026-09-08T11:00:00+0900",
+        "modification-timestamp": "1788832800",
+        "opening-timestamp": "1788832800",
+        "expiration-timestamp": "1793804399",
+        "expiration-date": "2026-11-04T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "290",
+        "apply-cnt": "151"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000067",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000067",
+            "name": "시루모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "퍼포먼스 마케팅 신입 공채",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "140",
+            "name": "퍼포먼스마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "퍼포먼스마케팅,SQL,GA4,광고운영,데이터분석",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000067",
+        "posting-timestamp": "1789203600",
+        "posting-date": "2026-09-12T18:00:00+0900",
+        "modification-timestamp": "1789635600",
+        "opening-timestamp": "1789203600",
+        "expiration-timestamp": "1796309999",
+        "expiration-date": "2026-12-03T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "893",
+        "apply-cnt": "39"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000068",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000068",
+            "name": "마루네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] Android 앱 개발 신입 공채",
+          "industry": {
+            "code": "306",
+            "name": "네트워크·통신·모바일"
+          },
+          "location": {
+            "code": "101230",
+            "name": "서울 &gt; 종로구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,229",
+            "name": "앱개발,Android"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "앱개발,Android,Git,Jetpack Compose,Kotlin,Android",
+        "salary": {
+          "code": "13",
+          "name": "3,400~3,600만원"
+        },
+        "id": "990000068",
+        "posting-timestamp": "1791010800",
+        "posting-date": "2026-10-03T16:00:00+0900",
+        "modification-timestamp": "1791356400",
+        "opening-timestamp": "1791010800",
+        "expiration-timestamp": "1793717999",
+        "expiration-date": "2026-11-03T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2704",
+        "apply-cnt": "148"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000069",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000069",
+            "name": "푸른결게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "서비스 기획 신입/경력 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 4,
+            "name": "신입·경력 4년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "서비스기획,데이터분석,Figma,서비스기획",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000069",
+        "posting-timestamp": "1788847200",
+        "posting-date": "2026-09-08T15:00:00+0900",
+        "modification-timestamp": "1789192800",
+        "opening-timestamp": "1788847200",
+        "expiration-timestamp": "1792681199",
+        "expiration-date": "2026-10-22T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3294",
+        "apply-cnt": "62"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000070",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000070",
+            "name": "가람시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 콘텐츠 마케팅 신입 공채",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "141",
+            "name": "콘텐츠마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "콘텐츠마케팅,카피라이팅,SNS,영상편집",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000070",
+        "posting-timestamp": "1788840000",
+        "posting-date": "2026-09-08T13:00:00+0900",
+        "modification-timestamp": "1788926400",
+        "opening-timestamp": "1788840000",
+        "expiration-timestamp": "1794149999",
+        "expiration-date": "2026-11-08T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3080",
+        "apply-cnt": "44"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000071",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000071",
+            "name": "해든클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 재무회계 신입 공채",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "4",
+            "name": "회계·세무·재무"
+          },
+          "job-code": {
+            "code": "31",
+            "name": "재무회계"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "재무회계,전산회계,엑셀,회계,ERP",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000071",
+        "posting-timestamp": "1790298000",
+        "posting-date": "2026-09-25T10:00:00+0900",
+        "modification-timestamp": "1790384400",
+        "opening-timestamp": "1790298000",
+        "expiration-timestamp": "1797692399",
+        "expiration-date": "2026-12-19T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "4128",
+        "apply-cnt": "137"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000072",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000072",
+            "name": "로아시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 백엔드 개발 신입 공채",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "백엔드/서버개발,JPA,Redis,MySQL,Spring Boot,Kotlin",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000072",
+        "posting-timestamp": "1790906400",
+        "posting-date": "2026-10-02T11:00:00+0900",
+        "modification-timestamp": "1791165600",
+        "opening-timestamp": "1790906400",
+        "expiration-timestamp": "1793545199",
+        "expiration-date": "2026-11-01T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3208",
+        "apply-cnt": "31"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000073",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000073",
+            "name": "윤슬랩스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] Android 앱 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101070",
+            "name": "서울 &gt; 구로구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "86,229",
+            "name": "앱개발,Android"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "앱개발,Android,Android,Kotlin,Jetpack Compose,Git",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000073",
+        "posting-timestamp": "1790751600",
+        "posting-date": "2026-09-30T16:00:00+0900",
+        "modification-timestamp": "1791183600",
+        "opening-timestamp": "1790751600",
+        "expiration-timestamp": "1798556399",
+        "expiration-date": "2026-12-29T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "297",
+        "apply-cnt": "119"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000074",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000074",
+            "name": "해든모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 서비스 기획 신입 공채",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "서비스기획,UX,데이터분석,Figma,서비스기획",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000074",
+        "posting-timestamp": "1789538400",
+        "posting-date": "2026-09-16T15:00:00+0900",
+        "modification-timestamp": "1789970400",
+        "opening-timestamp": "1789538400",
+        "expiration-timestamp": "1792767599",
+        "expiration-date": "2026-10-23T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3946",
+        "apply-cnt": "146"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000075",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000075",
+            "name": "솔빛데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "QA 엔지니어 경력직 채용",
+          "industry": {
+            "code": "314",
+            "name": "게임·애니메이션"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "94",
+            "name": "QA/테스터"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 2,
+            "max": 7,
+            "name": "경력 2년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "QA/테스터,Python,Jira,Selenium,테스트자동화",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000075",
+        "posting-timestamp": "1790560800",
+        "posting-date": "2026-09-28T11:00:00+0900",
+        "modification-timestamp": "1790647200",
+        "opening-timestamp": "1790560800",
+        "expiration-timestamp": "1793113199",
+        "expiration-date": "2026-10-27T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1507",
+        "apply-cnt": "119"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000076",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000076",
+            "name": "마루게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 풀스택 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84,92",
+            "name": "백엔드/서버개발,프론트엔드"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "백엔드/서버개발,프론트엔드,React,Node.js,PostgreSQL,TypeScript",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000076",
+        "posting-timestamp": "1788933600",
+        "posting-date": "2026-09-09T15:00:00+0900",
+        "modification-timestamp": "1789279200",
+        "opening-timestamp": "1788933600",
+        "expiration-timestamp": "1796050799",
+        "expiration-date": "2026-11-30T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "3727",
+        "apply-cnt": "11"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000077",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000077",
+            "name": "새봄네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 백엔드 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "84",
+            "name": "백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "백엔드/서버개발,Spring Boot,Node.js,Java,MySQL,Kotlin",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000077",
+        "posting-timestamp": "1788850800",
+        "posting-date": "2026-09-08T16:00:00+0900",
+        "modification-timestamp": "1789196400",
+        "opening-timestamp": "1788850800",
+        "expiration-timestamp": "1795359599",
+        "expiration-date": "2026-11-22T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "1375",
+        "apply-cnt": "36"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000078",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000078",
+            "name": "푸른결네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "자율주행 SW 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101210",
+            "name": "서울 &gt; 용산구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "88,2232",
+            "name": "임베디드,AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "임베디드,AI/ML,Python,ROS,자율주행,Linux",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000078",
+        "posting-timestamp": "1789689600",
+        "posting-date": "2026-09-18T09:00:00+0900",
+        "modification-timestamp": "1789689600",
+        "opening-timestamp": "1789689600",
+        "expiration-timestamp": "1794841199",
+        "expiration-date": "2026-11-16T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "367",
+        "apply-cnt": "169"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000079",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000079",
+            "name": "이음헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "데이터 엔지니어 경력직 채용",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2234",
+            "name": "데이터엔지니어"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 2,
+            "max": 7,
+            "name": "경력 2년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "데이터엔지니어,Python,Airflow,SQL,BigQuery",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000079",
+        "posting-timestamp": "1789891200",
+        "posting-date": "2026-09-20T17:00:00+0900",
+        "modification-timestamp": "1789977600",
+        "opening-timestamp": "1789891200",
+        "expiration-timestamp": "1797087599",
+        "expiration-date": "2026-12-12T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "218",
+        "apply-cnt": "171"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000080",
+        "active": 0,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000080",
+            "name": "해든테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "서비스 기획 경력직 채용",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101170",
+            "name": "서울 &gt; 성북구"
+          },
+          "job-type": {
+            "code": "2",
+            "name": "계약직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 5,
+            "max": 9,
+            "name": "경력 5년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "서비스기획,UX,데이터분석,Figma,서비스기획",
+        "salary": {
+          "code": "16",
+          "name": "4,000~5,000만원"
+        },
+        "id": "990000080",
+        "posting-timestamp": "1786849200",
+        "posting-date": "2026-08-16T12:00:00+0900",
+        "modification-timestamp": "1787281200",
+        "opening-timestamp": "1786849200",
+        "expiration-timestamp": "1790348399",
+        "expiration-date": "2026-09-25T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2860",
+        "apply-cnt": "105"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000081",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000081",
+            "name": "시루핀테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프론트엔드 개발 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,JavaScript,React,Vue.js",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000081",
+        "posting-timestamp": "1788685200",
+        "posting-date": "2026-09-06T18:00:00+0900",
+        "modification-timestamp": "1788685200",
+        "opening-timestamp": "1788685200",
+        "expiration-timestamp": "1793890799",
+        "expiration-date": "2026-11-05T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1280",
+        "apply-cnt": "113"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000082",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000082",
+            "name": "별하파트너스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] BX 디자인 체험형 인턴 모집",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "152",
+            "name": "브랜드디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "브랜드디자인,Illustrator,Photoshop,브랜딩",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000082",
+        "posting-timestamp": "1790406000",
+        "posting-date": "2026-09-26T16:00:00+0900",
+        "modification-timestamp": "1790665200",
+        "opening-timestamp": "1790406000",
+        "expiration-timestamp": "1791385199",
+        "expiration-date": "2026-10-07T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "390",
+        "apply-cnt": "38"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000083",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000083",
+            "name": "이음시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 그로스 마케팅 체험형 인턴 모집",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101230",
+            "name": "서울 &gt; 종로구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "142",
+            "name": "그로스해킹"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "그로스해킹,SQL,Amplitude,A/B 테스트",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000083",
+        "posting-timestamp": "1789376400",
+        "posting-date": "2026-09-14T18:00:00+0900",
+        "modification-timestamp": "1789549200",
+        "opening-timestamp": "1789376400",
+        "expiration-timestamp": "1791989999",
+        "expiration-date": "2026-10-14T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3245",
+        "apply-cnt": "139"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000084",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000084",
+            "name": "단비시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "LLM 서비스 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232,84",
+            "name": "AI/ML,백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "AI/ML,백엔드/서버개발,벡터DB,LLM,Python,RAG,FastAPI",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000084",
+        "posting-timestamp": "1788598800",
+        "posting-date": "2026-09-05T18:00:00+0900",
+        "modification-timestamp": "1788598800",
+        "opening-timestamp": "1788598800",
+        "expiration-timestamp": "1793545199",
+        "expiration-date": "2026-11-01T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3747",
+        "apply-cnt": "90"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000085",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000085",
+            "name": "새봄테크 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 사업기획 신입 공채",
+          "industry": {
+            "code": "608",
+            "name": "자동차·부품"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "165",
+            "name": "사업기획"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "사업기획,시장조사,엑셀,사업기획",
+        "salary": {
+          "code": "11",
+          "name": "3,000~3,200만원"
+        },
+        "id": "990000085",
+        "posting-timestamp": "1790218800",
+        "posting-date": "2026-09-24T12:00:00+0900",
+        "modification-timestamp": "1790305200",
+        "opening-timestamp": "1790218800",
+        "expiration-timestamp": "1794495599",
+        "expiration-date": "2026-11-12T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3572",
+        "apply-cnt": "137"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000086",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000086",
+            "name": "하람데이터랩 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 머신러닝 엔지니어 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232",
+            "name": "AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "AI/ML,딥러닝,PyTorch,Python,MLOps,머신러닝",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000086",
+        "posting-timestamp": "1790737200",
+        "posting-date": "2026-09-30T12:00:00+0900",
+        "modification-timestamp": "1790996400",
+        "opening-timestamp": "1790737200",
+        "expiration-timestamp": "1791989999",
+        "expiration-date": "2026-10-14T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1960",
+        "apply-cnt": "20"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000087",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000087",
+            "name": "온새모빌리티 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 퍼포먼스 마케팅 체험형 인턴 모집",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101160",
+            "name": "서울 &gt; 성동구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "140",
+            "name": "퍼포먼스마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "퍼포먼스마케팅,데이터분석,광고운영,SQL,GA4",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000087",
+        "posting-timestamp": "1790737200",
+        "posting-date": "2026-09-30T12:00:00+0900",
+        "modification-timestamp": "1790737200",
+        "opening-timestamp": "1790737200",
+        "expiration-timestamp": "1798383599",
+        "expiration-date": "2026-12-27T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "349",
+        "apply-cnt": "151"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000088",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000088",
+            "name": "누리랩스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] LLM 서비스 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232,84",
+            "name": "AI/ML,백엔드/서버개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "AI/ML,백엔드/서버개발,LLM,FastAPI,RAG,Python,벡터DB",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000088",
+        "posting-timestamp": "1790586000",
+        "posting-date": "2026-09-28T18:00:00+0900",
+        "modification-timestamp": "1790758800",
+        "opening-timestamp": "1790586000",
+        "expiration-timestamp": "1796741999",
+        "expiration-date": "2026-12-08T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "2376",
+        "apply-cnt": "174"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000089",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000089",
+            "name": "시루시스템즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "퍼포먼스 마케팅 신입 공채",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "140",
+            "name": "퍼포먼스마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "퍼포먼스마케팅,SQL,데이터분석,GA4",
+        "salary": {
+          "code": "13",
+          "name": "3,400~3,600만원"
+        },
+        "id": "990000089",
+        "posting-timestamp": "1790586000",
+        "posting-date": "2026-09-28T18:00:00+0900",
+        "modification-timestamp": "1790672400",
+        "opening-timestamp": "1790586000",
+        "expiration-timestamp": "1795877999",
+        "expiration-date": "2026-11-28T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3569",
+        "apply-cnt": "137"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000090",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000090",
+            "name": "라온스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2027 상반기] 프로덕트 매니저(PM) 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101180",
+            "name": "서울 &gt; 송파구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "171",
+            "name": "PM/PO"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "PM/PO,PM,애자일,Jira,SQL",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000090",
+        "posting-timestamp": "1789444800",
+        "posting-date": "2026-09-15T13:00:00+0900",
+        "modification-timestamp": "1789617600",
+        "opening-timestamp": "1789444800",
+        "expiration-timestamp": "1796914799",
+        "expiration-date": "2026-12-10T23:59:59+0900",
+        "close-type": {
+          "code": "4",
+          "name": "수시"
+        },
+        "read-cnt": "3781",
+        "apply-cnt": "178"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000091",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000091",
+            "name": "도담에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "머신러닝 엔지니어 신입/경력 채용",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101240",
+            "name": "서울 &gt; 중구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232",
+            "name": "AI/ML"
+          },
+          "experience-level": {
+            "code": 3,
+            "min": 0,
+            "max": 5,
+            "name": "신입·경력 5년↓"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "AI/ML,MLOps,딥러닝,머신러닝,PyTorch",
+        "salary": {
+          "code": "13",
+          "name": "3,400~3,600만원"
+        },
+        "id": "990000091",
+        "posting-timestamp": "1789545600",
+        "posting-date": "2026-09-16T17:00:00+0900",
+        "modification-timestamp": "1789804800",
+        "opening-timestamp": "1789545600",
+        "expiration-timestamp": "1797346799",
+        "expiration-date": "2026-12-15T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "2389",
+        "apply-cnt": "124"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000092",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000092",
+            "name": "다온스튜디오 (샘플)"
+          }
+        },
+        "position": {
+          "title": "서비스 기획 체험형 인턴 모집",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101200",
+            "name": "서울 &gt; 영등포구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "170",
+            "name": "서비스기획"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "서비스기획,UX,서비스기획,Figma,데이터분석",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000092",
+        "posting-timestamp": "1788847200",
+        "posting-date": "2026-09-08T15:00:00+0900",
+        "modification-timestamp": "1788933600",
+        "opening-timestamp": "1788847200",
+        "expiration-timestamp": "1795791599",
+        "expiration-date": "2026-11-27T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "2726",
+        "apply-cnt": "152"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000093",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000093",
+            "name": "윤슬게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "머신러닝 엔지니어 체험형 인턴 모집",
+          "industry": {
+            "code": "703",
+            "name": "의료·제약·바이오"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "2232",
+            "name": "AI/ML"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "AI/ML,Python,PyTorch,MLOps,머신러닝",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000093",
+        "posting-timestamp": "1789974000",
+        "posting-date": "2026-09-21T16:00:00+0900",
+        "modification-timestamp": "1790060400",
+        "opening-timestamp": "1789974000",
+        "expiration-timestamp": "1792249199",
+        "expiration-date": "2026-10-17T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3218",
+        "apply-cnt": "145"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000094",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000094",
+            "name": "솔빛클라우드 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프로덕트 디자인 신입 공채",
+          "industry": {
+            "code": "306",
+            "name": "네트워크·통신·모바일"
+          },
+          "location": {
+            "code": "101150",
+            "name": "서울 &gt; 서초구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "151",
+            "name": "프로덕트디자인"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "프로덕트디자인,인터랙션,모바일UI,Figma",
+        "salary": {
+          "code": "12",
+          "name": "3,200~3,400만원"
+        },
+        "id": "990000094",
+        "posting-timestamp": "1788926400",
+        "posting-date": "2026-09-09T13:00:00+0900",
+        "modification-timestamp": "1789358400",
+        "opening-timestamp": "1788926400",
+        "expiration-timestamp": "1791903599",
+        "expiration-date": "2026-10-13T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "1058",
+        "apply-cnt": "42"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000095",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000095",
+            "name": "시루헬스케어 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프로덕트 매니저(PM) 체험형 인턴 모집",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "171",
+            "name": "PM/PO"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "PM/PO,PM,애자일,Jira,SQL",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000095",
+        "posting-timestamp": "1788847200",
+        "posting-date": "2026-09-08T15:00:00+0900",
+        "modification-timestamp": "1789279200",
+        "opening-timestamp": "1788847200",
+        "expiration-timestamp": "1792940399",
+        "expiration-date": "2026-10-25T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "710",
+        "apply-cnt": "125"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000096",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000096",
+            "name": "가람커머스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프로덕트 매니저(PM) 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "301",
+            "name": "솔루션·SI·ERP·CRM"
+          },
+          "location": {
+            "code": "101130",
+            "name": "서울 &gt; 마포구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "16",
+            "name": "기획·전략"
+          },
+          "job-code": {
+            "code": "171",
+            "name": "PM/PO"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "PM/PO,SQL,Jira,애자일",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000096",
+        "posting-timestamp": "1790391600",
+        "posting-date": "2026-09-26T12:00:00+0900",
+        "modification-timestamp": "1790564400",
+        "opening-timestamp": "1790391600",
+        "expiration-timestamp": "1796482799",
+        "expiration-date": "2026-12-05T23:59:59+0900",
+        "close-type": {
+          "code": "2",
+          "name": "채용시"
+        },
+        "read-cnt": "3908",
+        "apply-cnt": "34"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000097",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000097",
+            "name": "단비랩스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "퍼포먼스 마케팅 채용연계형 인턴 (정규직 전환)",
+          "industry": {
+            "code": "403",
+            "name": "핀테크·결제·PG"
+          },
+          "location": {
+            "code": "101140",
+            "name": "서울 &gt; 서대문구"
+          },
+          "job-type": {
+            "code": "11",
+            "name": "인턴직 (정규직 전환가능)"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "140",
+            "name": "퍼포먼스마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "0",
+            "name": "학력무관"
+          }
+        },
+        "keyword": "퍼포먼스마케팅,광고운영,SQL,GA4",
+        "salary": {
+          "code": "99",
+          "name": "면접후 결정"
+        },
+        "id": "990000097",
+        "posting-timestamp": "1790665200",
+        "posting-date": "2026-09-29T16:00:00+0900",
+        "modification-timestamp": "1790665200",
+        "opening-timestamp": "1790665200",
+        "expiration-timestamp": "1792594799",
+        "expiration-date": "2026-10-21T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "3681",
+        "apply-cnt": "69"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000098",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000098",
+            "name": "해든게임즈 (샘플)"
+          }
+        },
+        "position": {
+          "title": "콘텐츠 마케팅 신입 공채",
+          "industry": {
+            "code": "304",
+            "name": "쇼핑몰·오픈마켓"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "14",
+            "name": "마케팅·홍보·조사"
+          },
+          "job-code": {
+            "code": "141",
+            "name": "콘텐츠마케팅"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "3",
+            "name": "대학교졸업(4년)"
+          }
+        },
+        "keyword": "콘텐츠마케팅,SNS,카피라이팅,영상편집",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000098",
+        "posting-timestamp": "1789257600",
+        "posting-date": "2026-09-13T09:00:00+0900",
+        "modification-timestamp": "1789689600",
+        "opening-timestamp": "1789257600",
+        "expiration-timestamp": "1792421999",
+        "expiration-date": "2026-10-19T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "2047",
+        "apply-cnt": "149"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000099",
+        "active": 1,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000099",
+            "name": "푸른결에이아이 (샘플)"
+          }
+        },
+        "position": {
+          "title": "프로덕트 디자인 경력직 채용",
+          "industry": {
+            "code": "306",
+            "name": "네트워크·통신·모바일"
+          },
+          "location": {
+            "code": "101010",
+            "name": "서울 &gt; 강남구"
+          },
+          "job-type": {
+            "code": "1",
+            "name": "정규직"
+          },
+          "job-mid-code": {
+            "code": "15",
+            "name": "디자인"
+          },
+          "job-code": {
+            "code": "151",
+            "name": "프로덕트디자인"
+          },
+          "experience-level": {
+            "code": 2,
+            "min": 2,
+            "max": 6,
+            "name": "경력 2년↑"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프로덕트디자인,Figma,모바일UI,인터랙션",
+        "salary": {
+          "code": "14",
+          "name": "3,600~3,800만원"
+        },
+        "id": "990000099",
+        "posting-timestamp": "1789704000",
+        "posting-date": "2026-09-18T13:00:00+0900",
+        "modification-timestamp": "1789704000",
+        "opening-timestamp": "1789704000",
+        "expiration-timestamp": "1797087599",
+        "expiration-date": "2026-12-12T23:59:59+0900",
+        "close-type": {
+          "code": "3",
+          "name": "상시"
+        },
+        "read-cnt": "1227",
+        "apply-cnt": "117"
+      },
+      {
+        "url": "https://example.com/saramin-dummy/jobs/relay/view?rec_idx=990000100",
+        "active": 0,
+        "company": {
+          "detail": {
+            "href": "https://example.com/saramin-dummy/company/990000100",
+            "name": "누리네트웍스 (샘플)"
+          }
+        },
+        "position": {
+          "title": "[2026 하반기] 프론트엔드 개발 체험형 인턴 모집",
+          "industry": {
+            "code": "305",
+            "name": "포털·인터넷·컨텐츠"
+          },
+          "location": {
+            "code": "101080",
+            "name": "서울 &gt; 금천구"
+          },
+          "job-type": {
+            "code": "4",
+            "name": "인턴직"
+          },
+          "job-mid-code": {
+            "code": "2",
+            "name": "IT개발·데이터"
+          },
+          "job-code": {
+            "code": "92,87",
+            "name": "프론트엔드,웹개발"
+          },
+          "experience-level": {
+            "code": 1,
+            "min": 0,
+            "max": 0,
+            "name": "신입"
+          },
+          "required-education-level": {
+            "code": "8",
+            "name": "대학교졸업(4년)이상"
+          }
+        },
+        "keyword": "프론트엔드,웹개발,Next.js,웹접근성,JavaScript,Vue.js",
+        "salary": {
+          "code": "0",
+          "name": "회사내규에 따름"
+        },
+        "id": "990000100",
+        "posting-timestamp": "1786244400",
+        "posting-date": "2026-08-09T12:00:00+0900",
+        "modification-timestamp": "1786417200",
+        "opening-timestamp": "1786244400",
+        "expiration-timestamp": "1790521199",
+        "expiration-date": "2026-09-27T23:59:59+0900",
+        "close-type": {
+          "code": "1",
+          "name": "접수마감일"
+        },
+        "read-cnt": "607",
+        "apply-cnt": "64"
+      }
+    ]
+  }
+}
