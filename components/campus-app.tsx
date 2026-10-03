@@ -31,7 +31,10 @@ import type {
   AppState,
   BookmarkletPayload,
   CalendarEvent,
+  KookminNoticeDetail,
   KookminScheduleItem,
+  LiveOpportunity,
+  LiveOpportunityResponse,
   Opportunity,
   ReminderRecord,
 } from "@/lib/contracts";
@@ -44,6 +47,16 @@ import { AnalyzeModal, Coaching } from "./ai-tools";
 import Settings from "./settings";
 import { Busy, Message, request, seoulDate } from "./ui";
 import Kookmin from "./kookmin";
+import KookminAnalyze from "./kookmin-analyze";
+
+type LiveKind = "scholarship" | "job";
+interface LiveState {
+  items: LiveOpportunity[];
+  loading: boolean;
+  error: string;
+  sources: LiveOpportunityResponse["sources"];
+}
+const EMPTY_LIVE: LiveState = { items: [], loading: false, error: "", sources: [] };
 import {
   dateRange,
   upcomingSchedule,
@@ -151,6 +164,12 @@ export default function CampusApp() {
   });
   const [kmuPayload, setKmuPayload] = useState<BookmarkletPayload | null>(null);
   const scheduleToken = useRef(0);
+  const [live, setLive] = useState<Record<LiveKind, LiveState>>({
+    scholarship: EMPTY_LIVE,
+    job: EMPTY_LIVE,
+  });
+  const liveRequested = useRef<Record<LiveKind, number>>({ scholarship: 0, job: 0 });
+  const [liveNotice, setLiveNotice] = useState<KookminNoticeDetail | null>(null);
   const hashHandled = useRef(false);
   const today = seoulDate();
 
@@ -200,6 +219,56 @@ export default function CampusApp() {
     window.history.replaceState(null, "", window.location.pathname);
   }, [loaded]);
 
+  const loadLive = useCallback(async (kind: LiveKind) => {
+    const token = ++liveRequested.current[kind];
+    setLive((previous) => ({
+      ...previous,
+      [kind]: { ...previous[kind], loading: true, error: "" },
+    }));
+    try {
+      const data = await request<LiveOpportunityResponse>(
+        `/api/opportunities/live?kind=${kind}`,
+      );
+      if (token !== liveRequested.current[kind]) return;
+      setLive((previous) => ({
+        ...previous,
+        [kind]: { items: data.items, loading: false, error: "", sources: data.sources },
+      }));
+    } catch (err) {
+      if (token !== liveRequested.current[kind]) return;
+      setLive((previous) => ({
+        ...previous,
+        [kind]: {
+          ...previous[kind],
+          loading: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "실시간 공고를 불러오지 못했습니다.",
+        },
+      }));
+    }
+  }, []);
+
+  // 장학금·취업 정보 화면을 처음 열 때만 실시간 공고를 불러옵니다.
+  useEffect(() => {
+    if ((view === "scholarship" || view === "job") && liveRequested.current[view] === 0)
+      void loadLive(view);
+  }, [view, loadLive]);
+
+  const analyzeLive = useCallback(async (item: LiveOpportunity) => {
+    try {
+      const data = await request<{ notice: KookminNoticeDetail }>(
+        `/api/opportunities/live/text?sourceId=${encodeURIComponent(item.sourceId)}&externalId=${encodeURIComponent(item.id.slice(item.sourceId.length + 1))}`,
+      );
+      setLiveNotice(data.notice);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "공고 본문을 불러오지 못했습니다.",
+      );
+    }
+  }, []);
+
   const loadCatalog = useCallback(async () => {
     try {
       const data = await request<{ opportunities: Opportunity[] }>(
@@ -222,8 +291,11 @@ export default function CampusApp() {
       if (
         previous &&
         JSON.stringify(previous.profile) !== JSON.stringify(next.profile)
-      )
+      ) {
         void loadCatalog();
+        // 프로필이 바뀌면 매칭 점수가 달라지므로 다음에 화면을 열 때 다시 불러옵니다.
+        liveRequested.current = { scholarship: 0, job: 0 };
+      }
     },
     [loadCatalog],
   );
@@ -653,6 +725,10 @@ export default function CampusApp() {
               key={view}
               kind={view}
               opportunities={catalog}
+              live={live[view].items}
+              liveStatus={live[view]}
+              onReloadLive={() => void loadLive(view)}
+              onAnalyzeLive={analyzeLive}
               onAdd={setEditor}
               onAnalyze={() => setAnalysis(view)}
               onCoach={(text) => {
@@ -717,6 +793,13 @@ export default function CampusApp() {
           kind={analysis}
           configured={app.settings.aiConfigured}
           onClose={closeAnalysis}
+          onAdd={setEditor}
+        />
+      )}
+      {liveNotice && (
+        <KookminAnalyze
+          notice={liveNotice}
+          onClose={() => setLiveNotice(null)}
           onAdd={setEditor}
         />
       )}

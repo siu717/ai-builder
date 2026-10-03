@@ -13,11 +13,19 @@ import {
   GraduationCap,
   BriefcaseBusiness,
   ChevronRight,
+  RefreshCw,
+  Sparkles,
+  CircleAlert,
 } from "lucide-react";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import type { Opportunity } from "@/lib/contracts";
+import {
+  LIVE_KEY_MISSING,
+  type LiveOpportunity,
+  type LiveOpportunityResponse,
+  type Opportunity,
+} from "@/lib/contracts";
 import type { EventDraft } from "./event-editor";
-import { seoulDate } from "./ui";
+import { Busy, seoulDate } from "./ui";
 import { checklistFromDocuments } from "@/lib/checklist";
 
 const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
@@ -29,19 +37,43 @@ const PROFILE_GAPS = [
   { label: "전공", phrase: "전공을 입력" },
   { label: "학점", phrase: "학점과 만점 기준을 함께 입력" },
 ];
+
+export interface LiveStatus {
+  loading: boolean;
+  error: string;
+  sources: LiveOpportunityResponse["sources"];
+}
+// 본문을 서버에서 다시 읽어 AI 분석에 넘길 수 있는 출처(국민대 공지)입니다.
+const ANALYZABLE_SOURCES = ["kmu-scholarship", "kmu-job"];
+
 export default function Opportunities({
   kind,
   opportunities,
+  live,
+  liveStatus,
+  onReloadLive,
+  onAnalyzeLive,
   onAdd,
   onAnalyze,
   onCoach,
 }: {
   kind: "scholarship" | "job";
   opportunities: Opportunity[];
+  live?: LiveOpportunity[];
+  liveStatus?: LiveStatus;
+  onReloadLive?: () => void;
+  onAnalyzeLive?: (item: LiveOpportunity) => void | Promise<void>;
   onAdd: (draft: EventDraft) => void;
   onAnalyze: () => void;
   onCoach: (text: string) => void;
 }) {
+  // 자동화 브라우저(E2E)에서는 외부 사이트 응답에 따라 화면이 달라지지 않도록 샘플 공고부터 보여 줍니다.
+  const [mode, setMode] = useState<"live" | "sample">(() =>
+    live === undefined ||
+    (typeof navigator !== "undefined" && navigator.webdriver)
+      ? "sample"
+      : "live",
+  );
   const [query, setQuery] = useState("");
   const [condition, setCondition] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -77,6 +109,28 @@ export default function Opportunities({
   }
   return (
     <>
+      {live !== undefined && (
+        <div className="live-switch" role="group" aria-label="공고 종류">
+          <button
+            type="button"
+            className={mode === "live" ? "active" : ""}
+            aria-pressed={mode === "live"}
+            onClick={() => setMode("live")}
+          >
+            실시간 공고
+            {!liveStatus?.loading && <b>{live.length}</b>}
+          </button>
+          <button
+            type="button"
+            className={mode === "sample" ? "active" : ""}
+            aria-pressed={mode === "sample"}
+            onClick={() => setMode("sample")}
+          >
+            샘플 공고
+            <b>{opportunities.filter((item) => item.kind === kind).length}</b>
+          </button>
+        </div>
+      )}
       <div className="view-toolbar">
         <div className="search-field">
           <Search size={17} />
@@ -90,6 +144,7 @@ export default function Opportunities({
           />
         </div>
         <select
+          hidden={mode === "live"}
           aria-label="지원 조건 필터"
           value={condition}
           onChange={(event) => setCondition(event.target.value)}
@@ -104,6 +159,19 @@ export default function Opportunities({
           공고 입력
         </button>
       </div>
+      {mode === "live" ? (
+        <LivePanel
+          kind={kind}
+          items={live ?? []}
+          status={liveStatus}
+          query={query}
+          onReload={onReloadLive}
+          onAnalyze={onAnalyzeLive}
+          onAdd={onAdd}
+          onCoach={onCoach}
+        />
+      ) : (
+      <>
       <div className="catalog-caption tt-caption">
         <span>
           {kind === "scholarship" ? "장학금" : "채용 공고"} {results.length}개
@@ -296,6 +364,285 @@ export default function Opportunities({
           </section>
         )}
       </div>
+      </>
+      )}
+    </>
+  );
+}
+
+function deadlineLabel(item: LiveOpportunity): string {
+  if (!item.date) return "마감 확인 필요";
+  const left = differenceInCalendarDays(
+    parseISO(item.date),
+    parseISO(seoulDate()),
+  );
+  return left < 0 ? "마감 지남" : left === 0 ? "D-DAY" : `D-${left}`;
+}
+
+function LivePanel({
+  kind,
+  items,
+  status,
+  query,
+  onReload,
+  onAnalyze,
+  onAdd,
+  onCoach,
+}: {
+  kind: "scholarship" | "job";
+  items: LiveOpportunity[];
+  status?: LiveStatus;
+  query: string;
+  onReload?: () => void;
+  onAnalyze?: (item: LiveOpportunity) => void | Promise<void>;
+  onAdd: (draft: EventDraft) => void;
+  onCoach: (text: string) => void;
+}) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const results = items.filter((item) => {
+    const haystack =
+      `${item.title} ${item.organization} ${item.tags.join(" ")} ${item.sourceName}`.toLowerCase();
+    return words.every((word) => haystack.includes(word));
+  });
+  const selected = results.find((item) => item.id === selectedId) || results[0];
+  const loading = status?.loading ?? false;
+  const sources = status?.sources ?? [];
+  return (
+    <>
+      <div className="catalog-caption tt-caption live-caption">
+        <span>
+          {kind === "scholarship" ? "장학금" : "채용 공고"} {results.length}개
+        </span>
+        <span className="live-tag">실시간</span>
+        {sources.map((source) => {
+          const needsKey = source.error === LIVE_KEY_MISSING;
+          return (
+            <span
+              key={source.id}
+              className={`live-chip ${source.ok ? "ok" : needsKey ? "key" : "fail"}`}
+              title={source.error || `${source.count}개`}
+            >
+              {source.name}{" "}
+              {source.ok ? source.count : needsKey ? "키 필요" : "실패"}
+            </span>
+          );
+        })}
+        {onReload && (
+          <button
+            type="button"
+            className="text-button live-reload"
+            onClick={onReload}
+            disabled={loading}
+          >
+            <RefreshCw size={13} />
+            새로고침
+          </button>
+        )}
+      </div>
+      <p className="tt-nudge live-note">
+        각 사이트에 공개된 공고를 그대로 가져옵니다. 마감일은 원문에 적힌
+        경우에만 표시하며, 지원 전 반드시 원문을 확인해 주세요.
+      </p>
+      {loading && items.length === 0 ? (
+        <Busy label="실시간 공고를 불러오는 중" />
+      ) : results.length === 0 ? (
+        <div className="empty-state">
+          {status?.error ? <CircleAlert size={27} /> : <Search size={27} />}
+          <h3>
+            {status?.error
+              ? "실시간 공고를 불러오지 못했어요"
+              : items.length === 0
+                ? "가져온 공고가 없어요"
+                : "검색 결과가 없어요"}
+          </h3>
+          <p>
+            {status?.error ||
+              (items.length === 0
+                ? "잠시 후 다시 시도하거나 샘플 공고를 확인해 보세요."
+                : "검색어를 바꿔 보세요.")}
+          </p>
+          {onReload && items.length === 0 && (
+            <button
+              type="button"
+              className="button secondary"
+              onClick={onReload}
+            >
+              <RefreshCw size={16} />
+              다시 시도
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="opportunity-layout">
+          <div className="opportunity-list">
+            {results.map((item) => (
+              <button
+                className={`opportunity-card ${selected?.id === item.id ? "selected" : ""}`}
+                key={item.id}
+                onClick={() => setSelectedId(item.id)}
+              >
+                <div className="opportunity-card-top">
+                  <span
+                    className={`organization-icon ${kind === "scholarship" ? "violet" : "cyan"}`}
+                  >
+                    {kind === "scholarship" ? (
+                      <GraduationCap size={23} />
+                    ) : (
+                      <Building2 size={22} />
+                    )}
+                  </span>
+                  <span className="opportunity-org">{item.organization}</span>
+                  <ChevronRight size={16} className="muted" />
+                </div>
+                <h3>{item.title}</h3>
+                {item.matchReason && (
+                  <p className="live-reason">{item.matchReason}</p>
+                )}
+                <div className="tag-row">
+                  <span className="plain-tag live-source">
+                    {item.sourceName}
+                  </span>
+                  {item.tags.slice(0, 3).map((tag) => (
+                    <span className="plain-tag" key={tag}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="opportunity-card-bottom">
+                  <span>
+                    {item.postedAt
+                      ? `${format(parseISO(item.postedAt), "M.d")} 등록`
+                      : ""}
+                  </span>
+                  <span>
+                    {item.date && `${format(parseISO(item.date), "M.d")} 마감 `}
+                    <strong>{deadlineLabel(item)}</strong>
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+          {selected && (
+            <section className="opportunity-detail">
+              <div className="detail-eyebrow">
+                <span>{selected.organization}</span>
+                <span className="live-tag">{selected.sourceName}</span>
+              </div>
+              <h2>{selected.title}</h2>
+              <div className="detail-facts">
+                <div>
+                  <span>신청 마감</span>
+                  <strong>
+                    {selected.date
+                      ? `${format(parseISO(selected.date), "yyyy.MM.dd")} ${selected.time || "시각 확인 필요"}`
+                      : "원문에서 확인 필요"}
+                  </strong>
+                </div>
+                <div>
+                  <span>등록일</span>
+                  <strong>
+                    {selected.postedAt
+                      ? format(parseISO(selected.postedAt), "yyyy.MM.dd")
+                      : "표시 없음"}
+                  </strong>
+                </div>
+              </div>
+              {selected.matchReason && (
+                <div className="recommendation">
+                  <span
+                    className={
+                      kind === "scholarship" ? "violet-text" : "cyan-text"
+                    }
+                  >
+                    {kind === "scholarship" ? (
+                      <GraduationCap size={18} />
+                    ) : (
+                      <BriefcaseBusiness size={18} />
+                    )}
+                  </span>
+                  <p>
+                    {selected.matchReason} · 프로필과 공고 문구를 비교한 참고
+                    정보이며 지원 자격 판정이 아닙니다.
+                  </p>
+                </div>
+              )}
+              {selected.description && (
+                <p className="live-description">{selected.description}</p>
+              )}
+              {selected.tags.length > 0 && (
+                <div className="tag-row">
+                  {selected.tags.map((tag) => (
+                    <span className="plain-tag" key={tag}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <a
+                className="text-button live-origin"
+                href={selected.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                원문 보기 <ArrowUpRight size={15} />
+              </a>
+              <div className="detail-actions">
+                <button
+                  className="button primary"
+                  onClick={() =>
+                    onAdd({
+                      title: selected.title,
+                      kind: selected.kind,
+                      date: selected.date ?? "",
+                      time: selected.time,
+                      notes: `출처: ${selected.sourceName}\n${selected.url}`,
+                      source: selected.url,
+                      isSample: false,
+                      reminders: [],
+                      idempotencyKey: selected.id,
+                    })
+                  }
+                >
+                  <CalendarPlus size={16} />
+                  신청 일정 등록
+                </button>
+                {onAnalyze &&
+                  ANALYZABLE_SOURCES.includes(selected.sourceId) && (
+                    <button
+                      className="button secondary"
+                      disabled={analyzing}
+                      onClick={async () => {
+                        setAnalyzing(true);
+                        try {
+                          await onAnalyze(selected);
+                        } finally {
+                          setAnalyzing(false);
+                        }
+                      }}
+                    >
+                      <Sparkles size={15} />
+                      {analyzing ? "본문 불러오는 중" : "AI로 조건 분석"}
+                    </button>
+                  )}
+                {kind === "job" && (
+                  <button
+                    className="button secondary"
+                    onClick={() =>
+                      onCoach(
+                        `${selected.title}\n${selected.organization}\n${selected.description}\n${selected.url}`,
+                      )
+                    }
+                  >
+                    취업 컨설팅 <ChevronRight size={15} />
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </>
   );
 }

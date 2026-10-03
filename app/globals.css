@@ -458,3 +458,24 @@ textarea { resize: vertical; line-height: 1.75; }
 @media (min-width: 641px) and (max-height: 790px) { .campus-photo { display: none; } }
 .kmu-preview.kmu-preview-first { margin: 0 0 26px; }
 .kmu-steps + .message { margin: 6px 0 12px; }
+
+/* 실시간 공고 */
+.live-switch { display: inline-flex; gap: 2px; padding: 3px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f6f8f7; }
+.live-switch button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; background: transparent; color: #5f6b6e; font-size: 12px; font-weight: 550; }
+.live-switch button.active { background: #ffffff; color: var(--primary-dark); box-shadow: 0 1px 2px rgba(20, 40, 30, 0.12); }
+.live-switch button b { font-size: 10px; font-weight: 600; padding: 0 5px; border-radius: 8px; background: #e8eded; color: #5f6b6e; }
+.live-switch button.active b { background: var(--green-bg); color: var(--primary-dark); }
+.live-caption { flex-wrap: wrap; row-gap: 6px; }
+.live-tag { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 3px; color: var(--primary-dark); background: var(--green-bg); font-size: 9px; line-height: 1.6; font-weight: 600; }
+.live-chip { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 9px; font-size: 9px; line-height: 1.7; border: 1px solid var(--line); color: #5f6b6e; background: #ffffff; }
+.live-chip.ok { border-color: #cfe5d8; color: var(--primary-dark); }
+.live-chip.fail { border-color: #ecc9c9; color: #a23f3f; background: #fdf4f4; }
+.live-chip.key { border-style: dashed; color: #6f797c; }
+.live-reload { margin-left: auto; }
+.live-reload:disabled { opacity: 0.5; cursor: default; }
+.live-note { margin-top: -6px; }
+.live-reason { color: var(--primary-dark); font-weight: 550; }
+.live-source { background: var(--green-bg); color: var(--primary-dark); }
+.live-description { margin: 14px 0 10px; font-size: 12px; line-height: 1.7; color: #4d585b; white-space: pre-wrap; overflow-wrap: anywhere; }
+.live-origin { margin: 12px 0 4px; font-size: 12px; color: var(--primary-dark); }
+.live-origin:hover { color: var(--primary); }
