@@ -76,3 +76,19 @@ test("scholarship documents become an editable preparation list before saving", 
   await expect(dialog.getByText(`0/${documents.length}개 준비 완료`, { exact: true })).toBeVisible();
   await dialog.getByRole("button", { name: "취소", exact: true }).click();
 });
+
+test("coaching preparation tasks can be collected into one checklist with a user-chosen date", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "취업 컨설팅", exact: true }).click();
+  await page.getByRole("button", { name: "샘플 컨설팅", exact: true }).click();
+  await expect(page.getByRole("button", { name: "준비 계획 한 번에 등록", exact: true })).toBeVisible();
+  const tasks = await page.locator(".coaching-task strong").allTextContents();
+  expect(tasks.length).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "준비 계획 한 번에 등록", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("날짜", { exact: true })).toHaveValue("");
+  for (let index = 0; index < tasks.length; index++) {
+    await expect(dialog.getByLabel(`준비물 ${index + 1}`, { exact: true })).toHaveValue(tasks[index]);
+  }
+  await dialog.getByRole("button", { name: "취소", exact: true }).click();
+});

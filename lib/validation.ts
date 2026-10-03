@@ -31,7 +31,7 @@ const calendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "마감 날짜를 �
 
 export const checklistSchema = z.array(z.object({
   id: z.string().uuid("준비물 식별자가 올바르지 않습니다."),
-  text: z.string().trim().min(1, "준비물 내용을 입력해주세요.").max(MAX_CHECKLIST_TEXT_LENGTH),
+  text: z.string().trim().min(1, "준비물 내용을 입력해주세요.").max(MAX_CHECKLIST_TEXT_LENGTH, `준비물 내용은 ${MAX_CHECKLIST_TEXT_LENGTH}자 이내로 입력해주세요.`),
   completed: z.boolean(),
 }).strict()).max(MAX_CHECKLIST_ITEMS, `준비물은 ${MAX_CHECKLIST_ITEMS}개까지 추가할 수 있습니다.`)
   .refine((items) => new Set(items.map((item) => item.id)).size === items.length, "준비물 항목이 중복되었습니다.");

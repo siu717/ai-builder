@@ -30,9 +30,10 @@ test("calendar editing, persistence, completion, deletion and responsive layout"
   try {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "오늘의 캠퍼스" })).toBeVisible();
+    await expect.poll(() => page.locator(".campus-photo img").evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await page.screenshot({ path: testInfo.outputPath("dashboard.png"), fullPage: true });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    await page.getByRole("button", { name: "캘린더", exact: true }).click();
+    await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "캘린더", exact: true }).click();
     await page.getByRole("button", { name: "마감순", exact: true }).click();
     await page.locator(".event-title-button").filter({ hasText: title }).click();
     const dialog = page.getByRole("dialog");
@@ -41,7 +42,7 @@ test("calendar editing, persistence, completion, deletion and responsive layout"
     await dialog.getByRole("button", { name: "일정 저장", exact: true }).click();
     await expect(dialog).not.toBeVisible();
     await page.reload();
-    await page.getByRole("button", { name: "캘린더", exact: true }).click();
+    await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "캘린더", exact: true }).click();
     await page.getByRole("button", { name: "마감순", exact: true }).click();
     await expect(page.locator(".event-title-button").filter({ hasText: `${title} 수정` })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("calendar.png"), fullPage: true });
@@ -62,6 +63,28 @@ test("calendar editing, persistence, completion, deletion and responsive layout"
   }
 });
 
+test("sample notice analysis and coaching connect to editable event drafts", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "오늘의 캠퍼스" })).toBeVisible();
+  await page.getByRole("button", { name: "공지 입력", exact: true }).click();
+  let dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "샘플 분석", exact: true }).click();
+  await expect(dialog.locator(".analysis-title")).toBeVisible();
+  await expect(dialog.getByText("샘플", { exact: true })).toBeVisible();
+  await dialog.getByRole("button", { name: "확인 · 일정 등록", exact: true }).click();
+  dialog = page.getByRole("dialog");
+  await expect(dialog).toHaveAttribute("aria-label", "새 일정");
+  await expect(dialog.getByLabel("일정 제목", { exact: true })).not.toHaveValue("");
+  await expect(dialog.getByText("샘플 일정 · 앱 알림만 발송됩니다", { exact: true })).toBeVisible();
+  await dialog.getByRole("button", { name: "취소", exact: true }).click();
+  await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "취업 컨설팅", exact: true }).click();
+  await page.getByRole("button", { name: "샘플 컨설팅", exact: true }).click();
+  await expect(page.locator(".feedback-item").first()).toBeVisible();
+  await expect(page.locator(".coaching-task").first()).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("coaching.png"), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test("real reminder worker processes app reminders and keeps delivery records", async ({ page, request }) => {
   const title = `검수 알림 ${randomUUID().slice(0, 8)}`;
   const input = sampleEvent(title);
@@ -73,7 +96,7 @@ test("real reminder worker processes app reminders and keeps delivery records", 
   try {
     await expect.poll(async () => (await state(request)).notifications.find((item) => item.eventId === event.id)?.status, { timeout: 20_000 }).toBe("sent");
     await page.goto("/");
-    await page.getByRole("button", { name: /^알림(?:\s|$)/ }).first().click();
+    await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: /^알림(?:\s|$)/ }).click();
     await expect(page.getByText(title, { exact: true })).toBeVisible();
     await page.reload();
     const delivered = (await state(request)).notifications.filter((item) => item.eventId === event.id);
@@ -95,7 +118,7 @@ test("catalogs show samples, credentials stay private and invalid schedules are 
   expect(opportunities.filter((item: { kind: string }) => item.kind === "scholarship").length).toBeGreaterThan(0);
   expect(opportunities.filter((item: { kind: string }) => item.kind === "job").length).toBeGreaterThan(0);
   await page.goto("/");
-  await page.getByRole("button", { name: "장학금", exact: true }).click();
+  await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "장학금", exact: true }).click();
   await expect(page.locator(".opportunity-card").first()).toBeVisible();
   await expect(page.getByText("샘플 공고", { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("scholarships.png"), fullPage: true });
