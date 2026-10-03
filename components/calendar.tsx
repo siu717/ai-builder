@@ -44,17 +44,36 @@ export function Deadline({ event }: { event: CalendarEvent }) {
     parseISO(event.date),
     parseISO(seoulDate()),
   );
+  // KMU80 D-day 단계: 지남(검정 채움) · 오늘(파랑 채움) · D-1~2(주황) · D-3~7(ink) · 이후(ink-4)
+  const tone = event.completed
+    ? "due-done"
+    : gap < 0
+      ? "due-overdue"
+      : gap === 0
+        ? "due-today"
+        : gap <= 2
+          ? "due-near"
+          : gap <= 7
+            ? "due-week"
+            : "due-later";
   return (
     <span
-      className={`deadline ${gap < 0 && !event.completed ? "overdue" : gap <= 3 ? "near" : ""}`}
+      className={`deadline ${tone} ${gap < 0 && !event.completed ? "overdue" : gap <= 3 ? "near" : ""}`}
     >
-      {event.completed
-        ? "완료"
-        : gap < 0
-          ? `${Math.abs(gap)}일 지남`
-          : gap === 0
-            ? "오늘 마감"
-            : `D-${gap}`}
+      {event.completed ? (
+        "완료"
+      ) : gap < 0 ? (
+        `${Math.abs(gap)}일 지남`
+      ) : gap === 0 ? (
+        <>
+          <span className="deadline-num" aria-hidden="true">
+            D-DAY
+          </span>
+          <span className="deadline-sr">오늘 마감</span>
+        </>
+      ) : (
+        <span className="deadline-num">{`D-${gap}`}</span>
+      )}
     </span>
   );
 }
@@ -89,8 +108,8 @@ export function EventList({
   return (
     <div className={`event-list ${compact ? "compact" : ""}`}>
       <div className="event-table-head">
-        <span>일정</span>
         <span>마감</span>
+        <span>일정</span>
         <span>상태</span>
       </div>
       {events.map((event) => (
@@ -98,19 +117,21 @@ export function EventList({
           className={`event-row ${event.completed ? "event-completed" : ""}`}
           key={event.id}
         >
-          <button
-            type="button"
-            className={`check-button ${event.completed ? "is-checked" : ""}`}
-            title={event.completed ? "완료 취소" : "완료 처리"}
-            aria-label={`${event.title} ${event.completed ? "완료 취소" : "완료 처리"}`}
-            onClick={() => onToggle(event)}
-          >
-            {event.completed && <Check size={13} />}
+          <Deadline event={event} />
+          <button className="event-date" onClick={() => onEdit(event)}>
+            <span>{format(parseISO(event.date), "M월 d일")}</span>
+            {event.time ? (
+              <small>{event.time}</small>
+            ) : (
+              <small className="time-unknown">시간 확인 필요</small>
+            )}
           </button>
           <button className="event-title-button" onClick={() => onEdit(event)}>
             <span className="event-title">{event.title}</span>
             <span className="event-meta">
-              <KindBadge kind={event.kind} />
+              {event.source && (
+                <span className="event-source">{event.source}</span>
+              )}
               <ChecklistProgress items={event.checklist} />
               {event.isSample && <span className="sample-tag">샘플</span>}
               {!compact && event.notes && (
@@ -118,18 +139,25 @@ export function EventList({
               )}
             </span>
           </button>
-          <button className="event-date" onClick={() => onEdit(event)}>
-            <span>{format(parseISO(event.date), "M월 d일")}</span>
-            <small>{event.time || "시간 확인 필요"}</small>
-          </button>
-          <Deadline event={event} />
+          <span className="event-kind">
+            <KindBadge kind={event.kind} />
+          </span>
           <button
             className="icon-button event-open"
             title="일정 상세"
             aria-label={`${event.title} 상세`}
             onClick={() => onEdit(event)}
           >
-            <ArrowUpRight size={16} />
+            <ArrowUpRight size={18} />
+          </button>
+          <button
+            type="button"
+            className={`check-button ${event.completed ? "is-checked" : ""}`}
+            title={event.completed ? "완료 취소" : "완료 처리"}
+            aria-label={`${event.title} ${event.completed ? "완료 취소" : "완료 처리"}`}
+            onClick={() => onToggle(event)}
+          >
+            <Check size={18} strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
       ))}
@@ -156,7 +184,10 @@ export function MonthCalendar({
   return (
     <div className={`calendar ${small ? "calendar-small" : ""}`}>
       <div className="calendar-heading">
-        <h3>{format(month, "yyyy년 M월")}</h3>
+        <h3>
+          <span className="calendar-num">{format(month, "yyyy")}</span>년{" "}
+          <span className="calendar-num">{format(month, "M")}</span>월
+        </h3>
         <div className="calendar-controls">
           <button
             type="button"

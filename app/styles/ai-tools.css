@@ -1,0 +1,108 @@
+/* ai-tools — 공지 분석 모달(AnalyzeModal) + 취업 컨설팅(Coaching). KMU80: 괘선 · 큰 숫자 · 노랑 채움 "확인 필요". Tokens only. */
+
+/* ───────── shared: connection label, inputs ───────── */
+.connection-label { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-3); font-size: var(--text-xs); font-weight: 500; white-space: nowrap; }
+.connection-label > span { height: 8px; width: 8px; border-radius: 50%; border: 1px solid var(--ink-4); background: transparent; }
+.connection-label.connected { color: var(--met); font-weight: 600; }
+.connection-label.connected > span { border-color: var(--met); background: var(--met); }
+
+.analyze-layout .field, .coaching-input .field { font-size: var(--text-sm); font-weight: 600; color: var(--ink); gap: 8px; }
+.analyze-layout .field .optional { font-size: var(--text-xs); font-weight: 500; color: var(--ink-3); }
+.analyze-layout .field input, .coaching-input .field input { font-size: var(--text-md); }
+.analysis-source, .coaching-source { font-size: var(--text-md); line-height: 1.8; color: var(--ink); resize: vertical; word-break: keep-all; }
+.analysis-source { min-height: 280px; }
+.coaching-source { min-height: 180px; }
+.coaching-input .field:nth-of-type(2) .coaching-source { min-height: 280px; }
+.analyze-layout .inline-actions, .coaching-input .inline-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* empty / loading column */
+.analysis-result .empty-state, .coaching-output .empty-state { color: var(--ink-4); border-top: 2px solid var(--line-strong); }
+.analysis-result .empty-state h3, .coaching-output .empty-state h3 { font-size: var(--text-md); font-weight: 500; color: var(--ink-2); }
+
+/* ───────── AnalyzeModal ───────── */
+.analyze-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+.analyze-layout > section { min-width: 0; }
+.analyze-layout > section:first-child { padding-right: 32px; }
+.analysis-result { border-left: 1px solid var(--line); padding-left: 32px; }
+.analyze-layout .section-heading h3 { font-size: var(--text-lg); font-weight: 700; color: var(--ink); }
+
+/* kind switch -> underline tabs (eCampus) */
+.analyze-layout .segmented.analysis-kinds { display: flex; gap: 24px; width: 100%; margin: 0 0 22px; padding: 0; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+.analyze-layout .segmented.analysis-kinds button { min-height: 44px; padding: 0 2px; margin-bottom: -1px; border-radius: 0; background: transparent; box-shadow: none; color: var(--ink-3); font-size: var(--text-md); font-weight: 500; border-bottom: 3px solid transparent; }
+.analyze-layout .segmented.analysis-kinds button:hover { color: var(--ink); }
+.analyze-layout .segmented.analysis-kinds button.active { color: var(--ink); font-weight: 700; background: transparent; box-shadow: none; border-bottom-color: var(--kmu-blue); }
+.analyze-layout .segmented.analysis-kinds button:focus-visible { outline: none; box-shadow: var(--focus); }
+
+/* result */
+.analysis-title { font-size: 23px; font-weight: 700; line-height: 1.35; letter-spacing: -0.02em; color: var(--ink); margin: 6px 0 20px; word-break: keep-all; }
+.result-fields { margin: 0; border-top: 2px solid var(--line-strong); }
+.result-fields > div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: baseline; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.result-fields dt { font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); }
+.result-fields dd { margin: 0; font-size: var(--text-md); color: var(--ink); line-height: 1.6; overflow-wrap: anywhere; word-break: keep-all; }
+.result-num { font-family: var(--font-num); font-size: 28px; line-height: 1; letter-spacing: 0.02em; color: var(--ink); }
+.result-check { display: inline-flex; align-items: center; padding: 1px 8px; background: var(--check); color: var(--ink); font-size: var(--text-sm); font-weight: 700; }
+.analysis-summary { font-size: var(--text-md); line-height: 1.75; color: var(--ink-2); margin: 18px 0; word-break: keep-all; }
+
+/* 확인 필요 block: yellow-filled label + ink list */
+.missing-fields { margin: 0 0 22px; padding: 14px 0 4px; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line); }
+.missing-fields h4 { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: var(--check); color: var(--ink); font-size: var(--text-sm); font-weight: 700; }
+.missing-fields ul { margin: 12px 0 10px; padding-left: 20px; font-size: var(--text-sm); line-height: 1.7; color: var(--ink); }
+.missing-fields li + li { margin-top: 4px; }
+
+.analysis-result .detail-section-title { margin: 22px 0 10px; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; color: var(--kmu-blue); }
+.analysis-result .documents { gap: 0; border-top: 2px solid var(--line-strong); }
+.analysis-result .documents li { padding: 11px 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); color: var(--ink); gap: 10px; }
+.analysis-result .documents li svg { color: var(--ink-3); flex: none; }
+
+/* conditions -> numbered ledger (Scholarship condition table) */
+.analysis-result .conditions { gap: 0; margin: 22px 0 0; border-top: 2px solid var(--line-strong); }
+.analysis-result .condition { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.condition-index { font-family: var(--font-num); font-size: 26px; line-height: 1; color: var(--ink-4); padding-top: 1px; }
+.analysis-result .condition strong { font-size: var(--text-md); font-weight: 600; color: var(--ink); }
+.analysis-result .condition p { font-size: var(--text-sm); line-height: 1.6; color: var(--ink-3); margin-top: 3px; }
+.analysis-result .status-text { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-sm); font-weight: 700; white-space: nowrap; }
+.analysis-result .status-text.status-met { color: var(--met); }
+.analysis-result .status-text.status-unmet { color: var(--unmet); }
+.analysis-result .status-text.status-unknown { color: var(--ink); background: var(--check); padding: 2px 8px; }
+.analysis-register { margin-top: 24px; }
+
+/* ───────── Coaching ───────── */
+.coaching-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+.coaching-input, .coaching-output { min-width: 0; }
+.coaching-input { padding-right: 36px; }
+.coaching-output { border-left: 1px solid var(--line); padding-left: 36px; }
+.coaching-summary { font-size: var(--text-md); line-height: 1.8; color: var(--ink-2); margin: 0 0 8px; padding: 16px 0 18px; border-top: 2px solid var(--line-strong); word-break: keep-all; }
+
+.coaching-eyebrow { margin: 28px 0 0; padding-bottom: 10px; border-bottom: 2px solid var(--line-strong); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.1em; color: var(--kmu-blue); }
+.coaching-eyebrow-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 28px; border-bottom: 2px solid var(--line-strong); padding-bottom: 10px; }
+.coaching-eyebrow-row .coaching-eyebrow { margin: 0; padding: 0; border: 0; }
+
+.feedback-item { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.feedback-item blockquote { margin: 0 0 12px; padding: 12px 14px; border: 0; background: var(--surface-2); font-size: var(--text-md); line-height: 1.7; color: var(--ink-2); word-break: keep-all; }
+.feedback-item h4 { font-size: var(--text-lg); font-weight: 600; line-height: 1.45; color: var(--ink); word-break: keep-all; }
+.feedback-item p { margin-top: 6px; font-size: var(--text-md); line-height: 1.75; color: var(--ink-2); word-break: keep-all; }
+
+.question-list { list-style: none; margin: 0; padding: 0; counter-reset: question; }
+.question-list li { counter-increment: question; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); line-height: 1.65; color: var(--ink); word-break: keep-all; }
+.question-list li::before { content: counter(question, decimal-leading-zero); font-family: var(--font-num); font-size: 26px; line-height: 1; color: var(--kmu-blue); }
+
+.coaching-task { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.coaching-task > div { min-width: 0; }
+.coaching-task strong { font-size: var(--text-lg); font-weight: 600; color: var(--ink); word-break: keep-all; }
+.coaching-task p { margin-top: 4px; font-size: var(--text-sm); line-height: 1.6; color: var(--ink-3); word-break: keep-all; }
+.coaching-task .coaching-task-add { flex: none; width: 44px; min-width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--kmu-blue); background: var(--surface); color: var(--kmu-blue); }
+.coaching-task .coaching-task-add:hover { background: var(--kmu-blue-tint); color: var(--kmu-blue-dark); }
+.coaching-task .coaching-task-add:focus-visible { outline: none; box-shadow: var(--focus); }
+
+/* ───────── narrow screens (re-declared here: shell.css loads earlier) ───────── */
+@media (max-width: 1040px) {
+  .coaching-layout { grid-template-columns: minmax(0, 1fr); }
+  .coaching-input { padding-right: 0; }
+  .coaching-output { border-left: 0; border-top: 1px solid var(--line); padding: 28px 0 0; margin-top: 28px; }
+}
+@media (max-width: 760px) {
+  .analyze-layout { grid-template-columns: minmax(0, 1fr); }
+  .analyze-layout > section:first-child { padding-right: 0; }
+  .analysis-result { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; margin-top: 24px; }
+  .analyze-layout .segmented.analysis-kinds { gap: 18px; overflow-x: auto; }
+}
