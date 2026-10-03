@@ -4,25 +4,41 @@
 # 실행할 때마다 주소가 바뀐다.
 #
 # 준비: brew install cloudflared
+#       .env.local 에 BASIC_AUTH_USER, BASIC_AUTH_PASSWORD
 # 실행: ./scripts/share-public.sh        종료: Ctrl+C
-# 비공개: PUBLIC_ACCESS_MODE=private ./scripts/share-public.sh (.env.local 의 BASIC_AUTH_* 필요)
+#
+# 공개 서버는 DB 하나(기본 data/public-demo.db)만 쓴다. 설정·API 키·텔레그램이 재시작 후에도
+# 그대로 남아야 하므로 방문자별 DB(anonymous) 모드는 쓰지 않고, 시작할 때마다 DB 를 백업한다.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PORT="${PORT:-3100}"
 LOG_DIR="data/share"
-export PUBLIC_ACCESS_MODE="${PUBLIC_ACCESS_MODE:-anonymous}"
-export PUBLIC_SESSION_DIR="${PUBLIC_SESSION_DIR:-data/public-sessions}"
 mkdir -p "$LOG_DIR"
 
-case "$PUBLIC_ACCESS_MODE" in
-  anonymous|private) ;;
-  *) echo "PUBLIC_ACCESS_MODE 는 anonymous 또는 private 이어야 합니다." >&2; exit 1 ;;
-esac
+if [ "${PUBLIC_ACCESS_MODE:-private}" != private ]; then
+  echo "공개 서버는 DB 하나만 씁니다. PUBLIC_ACCESS_MODE=${PUBLIC_ACCESS_MODE} 는 지원하지 않습니다." >&2; exit 1
+fi
+export PUBLIC_ACCESS_MODE=private
 
-# Anonymous guests use separate databases; private mode requires site credentials.
-if [ "$PUBLIC_ACCESS_MODE" = private ] && ! node --env-file-if-exists=.env.local -e 'process.exit(process.env.BASIC_AUTH_USER?.trim() && process.env.BASIC_AUTH_PASSWORD ? 0 : 1)'; then
+# 모든 접속자가 같은 DB 를 쓰므로 사이트 비밀번호 없이는 공개하지 않는다.
+if ! node --env-file-if-exists=.env.local -e 'process.exit(process.env.BASIC_AUTH_USER?.trim() && process.env.BASIC_AUTH_PASSWORD ? 0 : 1)'; then
   echo ".env.local 에 BASIC_AUTH_USER 와 BASIC_AUTH_PASSWORD 를 설정하세요." >&2; exit 1
+fi
+
+# 없는 경로를 열면 SQLite 가 빈 DB 를 만들어 저장된 설정이 사라진 것처럼 보인다. 최초 1회만 PUBLIC_DB_INIT=1 로 새로 만든다.
+DB_PATH="$(pwd)/data/public-demo.db"
+[ -n "${PUBLIC_DATABASE_URL:-}" ] && DB_PATH="${PUBLIC_DATABASE_URL#file:}"
+if [ ! -s "$DB_PATH" ] && [ "${PUBLIC_DB_INIT:-}" != 1 ]; then
+  echo "공개 DB 가 없습니다: $DB_PATH" >&2
+  echo "경로를 확인하세요. 처음 만드는 경우에만 PUBLIC_DB_INIT=1 을 붙여 실행합니다." >&2; exit 1
+fi
+if [ -s "$DB_PATH" ]; then
+  command -v sqlite3 >/dev/null || { echo "백업에 sqlite3 가 필요합니다." >&2; exit 1; }
+  BACKUP="data/backups/pre-start-$(date +%Y%m%d-%H%M%S).db"
+  mkdir -p data/backups && chmod 700 data/backups
+  sqlite3 "$DB_PATH" ".backup '$BACKUP'" && chmod 600 "$BACKUP"
+  echo "DB 백업: $BACKUP"
 fi
 
 command -v cloudflared >/dev/null || { echo "cloudflared 가 없습니다: brew install cloudflared" >&2; exit 1; }
@@ -44,7 +60,7 @@ done
 
 # 로컬 개발용 DB(data/campus.db)와 섞이지 않도록 공개용 DB 를 따로 쓴다.
 export APP_URL="$URL"
-export DATABASE_URL="${PUBLIC_DATABASE_URL:-file:data/public.db}"
+export DATABASE_URL="file:$DB_PATH"
 
 npm run build > "$LOG_DIR/build.log" 2>&1 || { echo "빌드 실패: $LOG_DIR/build.log" >&2; exit 1; }
 node_modules/.bin/next start -H 127.0.0.1 -p "$PORT" > "$LOG_DIR/web.log" 2>&1 &
@@ -55,7 +71,7 @@ pids+=($!)
 
 ready=0
 for _ in $(seq 1 60); do
-  if PORT="$PORT" node --env-file-if-exists=.env.local -e 'const headers={};if(process.env.PUBLIC_ACCESS_MODE!=="anonymous"&&process.env.BASIC_AUTH_USER&&process.env.BASIC_AUTH_PASSWORD)headers.Authorization="Basic "+Buffer.from(process.env.BASIC_AUTH_USER+":"+process.env.BASIC_AUTH_PASSWORD).toString("base64");fetch("http://127.0.0.1:"+process.env.PORT+"/api/health",{headers,signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'; then
+  if PORT="$PORT" node --env-file-if-exists=.env.local -e 'const headers={};if(process.env.BASIC_AUTH_USER&&process.env.BASIC_AUTH_PASSWORD)headers.Authorization="Basic "+Buffer.from(process.env.BASIC_AUTH_USER+":"+process.env.BASIC_AUTH_PASSWORD).toString("base64");fetch("http://127.0.0.1:"+process.env.PORT+"/api/health",{headers,signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'; then
     ready=1
     break
   fi

@@ -2,11 +2,9 @@
 
 > **knowverse.net / www.knowverse.net 은 노우버스 회사 사이트입니다.** 캠퍼스 비서는 반드시 별도 주소(`campus.knowverse.net` 또는 터널 주소)로만 공개합니다.
 
-공개 배포의 기본값은 `PUBLIC_ACCESS_MODE=anonymous`입니다. 로그인이나 사이트 비밀번호 화면 없이 접속하고, 서명된 HttpOnly 게스트 쿠키로 브라우저별 SQLite 데이터를 분리합니다. `PUBLIC_SESSION_DIR`은 기존 개인용 `DATABASE_URL`과 별도의 디렉터리를 지정합니다. 공개 모드에서는 운영자의 환경변수 AI·텔레그램·외부 데이터 API 키를 사용하지 않으며, 각 방문자가 자신의 설정에서 입력한 키만 사용합니다.
+공개 서버는 **DB 하나만 사용합니다**(기본 `data/public-demo.db`). 설정 화면에 저장한 프로필·API 키·텔레그램 설정은 이 DB에 영속 저장되며, 재배포·재시작해도 같은 DB를 써야 합니다. 브라우저별 게스트 DB(`PUBLIC_ACCESS_MODE=anonymous`)는 쿠키 삭제나 30일 만료 시 설정이 사라지므로 공개 서버에서 쓰지 않습니다.
 
-게스트 쿠키는 생성 시점부터 30일 후 만료되고, 만료된 게스트 DB는 worker가 정리합니다. 쿠키 삭제·만료 후 데이터 접근을 복구하거나 다른 브라우저로 이전하는 계정 기능은 없습니다. 같은 브라우저를 사용하는 사람은 같은 데이터에 접근하므로 공용 기기에 개인 키를 저장하지 않습니다. 게스트 쿠키는 사용자 계정이나 비밀 저장소를 대신하지 않습니다.
-
-개인용 비밀번호 보호가 필요하면 `PUBLIC_ACCESS_MODE=private`와 `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`를 모두 설정합니다. 이 모드는 기존 `DATABASE_URL`을 공유하며 환경변수 자격증명도 사용할 수 있습니다. 개인용 공유 DB는 사이트 비밀번호 없이 공개하지 않습니다.
+모든 접속자가 같은 DB를 공유하므로 `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`로 사이트 비밀번호를 켜고 공개합니다.
 
 | 방법 | 비용 | 주소 | 언제 |
 |---|---|---|---|
@@ -24,8 +22,8 @@ brew install cloudflared            # 최초 1회
 `.env.local`에 다음을 넣습니다(커밋되지 않음).
 
 ```bash
-PUBLIC_ACCESS_MODE=anonymous
-PUBLIC_SESSION_DIR=./data/public-sessions
+BASIC_AUTH_USER=team
+BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
 ```
 
 실행:
@@ -34,9 +32,11 @@ PUBLIC_SESSION_DIR=./data/public-sessions
 ./scripts/share-public.sh
 ```
 
-`공개 주소: https://….trycloudflare.com`이 출력되면 로그인 없이 바로 접속합니다. AI 분석과 텔레그램 알림에는 방문자가 설정 화면에 저장한 자격증명이 필요합니다. `Ctrl+C`로 종료합니다.
+`공개 주소: https://….trycloudflare.com`이 출력되면 그 주소로 접속해 비밀번호를 입력합니다. `Ctrl+C`로 종료합니다.
 
-- 공개용 데이터는 `PUBLIC_SESSION_DIR`의 브라우저별 DB에 저장됩니다. 기존 `data/public.db`와 로컬 개발 DB는 공개 방문자에게 제공하지 않습니다.
+- 공개용 데이터는 `data/public-demo.db` 하나에 저장됩니다. 다른 경로는 `PUBLIC_DATABASE_URL=file:/절대/경로.db`로 지정합니다.
+- 스크립트는 시작할 때마다 DB를 `data/backups/pre-start-*.db`로 백업합니다.
+- DB 파일이 없으면 빈 DB를 만들지 않고 멈춥니다. 처음 만들 때만 `PUBLIC_DB_INIT=1`을 붙입니다.
 - 로그는 `data/share/`(tunnel, build, web, worker)에 남습니다.
 - 다시 실행하면 주소가 바뀝니다. `APP_URL`은 스크립트가 자동으로 맞춥니다.
 - 맥이 잠자기에 들어가면 끊깁니다. 데모 중에는 `caffeinate -dims`를 함께 켜 두세요.
@@ -61,13 +61,13 @@ cp .env.example .env
 
 ```bash
 APP_URL=https://campus.knowverse.net
-PUBLIC_ACCESS_MODE=anonymous
-PUBLIC_SESSION_DIR=/app/data/public-sessions
+BASIC_AUTH_USER=team
+BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
 ```
 
-`APP_URL`이 정확해야 합니다. 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 일치하는 요청만 받으므로, 틀리면 화면은 떠도 저장·AI 분석이 403으로 실패합니다. 게스트 모드에서는 `BASIC_AUTH_*`를 설정하지 않아도 되며, 남아 있어도 로그인 화면을 요구하지 않습니다. 비밀번호 보호 배포로 전환할 때는 `PUBLIC_ACCESS_MODE=private`와 두 사이트 비밀번호 변수를 함께 설정합니다.
+`APP_URL`이 정확해야 합니다. 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 일치하는 요청만 받으므로, 틀리면 화면은 떠도 저장·AI 분석이 403으로 실패합니다. 모든 데이터와 설정은 `campus-data` 볼륨의 DB 하나(`/app/data/campus.db`)에 저장되므로 두 사이트 비밀번호 변수를 함께 설정합니다.
 
-Anthropic 키는 배포 후 **설정 → AI 분석 설정**에서 저장·교체·삭제합니다. 게스트 모드는 방문자 DB에 저장된 키만 사용하고 환경변수 키로 대체하지 않습니다. 비밀번호 보호 모드에서는 UI 저장값이 환경변수보다 우선합니다. 변경된 키는 웹 서버를 재시작하지 않아도 다음 분석에 반영됩니다. SQLite 본 파일과 WAL·SHM 보조 파일은 `0600`, 게스트 데이터 및 컨테이너의 데이터 디렉터리는 `0700`으로 보관합니다.
+Anthropic 키는 배포 후 **설정 → AI 분석 설정**에서 저장·교체·삭제합니다. UI 저장값이 환경변수보다 우선합니다. 변경된 키는 웹 서버를 재시작하지 않아도 다음 분석에 반영됩니다. SQLite 본 파일과 WAL·SHM 보조 파일은 `0600`, 게스트 데이터 및 컨테이너의 데이터 디렉터리는 `0700`으로 보관합니다.
 
 ```bash
 docker compose up -d --build

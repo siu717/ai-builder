@@ -2,7 +2,7 @@
 #
 #   web     Next.js (UI + API)
 #   worker  알림 처리. 앱 내 알림도 이 프로세스가 pending → sent 로 넘기므로 필수다.
-#   caddy   HTTPS(자동 인증서). anonymous 모드는 방문자별 DB를, private 모드는 사이트 인증을 쓴다.
+#   caddy   HTTPS(자동 인증서). DB 하나를 모든 접속자가 공유하므로 사이트 인증을 쓴다.
 #
 # web 과 worker 는 같은 SQLite 파일(campus-data 볼륨)을 공유한다. lib/db.ts 가
 # WAL + busy_timeout 을 켜므로 같은 호스트의 두 프로세스가 함께 써도 된다.
@@ -14,7 +14,7 @@ x-app: &app
   env_file: .env
   environment: &app-env
     DATABASE_URL: file:/app/data/campus.db
-    PUBLIC_ACCESS_MODE: ${PUBLIC_ACCESS_MODE:-anonymous}
+    PUBLIC_ACCESS_MODE: private
     PUBLIC_SESSION_DIR: /app/data/public-sessions
   volumes:
     - campus-data:/app/data
