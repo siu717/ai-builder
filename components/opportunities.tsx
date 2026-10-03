@@ -7,7 +7,6 @@ import {
   ArrowRight,
   Check,
   X,
-  FileText,
   ChevronRight,
   Database,
   RefreshCw,
@@ -17,6 +16,7 @@ import type {
   AppState,
   EligibilityCondition,
   Opportunity,
+  Profile,
   PublicDataResult,
 } from "@/lib/contracts";
 import type { LiveOpportunity, LiveOpportunityResponse } from "@/lib/sources/types";
@@ -34,6 +34,29 @@ const SOURCE_LABELS = {
 const MAX_VISIBLE = 120;
 
 const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
+// 자격 대조에 쓰는 프로필 필드 — 매칭 로직은 그대로, 비어 있는 항목만 안내한다
+const PROFILE_NEEDS: Record<"scholarship" | "job", [keyof Profile, string][]> = {
+  scholarship: [
+    ["year", "학년"],
+    ["gpa", "학점"],
+    ["major", "전공"],
+  ],
+  job: [
+    ["year", "학년"],
+    ["major", "전공"],
+    ["interests", "관심 분야"],
+  ],
+};
+function missingProfileFields(kind: "scholarship" | "job", profile: Profile) {
+  return PROFILE_NEEDS[kind]
+    .filter(([key]) => !profile[key].trim())
+    .map(([, label]) => label);
+}
+// 마지막 글자 받침 유무로 을/를
+function objectParticle(word: string) {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  return code >= 0 && code < 11172 && code % 28 === 0 ? "를" : "을";
+}
 type ConditionStatus = EligibilityCondition["status"];
 type DueTier = "overdue" | "today" | "near" | "week" | "later";
 
@@ -41,7 +64,7 @@ function daysLeft(date: string) {
   return differenceInCalendarDays(parseISO(date), parseISO(seoulDate()));
 }
 function dueLabel(days: number) {
-  return days < 0 ? "마감 지남" : `D-${days}`;
+  return days < 0 ? "마감 지남" : days === 0 ? "D-DAY" : `D-${days}`;
 }
 // KMU80 D-day 단계: 지남 · 오늘 · D-1~2 · D-3~7 · 그 이후
 function dueTier(days: number): DueTier {
@@ -69,11 +92,11 @@ export default function Opportunities({
   kind,
   opportunities,
   onAdd,
-  onAnalyze,
   onCoach,
   dataKeyReady,
   onSettings,
   onState,
+  profile,
 }: {
   kind: "scholarship" | "job";
   opportunities: Opportunity[];
@@ -83,7 +106,9 @@ export default function Opportunities({
   dataKeyReady: boolean;
   onSettings: () => void;
   onState: (state: AppState) => void;
+  profile: Profile;
 }) {
+  // onAnalyze 는 받지만 쓰지 않는다 — 페이지 헤더 "공지 입력"이 같은 모달을 연다
   const [query, setQuery] = useState("");
   const [condition, setCondition] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -146,6 +171,13 @@ export default function Opportunities({
       (condition === "all" || overall(item) === condition),
   );
   const results = matches.slice(0, MAX_VISIBLE);
+  const total = pool.filter((item) => item.kind === kind).length;
+  const filtered = query.trim() !== "" || condition !== "all";
+  const missing = missingProfileFields(kind, profile);
+  function resetFilters() {
+    setQuery("");
+    setCondition("all");
+  }
   const selected = results.find((item) => item.id === selectedId) || results[0];
   function overall(item: Opportunity) {
     return item.conditions.some((entry) => entry.status === "unmet")
@@ -163,6 +195,10 @@ export default function Opportunities({
     unknown:
       selected?.conditions.filter((entry) => entry.status === "unknown").length ?? 0,
   };
+  const allUnknown =
+    !!selected &&
+    selected.conditions.length > 0 &&
+    counts.unknown === selected.conditions.length;
   const switcher = (
     <div className="segmented source-switch" role="group" aria-label="공고 출처">
       {(Object.entries(SOURCE_LABELS[kind]) as [Source, string][]).map(
@@ -279,15 +315,26 @@ export default function Opportunities({
           <option value="unknown">확인 필요</option>
           <option value="unmet">조건 불충족</option>
         </select>
-        <button className="button secondary" onClick={onAnalyze}>
-          <FileText size={16} />
-          공고 입력
-        </button>
       </div>
+      {missing.length > 0 && (
+        <div className="opp-profile-nudge">
+          <span className="opp-eyebrow">자격 대조</span>
+          <p>
+            <strong>{missing.join("·")}</strong>
+            {objectParticle(missing[missing.length - 1])} 입력하면 지원 조건을 자동으로
+            대조해요. 지금은 해당 조건을 확인 필요로 표시하고 있어요.
+          </p>
+          <button type="button" className="button secondary" onClick={onSettings}>
+            프로필 입력
+          </button>
+        </div>
+      )}
       <div className="catalog-caption">
         <span>
-          {kindLabel} {matches.length}개
-          {matches.length > results.length && ` 중 ${results.length}개 표시`}
+          {filtered
+            ? `${kindLabel} ${total}개 중 ${matches.length}개`
+            : `${kindLabel} ${matches.length}개`}
+          {matches.length > results.length && ` · ${results.length}개 표시`}
         </span>
         {source === "sample" ? (
           <span className="sample-tag">샘플 공고</span>
@@ -314,15 +361,27 @@ export default function Opportunities({
       {loadError && <Message text={loadError} error />}
       {source === "public" &&
         live?.notices?.map((notice) => <Message key={notice} text={notice} error />)}
-      <div className={`opportunity-layout opp-kind-${kind}`}>
-        <div className="opportunity-list">
-          {results.length === 0 && (
-            <div className="empty-state">
-              <Search size={27} />
-              <h3>검색 결과가 없어요</h3>
-              <p>검색어나 지원 조건을 바꿔 보세요.</p>
-            </div>
+      {results.length === 0 && (
+        <div className="empty-state opp-empty">
+          <Search size={27} />
+          {filtered ? (
+            <>
+              <h3>조건에 맞는 공고가 없어요</h3>
+              <p>검색어나 지원 조건을 바꾸거나 필터를 초기화해 보세요.</p>
+              <button type="button" className="text-button" onClick={resetFilters}>
+                필터 초기화
+              </button>
+            </>
+          ) : (
+            <>
+              <h3>표시할 공고가 없어요</h3>
+              <p>다른 출처를 선택하거나 잠시 후 새로고침해 보세요.</p>
+            </>
           )}
+        </div>
+      )}
+      <div className={`opportunity-layout opp-kind-${kind}`} hidden={results.length === 0}>
+        <div className="opportunity-list">
           {results.map((item) => {
             const days = daysLeft(item.date);
             const isSelected = selected?.id === item.id;
@@ -415,6 +474,15 @@ export default function Opportunities({
                 )}
               </div>
             </div>
+            {allUnknown && missing.length > 0 && (
+              <p className="opp-profile-hint">
+                프로필이 비어 있어 확인 필요로 표시했어요.
+                <button type="button" className="text-button" onClick={onSettings}>
+                  {missing.join("·")} 입력하기
+                  <ArrowRight size={15} />
+                </button>
+              </p>
+            )}
             <div className="detail-facts">
               <div>
                 <span>신청 마감</span>

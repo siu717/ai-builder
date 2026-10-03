@@ -190,8 +190,12 @@ export default function ExamSchedules({
               <ul className="exam-steps">
                 {schedule.steps.map((step) => {
                   const past = stepDate(step) < today;
+                  // 다가오는 첫 단계만 진하게 — 무엇부터 챙길지 한눈에
+                  const next =
+                    !past &&
+                    schedule.steps.find((item) => stepDate(item) >= today)?.id === step.id;
                   return (
-                    <li key={step.id} className={past ? "past" : ""}>
+                    <li key={step.id} className={past ? "past" : next ? "next" : ""}>
                       <span className="exam-step-label">{step.label}</span>
                       <span className="exam-step-date">{range(step)}</span>
                       <button

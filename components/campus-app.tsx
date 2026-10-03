@@ -138,6 +138,9 @@ export default function CampusApp() {
   const toggling = useRef(new Set<string>());
   const mutationRef = useRef(false);
   const revisionRef = useRef(0);
+  const navRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const shownViewRef = useRef<View | null>(null);
   const [loadKey, setLoadKey] = useState(0);
   const today = seoulDate();
   const [schedule, setSchedule] = useState<ScheduleState>({
@@ -329,6 +332,46 @@ export default function CampusApp() {
   }, [toast]);
   const closeEditor = useCallback(() => setEditor(null), []);
   const closeAnalysis = useCallback(() => setAnalysis(null), []);
+  const shellReady = app !== null;
+  // 가로 스크롤 메뉴 양 끝 페이드: 더 넘길 항목이 있는 쪽만 흐리게.
+  const markNavEdges = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    nav.dataset.start = String(nav.scrollLeft <= 1);
+    nav.dataset.end = String(
+      nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1,
+    );
+  }, []);
+  useEffect(() => {
+    if (!shellReady) return;
+    markNavEdges();
+    window.addEventListener("resize", markNavEdges);
+    return () => window.removeEventListener("resize", markNavEdges);
+  }, [shellReady, markNavEdges]);
+  // 화면 전환: 맨 위로(즉시) · 새 제목으로 포커스 · 모바일 가로 메뉴에서 현재 항목을 가운데로.
+  useEffect(() => {
+    if (!shellReady) return;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const nav = navRef.current;
+    const active = nav?.querySelector<HTMLElement>("[aria-current=page]");
+    if (nav && active && nav.scrollWidth > nav.clientWidth) {
+      const navBox = nav.getBoundingClientRect();
+      const itemBox = active.getBoundingClientRect();
+      nav.scrollBy({
+        left:
+          itemBox.left + itemBox.width / 2 - (navBox.left + navBox.width / 2),
+        behavior: reduceMotion || shownViewRef.current === null ? "auto" : "smooth",
+      });
+    }
+    // 첫 로드에는 포커스·스크롤을 건드리지 않는다.
+    if (shownViewRef.current !== null && shownViewRef.current !== view) {
+      window.scrollTo(0, 0);
+      headingRef.current?.focus({ preventScroll: true });
+    }
+    shownViewRef.current = view;
+  }, [view, shellReady]);
 
   async function toggleEvent(event: CalendarEvent) {
     if (toggling.current.has(event.id)) return;
@@ -467,6 +510,10 @@ export default function CampusApp() {
   ).length;
   const editEvent = (event: CalendarEvent) => setEditor(event);
   const addEvent = (date?: string) => setEditor({ date: date || today });
+  // 화면별 상단 동작: 컨설팅은 자체 입력이 있어 일정 추가만, 알림·설정은 없음.
+  const showNoticeAction =
+    view === "today" || view === "calendar" || view === "scholarship" || view === "job";
+  const showAddAction = showNoticeAction || view === "coaching";
   const pageContext = view === "today"
     ? format(parseISO(today), "yyyy년 M월 d일")
     : view === "kookmin"
@@ -483,6 +530,9 @@ export default function CampusApp() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main">
+        본문으로 건너뛰기
+      </a>
       <header className="site-header">
         <div className="site-header-inner">
           <button
@@ -494,7 +544,12 @@ export default function CampusApp() {
             <span className="brand-wordmark">참십 Campus</span>
             <span className="brand-sub">국민대학교 AI 대학생활 비서</span>
           </button>
-          <nav className="main-nav" aria-label="주 메뉴">
+          <nav
+            className="main-nav"
+            aria-label="주 메뉴"
+            ref={navRef}
+            onScroll={markNavEdges}
+          >
             {NAV.map(({ id, label }) => (
               <button
                 type="button"
@@ -508,7 +563,13 @@ export default function CampusApp() {
               >
                 <span>{label}</span>
                 {id === "notifications" && unread > 0 && (
-                  <span className="nav-count">{unread}</span>
+                  <>
+                    {" "}
+                    <span className="nav-count">
+                      {unread}
+                      <span className="sr-only">개 읽지 않음</span>
+                    </span>
+                  </>
                 )}
               </button>
             ))}
@@ -569,7 +630,7 @@ export default function CampusApp() {
             </span>
           </div>
         </div>
-        <main>
+        <main id="main" tabIndex={-1}>
           <div className="page-heading">
             <div>
               <div className="page-eyebrow">
@@ -577,27 +638,31 @@ export default function CampusApp() {
                   ? `${app.profile.name}님의 오늘`
                   : "MY CAMPUS"}
               </div>
-              <h1>{current.title}</h1>
+              <h1 ref={headingRef} tabIndex={-1}>
+                {current.title}
+              </h1>
               <p>{pageContext}</p>
             </div>
-            {view !== "settings" && (
+            {showAddAction && (
               <div className="heading-actions">
-                <button
-                  type="button"
-                  className="button secondary"
-                  onClick={() =>
-                    setAnalysis(
-                      view === "scholarship"
-                        ? "scholarship"
-                        : view === "job"
-                          ? "job"
-                          : "assignment",
-                    )
-                  }
-                >
-                  <FileText size={16} />
-                  공지 입력
-                </button>
+                {showNoticeAction && (
+                  <button
+                    type="button"
+                    className="button secondary"
+                    onClick={() =>
+                      setAnalysis(
+                        view === "scholarship"
+                          ? "scholarship"
+                          : view === "job"
+                            ? "job"
+                            : "assignment",
+                      )
+                    }
+                  >
+                    <FileText size={16} />
+                    공지 입력
+                  </button>
+                )}
                 <button
                   type="button"
                   className="button primary"
@@ -661,6 +726,7 @@ export default function CampusApp() {
               dataKeyReady={Boolean(app.settings.dataKeys.dataGoKr)}
               onSettings={() => setView("settings")}
               onState={applyState}
+              profile={app.profile}
             />
           )}
           {view === "coaching" && (
@@ -802,7 +868,30 @@ function Dashboard({
   const todayDate = parseISO(today);
   const [selectedDate, setSelectedDate] = useState(today);
   const [filter, setFilter] = useState("all");
+  const ledgerRef = useRef<HTMLElement>(null);
   const active = app.events.filter((event) => !event.completed);
+  const firstRun = app.events.length === 0;
+  const profileFields = [
+    app.profile.year,
+    app.profile.major,
+    app.profile.gpa,
+    app.profile.interests,
+  ];
+  const profileFilled = profileFields.filter((value) => value.trim()).length;
+  const profileBasics = [app.profile.year, app.profile.major, app.profile.gpa]
+    .every((value) => value.trim());
+  const showOverdue = () => {
+    setFilter("all");
+    // after React commits the "all" tab, jump to the first (oldest = overdue) row
+    window.requestAnimationFrame(() => {
+      const row = ledgerRef.current?.querySelector<HTMLElement>(".event-row");
+      if (!row) return;
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row
+        .querySelector<HTMLElement>(".event-title-button")
+        ?.focus({ preventScroll: true });
+    });
+  };
   const dueToday = active.filter((event) => event.date === today).length;
   const week = active.filter((event) => {
     const gap = differenceInCalendarDays(parseISO(event.date), parseISO(today));
@@ -858,6 +947,13 @@ function Dashboard({
             tone="violet"
           />
         </div>
+        {profileFilled < profileFields.length && (
+          <ProfileMeter
+            filled={profileFilled}
+            total={profileFields.length}
+            onFill={() => onNavigate("settings")}
+          />
+        )}
         <section className="mini-calendar-section">
           <MonthCalendar
             small
@@ -868,9 +964,13 @@ function Dashboard({
             <div>
               <strong>{format(parseISO(selectedDate), "M월 d일")}</strong>
               <span>
-                {selected.length
-                  ? `일정 ${selected.length}개`
-                  : "여유로운 하루"}
+                {selected.length ? (
+                  <>
+                    일정 <b className="selected-count">{selected.length}</b>개
+                  </>
+                ) : (
+                  "여유로운 하루"
+                )}
               </span>
             </div>
             {selected.slice(0, 3).map((event) => (
@@ -888,12 +988,25 @@ function Dashboard({
         </section>
       </section>
       <div className="today-ledger">
-        <section className="deadlines-section">
+        <section className="deadlines-section" ref={ledgerRef}>
           <div className="section-heading ledger-head">
-            <h2>
-              다가오는 마감{" "}
-              <span className="count-label">{active.length}</span>
-            </h2>
+            <div className="ledger-title">
+              <h2>
+                다가오는 마감{" "}
+                <span className="count-label">{active.length}</span>
+              </h2>
+              {missed > 0 && (
+                <button
+                  type="button"
+                  className="overdue-nudge"
+                  onClick={showOverdue}
+                >
+                  <CircleAlert size={15} aria-hidden="true" />
+                  지난 마감 {missed}건 정리
+                </button>
+              )}
+            </div>
+            {!firstRun && (
             <div className="category-tabs">
               {DASHBOARD_TABS.map(([value, label]) => (
                 <button
@@ -912,32 +1025,26 @@ function Dashboard({
                 </button>
               ))}
             </div>
-          </div>
-          <EventList
-            events={upcoming}
-            onEdit={onEdit}
-            onToggle={onToggle}
-            onAdd={onAdd}
-          />
-          <div className="ledger-foot">
-            {!app.events.length && (
-              <div className="sample-action">
-                <button
-                  className="text-button"
-                  disabled={sampleBusy}
-                  onClick={onSamples}
-                >
-                  {sampleBusy ? (
-                    <Busy label="추가 중" />
-                  ) : (
-                    <>
-                      <Layers size={16} />
-                      샘플 일정 추가
-                    </>
-                  )}
-                </button>
-              </div>
             )}
+          </div>
+          {firstRun ? (
+            <Onboarding
+              profileDone={profileBasics}
+              onProfile={() => onNavigate("settings")}
+              onAnalyze={onAnalyze}
+              onAlerts={() => onNavigate("settings")}
+              onSamples={onSamples}
+              sampleBusy={sampleBusy}
+            />
+          ) : (
+            <EventList
+              events={upcoming}
+              onEdit={onEdit}
+              onToggle={onToggle}
+              onAdd={onAdd}
+            />
+          )}
+          <div className="ledger-foot">
             <button
               className="text-button ledger-more"
               onClick={() => onNavigate("calendar")}
@@ -1119,6 +1226,143 @@ function Summary({
     </div>
   );
 }
+function ProfileMeter({
+  filled,
+  total,
+  onFill,
+}: {
+  filled: number;
+  total: number;
+  onFill: () => void;
+}) {
+  return (
+    <div className="profile-meter">
+      <span className="profile-meter-label">
+        프로필 <b>{filled}/{total}</b>
+      </span>
+      <span
+        className="profile-meter-bar"
+        role="img"
+        aria-label={`프로필 ${total}개 항목 중 ${filled}개 입력`}
+      >
+        {Array.from({ length: total }, (_, index) => (
+          <span key={index} className={index < filled ? "is-filled" : ""} />
+        ))}
+      </span>
+      <button
+        type="button"
+        className="profile-meter-action"
+        aria-label="프로필 채우기"
+        onClick={onFill}
+      >
+        채우기
+      </button>
+    </div>
+  );
+}
+
+function Onboarding({
+  profileDone,
+  onProfile,
+  onAnalyze,
+  onAlerts,
+  onSamples,
+  sampleBusy,
+}: {
+  profileDone: boolean;
+  onProfile: () => void;
+  onAnalyze: () => void;
+  onAlerts: () => void;
+  onSamples: () => void;
+  sampleBusy: boolean;
+}) {
+  const steps: {
+    title: string;
+    body: string;
+    action: string;
+    onClick: () => void;
+    done?: boolean;
+  }[] = [
+    {
+      title: "프로필 입력",
+      body: "학년·전공·학점을 적으면 장학금·채용 조건을 내 기준으로 비교해 드려요.",
+      action: profileDone ? "프로필 수정하기" : "프로필 입력하기",
+      onClick: onProfile,
+      done: profileDone,
+    },
+    {
+      title: "공고·공지 붙여넣기",
+      body: "과제 공지나 모집 공고 원문을 붙여 넣으면 마감일을 찾아 일정으로 만들어요.",
+      action: "공지 분석하기",
+      onClick: onAnalyze,
+    },
+    {
+      title: "마감 알림 받기",
+      body: "D-3·D-1·당일 알림을 앱과 텔레그램으로 받을 수 있어요.",
+      action: "알림 설정하기",
+      onClick: onAlerts,
+    },
+  ];
+  return (
+    <section className="onboarding" aria-labelledby="onboarding-title">
+      <h3 id="onboarding-title" className="onboarding-title">
+        시작하기
+      </h3>
+      <ol className="onboarding-steps">
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className={`onboarding-step${step.done ? " is-done" : ""}`}
+          >
+            <span className="onboarding-num" aria-hidden="true">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div className="onboarding-copy">
+              <h4>
+                {step.title}
+                {step.done && (
+                  <span className="onboarding-done">
+                    <CheckCheck size={15} aria-hidden="true" />
+                    입력 완료
+                  </span>
+                )}
+              </h4>
+              <p>{step.body}</p>
+            </div>
+            <button
+              type="button"
+              className="text-button onboarding-action"
+              onClick={step.onClick}
+            >
+              {step.action}
+              <span className="round-arrow" aria-hidden="true">
+                <ArrowRight size={15} />
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      <p className="onboarding-sample">
+        <span>샘플로 먼저 둘러보기</span>
+        <button
+          className="text-button"
+          disabled={sampleBusy}
+          onClick={onSamples}
+        >
+          {sampleBusy ? (
+            <Busy label="추가 중" />
+          ) : (
+            <>
+              <Layers size={16} />
+              샘플 일정 추가
+            </>
+          )}
+        </button>
+      </p>
+    </section>
+  );
+}
+
 function notificationTime(value: string) {
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: "Asia/Seoul",
