@@ -9,12 +9,26 @@ import {
   X,
   FileText,
   ChevronRight,
+  Database,
+  RefreshCw,
 } from "lucide-react";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import type { EligibilityCondition, Opportunity } from "@/lib/contracts";
+import type {
+  EligibilityCondition,
+  Opportunity,
+  PublicDataResult,
+} from "@/lib/contracts";
 import type { EventDraft } from "./event-editor";
-import { seoulDate } from "./ui";
+import ExamSchedules from "./exam-schedules";
+import { Busy, Message, request, seoulDate } from "./ui";
 import { checklistFromDocuments } from "@/lib/checklist";
+
+type Source = "sample" | "public" | "exams";
+const SOURCE_LABELS = {
+  scholarship: { sample: "샘플", public: "한국장학재단" },
+  job: { sample: "샘플", public: "공공기관 채용", exams: "자격증 시험" },
+} as const;
+const MAX_VISIBLE = 120;
 
 const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
 type ConditionStatus = EligibilityCondition["status"];
@@ -54,17 +68,49 @@ export default function Opportunities({
   onAdd,
   onAnalyze,
   onCoach,
+  dataKeyReady,
+  onSettings,
 }: {
   kind: "scholarship" | "job";
   opportunities: Opportunity[];
   onAdd: (draft: EventDraft) => void;
   onAnalyze: () => void;
   onCoach: (text: string) => void;
+  dataKeyReady: boolean;
+  onSettings: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [condition, setCondition] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const results = opportunities.filter(
+  const [source, setSource] = useState<Source>("sample");
+  const [live, setLive] = useState<PublicDataResult<Opportunity> | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  async function loadPublic(refresh = false) {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setLive(
+        await request<PublicDataResult<Opportunity>>(
+          `/api/public-data?source=${kind === "job" ? "jobs" : "scholarships"}${refresh ? "&refresh=1" : ""}`,
+        ),
+      );
+      setSelectedId(null);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "공공데이터를 불러오지 못했습니다.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+  function choose(next: Source) {
+    setSource(next);
+    setSelectedId(null);
+    if (next === "public" && dataKeyReady && !live && !loading) void loadPublic();
+  }
+  const pool = source === "public" ? live?.items || [] : opportunities;
+  const matches = pool.filter(
     (item) =>
       item.kind === kind &&
       `${item.title} ${item.organization} ${item.tags.join(" ")}`
@@ -72,6 +118,7 @@ export default function Opportunities({
         .includes(query.toLowerCase()) &&
       (condition === "all" || overall(item) === condition),
   );
+  const results = matches.slice(0, MAX_VISIBLE);
   const selected = results.find((item) => item.id === selectedId) || results[0];
   function overall(item: Opportunity) {
     return item.conditions.some((entry) => entry.status === "unmet")
@@ -89,8 +136,76 @@ export default function Opportunities({
     unknown:
       selected?.conditions.filter((entry) => entry.status === "unknown").length ?? 0,
   };
+  const switcher = (
+    <div className="segmented source-switch" role="group" aria-label="공고 출처">
+      {(Object.entries(SOURCE_LABELS[kind]) as [Source, string][]).map(
+        ([id, label]) => (
+          <button
+            type="button"
+            key={id}
+            className={source === id ? "active" : ""}
+            aria-pressed={source === id}
+            onClick={() => choose(id)}
+          >
+            {id !== "sample" && <Database size={14} />}
+            {label}
+          </button>
+        ),
+      )}
+    </div>
+  );
+  if (source === "exams") {
+    return (
+      <>
+        {switcher}
+        <ExamSchedules
+          dataKeyReady={dataKeyReady}
+          onSettings={onSettings}
+          onAdd={onAdd}
+        />
+      </>
+    );
+  }
+  if (source === "public" && (!dataKeyReady || (!live && (loading || loadError)))) {
+    return (
+      <>
+        {switcher}
+        <div className="empty-state public-data-state">
+          <Database size={27} />
+          {!dataKeyReady ? (
+            <>
+              <h3>공공데이터포털 인증키가 필요해요</h3>
+              <p>
+                설정 → 외부 데이터 API에 인증키를 입력하면{" "}
+                {kind === "scholarship" ? "한국장학재단 장학금" : "공공기관 채용 공고"}을
+                불러옵니다.
+              </p>
+              <button type="button" className="button primary" onClick={onSettings}>
+                설정에서 키 입력
+              </button>
+            </>
+          ) : loading ? (
+            <Busy label="공공데이터를 불러오는 중" />
+          ) : (
+            <>
+              <Message text={loadError} error />
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => void loadPublic()}
+              >
+                <RefreshCw size={15} />
+                다시 시도
+              </button>
+            </>
+          )}
+        </div>
+      </>
+    );
+  }
   return (
     <>
+      {switcher}
       <div className="view-toolbar">
         <div className="search-field">
           <Search size={17} />
@@ -120,10 +235,32 @@ export default function Opportunities({
       </div>
       <div className="catalog-caption">
         <span>
-          {kindLabel} {results.length}개
+          {kindLabel} {matches.length}개
+          {matches.length > results.length && ` 중 ${results.length}개 표시`}
         </span>
-        <span className="sample-tag">샘플 공고</span>
+        {source === "sample" ? (
+          <span className="sample-tag">샘플 공고</span>
+        ) : (
+          <>
+            <span className="public-tag">공공데이터포털</span>
+            {live && (
+              <span>
+                {format(new Date(live.fetchedAt), "HH:mm")} 기준 · 모집 중인 공고만
+              </span>
+            )}
+            <button
+              type="button"
+              className="text-button caption-refresh"
+              disabled={loading}
+              onClick={() => void loadPublic(true)}
+            >
+              <RefreshCw size={14} />
+              {loading ? "불러오는 중" : "새로고침"}
+            </button>
+          </>
+        )}
       </div>
+      {loadError && <Message text={loadError} error />}
       <div className={`opportunity-layout opp-kind-${kind}`}>
         <div className="opportunity-list">
           {results.length === 0 && (
@@ -186,7 +323,11 @@ export default function Opportunities({
                     /
                   </span>
                   <span>{selected.organization}</span>
-                  <span className="sample-tag">샘플</span>
+                  {selected.isSample ? (
+                    <span className="sample-tag">샘플</span>
+                  ) : (
+                    <span className="public-tag">공공데이터</span>
+                  )}
                 </div>
                 <h2>{selected.title}</h2>
               </div>
@@ -258,11 +399,17 @@ export default function Opportunities({
               ))}
             </div>
             <h3 className="detail-section-title">준비할 서류</h3>
-            <ul className="documents">
-              {selected.documents.map((document) => (
-                <li key={document}>{document}</li>
-              ))}
-            </ul>
+            {selected.documents.length ? (
+              <ul className="documents">
+                {selected.documents.map((document) => (
+                  <li key={document}>{document}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="documents-missing">
+                데이터에 제출 서류가 없습니다. 공고 원문에서 확인해 주세요.
+              </p>
+            )}
             <details className="original-source">
               <summary>공고 원문</summary>
               <pre>{selected.originalText}</pre>
@@ -286,10 +433,12 @@ export default function Opportunities({
                     kind: selected.kind,
                     date: selected.date,
                     time: selected.time,
-                    notes: `준비 서류: ${selected.documents.join(", ")}`,
-                    source: selected.originalText,
+                    notes: selected.documents.length
+                      ? `준비 서류: ${selected.documents.join(", ")}`
+                      : "제출 서류는 공고 원문에서 확인하세요.",
+                    source: selected.originalText.slice(0, 2000),
                     checklist: checklistFromDocuments(selected.documents),
-                    isSample: true,
+                    isSample: selected.isSample,
                     reminders: [],
                     idempotencyKey: selected.id,
                   })

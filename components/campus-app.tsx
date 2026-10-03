@@ -393,7 +393,7 @@ export default function CampusApp() {
   const pageContext = view === "today"
     ? format(parseISO(today), "yyyy년 M월 d일")
     : view === "scholarship" || view === "job"
-      ? `샘플 공고 ${catalog.filter((item) => item.kind === view).length}개 · ${app.profile.major || "전공 미입력"}`
+      ? `${app.profile.major || "전공 미입력"} · 지원 조건 비교`
       : view === "calendar"
         ? `진행 중 ${app.events.filter((event) => !event.completed).length}개 · 완료 ${app.events.filter((event) => event.completed).length}개`
         : view === "notifications"
@@ -566,6 +566,8 @@ export default function CampusApp() {
                 setCoachJob(text);
                 setView("coaching");
               }}
+              dataKeyReady={Boolean(app.settings.dataKeys.dataGoKr)}
+              onSettings={() => setView("settings")}
             />
           )}
           {view === "coaching" && (

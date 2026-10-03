@@ -136,3 +136,30 @@
   .opp-meter-seg { width: 28px; }
   .opportunity-detail .condition .opp-status { flex-basis: auto; margin-left: 54px; }
 }
+
+/* ---------- 공공데이터포털: 출처 탭 · 캡션 · 시험일정 ---------- */
+.source-switch { margin-bottom: 20px; }
+.source-switch button svg { color: var(--ink-4); }
+.source-switch button.active svg { color: var(--kmu-blue); }
+.public-tag { display: inline-flex; align-items: center; padding: 0 6px; border: 1px solid var(--kmu-blue-line); border-radius: var(--radius-sm); background: var(--kmu-blue-tint); color: var(--kmu-blue); font-size: var(--text-xs); font-weight: 600; line-height: 1.6; white-space: nowrap; }
+.detail-eyebrow .public-tag { margin-left: 4px; border-radius: 0; padding: 0 7px; }
+.catalog-caption { flex-wrap: wrap; }
+.caption-refresh { margin-left: auto; min-height: 36px; font-size: var(--text-sm); font-weight: 600; }
+.public-data-state { border-top: 2px solid var(--line-strong); }
+.public-data-state svg { color: var(--ink-4); }
+.public-data-state p { max-width: 420px; }
+.documents-missing { padding: 12px 0; border-top: 2px solid var(--line-strong); border-bottom: 1px solid var(--line); font-size: var(--text-md); color: var(--ink-3); }
+.check-inline { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: var(--text-sm); color: var(--ink-2); white-space: nowrap; cursor: pointer; }
+.check-inline input { width: 18px; height: 18px; accent-color: var(--kmu-blue); }
+
+.exam-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 28px 32px; word-break: keep-all; }
+.exam-card { min-width: 0; border-top: 2px solid var(--line-strong); }
+.exam-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 0 12px; border-bottom: 1px solid var(--line); }
+.exam-card-heading h3 { font-size: var(--text-lg); font-weight: 600; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+.exam-card-heading .plain-tag { flex: 0 0 auto; padding-top: 3px; }
+.exam-steps { list-style: none; margin: 0; padding: 0; }
+.exam-steps li { display: grid; grid-template-columns: minmax(0, 1fr) auto 64px; align-items: center; gap: 12px; min-height: 48px; border-bottom: 1px solid var(--line); font-size: var(--text-md); color: var(--ink); }
+.exam-step-date { font-variant-numeric: tabular-nums; color: var(--ink-2); font-weight: 600; }
+.exam-steps .text-button { justify-self: end; font-size: var(--text-sm); font-weight: 600; }
+.exam-steps li.past, .exam-steps li.past .exam-step-date { color: var(--ink-4); font-weight: 400; }
+.exam-steps li.past .text-button { color: var(--ink-4); opacity: 1; }
