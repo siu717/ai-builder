@@ -55,5 +55,6 @@ export async function verifyTelegramBot(token: string, fetcher = fetch): Promise
 }
 
 export function notificationText(event: EventInput): string {
-  return `[캠퍼스 비서 · ${KIND_LABELS[event.kind]}]\n${event.title}\n마감: ${event.date}${event.time ? ` ${event.time} (한국 시간)` : " (시각 확인 필요)"}${event.notes ? `\n${event.notes.slice(0, 1000)}` : ""}`;
+  const link = /^https?:\/\//i.test(event.source) ? `\n원문: ${event.source}` : "";
+  return `[캠퍼스 비서 · ${KIND_LABELS[event.kind]}]\n${event.title}\n마감: ${event.date}${event.time ? ` ${event.time} (한국 시간)` : " (시각 확인 필요)"}${event.notes ? `\n${event.notes.slice(0, 1000)}` : ""}${link}`;
 }

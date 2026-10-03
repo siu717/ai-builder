@@ -189,6 +189,23 @@ export async function saveScholarshipPreferences(input: unknown, database?: Clie
   await db.execute({ sql: "UPDATE scholarship_preferences SET enabled = ?, keywords = ? WHERE id = 1", args: [preferences.enabled ? 1 : 0, preferences.keywords] });
   return preferences;
 }
+// 자동 등록한 장학 일정은 텔레그램으로 알린다: 등록 직후 한 번, 마감 3일 전·1일 전 오전 9시(한국 시간).
+// 텔레그램이 꺼져 있으면 알림 워커가 대기시켰다가 연결되면 보낸다.
+export function automaticReminders(deadline: string, boundary: Date, now: Date): EventInput["reminders"] {
+  const candidates = [new Date(now.getTime() + 60_000)];
+  for (const days of [3, 1]) {
+    const day = new Date(`${deadline}T09:00:00+09:00`);
+    day.setUTCDate(day.getUTCDate() - days);
+    candidates.push(day);
+  }
+  const seen = new Set<string>();
+  return candidates
+    .filter((at) => at > now && at <= boundary)
+    .map((at) => at.toISOString())
+    .filter((at) => !seen.has(at) && seen.add(at))
+    .map((at) => ({ at, channel: "telegram" as const }));
+}
+
 export async function syncScholarshipEvents(notices: ScholarshipNotice[], database?: Client, now = new Date()) {
   const db = database || await getDatabase();
   const preferences = await getScholarshipPreferences(db);
@@ -215,7 +232,8 @@ export async function syncScholarshipEvents(notices: ScholarshipNotice[], databa
       notes: needsReview ? reviewNote + notes : notes,
       source: notice.url, isSample: false,
       checklist: existing?.checklist ?? notice.documents.map((text) => ({ id: randomUUID(), text, completed: false })),
-      reminders: needsReview ? [] : existing?.reminders.filter((reminder) => new Date(reminder.at) > now && new Date(reminder.at) <= boundary) ?? [],
+      reminders: needsReview ? [] : existing?.reminders.filter((reminder) => new Date(reminder.at) > now && new Date(reminder.at) <= boundary)
+        ?? automaticReminders(notice.deadline!, boundary, now),
       idempotencyKey: notice.id,
     };
     let eventId: string;
