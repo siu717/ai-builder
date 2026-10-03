@@ -1,8 +1,8 @@
-# knowverse.net 배포 구성.
+# campus.knowverse.net 배포 구성.
 #
 #   web     Next.js (UI + API)
 #   worker  알림 처리. 앱 내 알림도 이 프로세스가 pending → sent 로 넘기므로 필수다.
-#   caddy   HTTPS(자동 인증서) + Basic Auth. 앱에 로그인이 없어 공개 노출을 막는다.
+#   caddy   HTTPS(자동 인증서). 비밀번호는 앱(proxy.ts)이 .env 의 BASIC_AUTH_* 로 검사한다.
 #
 # web 과 worker 는 같은 SQLite 파일(campus-data 볼륨)을 공유한다. lib/db.ts 가
 # WAL + busy_timeout 을 켜므로 같은 호스트의 두 프로세스가 함께 써도 된다.
@@ -20,6 +20,11 @@ x-app: &app
 services:
   web:
     <<: *app
+    environment:
+      DATABASE_URL: file:/app/data/campus.db
+      APP_URL: ${APP_URL:?APP_URL 을 .env 에 설정하세요 (https://campus.knowverse.net)}
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:?BASIC_AUTH_USER 를 .env 에 설정하세요}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?BASIC_AUTH_PASSWORD 를 .env 에 설정하세요}
     expose:
       - "3000"
     healthcheck:
@@ -43,9 +48,6 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
-    environment:
-      BASIC_AUTH_USER: ${BASIC_AUTH_USER:?BASIC_AUTH_USER 를 .env 에 설정하세요}
-      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:?BASIC_AUTH_HASH 를 .env 에 설정하세요}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
