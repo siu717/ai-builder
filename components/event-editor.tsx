@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, BellPlus, Trash2, Save, Plus, Send } from "lucide-react";
+import { Bell, BellPlus, Info, Trash2, Save, Plus } from "lucide-react";
 import type {
   AppState,
   CalendarEvent,
@@ -172,7 +172,10 @@ export default function EventEditor({
     >
       <form className="modal-body" onSubmit={save}>
         {initial.isSample && (
-          <div className="sample-banner">샘플 일정 · 앱 알림만 발송됩니다</div>
+          <div className="sample-banner">
+            <Info size={16} aria-hidden="true" />
+            샘플 일정 · 앱 알림만 발송됩니다
+          </div>
         )}
         <label className="field">
           일정 제목
@@ -234,7 +237,7 @@ export default function EventEditor({
         <div className="reminder-section">
           <div className="section-heading">
             <h3>
-              <Bell size={16} /> 알림
+              <Bell size={16} aria-hidden="true" /> 알림
             </h3>
             <span className="muted small">Asia/Seoul</span>
           </div>

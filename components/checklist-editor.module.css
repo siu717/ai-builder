@@ -1,84 +1,131 @@
+/* 준비물 체크리스트 — KMU80: ruled list, 22px square checks, segmented progress */
 .section {
   display: grid;
-  gap: 12px;
-  padding: 18px 0;
-  border-top: 1px solid var(--line, #e4e7ec);
+  gap: 10px;
+  margin: 4px 0 24px;
+  padding-top: 14px;
+  border-top: 2px solid var(--line-strong);
 }
 
 .heading {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px 12px;
 }
 
 .heading h3 {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 700;
 }
 
 .count {
-  color: var(--muted, #667085);
-  font-size: 12px;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .progress {
   width: 100%;
-  height: 6px;
-  accent-color: var(--primary, #167c57);
+}
+
+.segments {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  height: 4px;
+}
+
+.segmentsCompact {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 3px;
+  margin-left: 2px;
+}
+
+.segment {
+  flex: 1;
+  background: var(--line);
+}
+
+.segment[data-filled="true"] {
+  background: var(--kmu-blue);
 }
 
 .list {
   display: grid;
-  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.list:empty {
+  display: none;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .row input[type="checkbox"] {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--primary, #167c57);
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  margin: 0 0 0 2px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  accent-color: var(--kmu-blue);
   cursor: pointer;
+}
+
+.row input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--kmu-blue);
+  outline-offset: 2px;
 }
 
 .row input[type="text"] {
   flex: 1;
   min-width: 0;
-  padding: 9px 10px;
-  border: 1px solid var(--line, #e4e7ec);
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 13px;
-}
-
-.row input[type="text"]:focus-visible {
-  outline: 2px solid var(--primary, #167c57);
-  outline-offset: 2px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 12px;
+  color: var(--ink);
+  font-size: var(--text-md);
 }
 
 .row[data-completed="true"] input[type="text"] {
-  color: var(--muted, #667085);
+  color: var(--ink-3);
   text-decoration: line-through;
+  text-decoration-color: var(--ink-4);
+}
+
+.row :global(.icon-button) {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.section :global(.text-button) {
+  color: var(--kmu-blue);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding-inline: 2px;
 }
 
 .hint {
   margin: 0;
-  color: var(--muted, #667085);
-  font-size: 12px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
   line-height: 1.6;
 }
 
@@ -86,7 +133,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--muted, #667085);
-  font-size: 11px;
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

@@ -5,11 +5,10 @@ import {
   Sparkles,
   CalendarPlus,
   FileText,
-  ArrowRight,
   MessageSquareText,
-  ListChecks,
   CircleHelp,
-  CheckCircle2,
+  Check,
+  X,
 } from "lucide-react";
 import {
   TASK_SAMPLE,
@@ -92,6 +91,7 @@ export function AnalyzeModal({
                 type="button"
                 key={value}
                 className={kind === value ? "active" : ""}
+                aria-pressed={kind === value}
                 onClick={() => {
                   setKind(value);
                   setResult(null);
@@ -108,6 +108,7 @@ export function AnalyzeModal({
           <label className="field">
             공지 · 공고 내용
             <textarea
+              className="analysis-source"
               rows={9}
               value={text}
               onChange={(event) => {
@@ -191,11 +192,23 @@ export function AnalyzeModal({
               <dl className="result-fields">
                 <div>
                   <dt>마감 날짜</dt>
-                  <dd>{result.date || "확인 필요"}</dd>
+                  <dd>
+                    {result.date ? (
+                      <span className="result-num">{result.date}</span>
+                    ) : (
+                      <span className="result-check">확인 필요</span>
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt>마감 시각</dt>
-                  <dd>{result.time || "확인 필요"}</dd>
+                  <dd>
+                    {result.time ? (
+                      <span className="result-num">{result.time}</span>
+                    ) : (
+                      <span className="result-check">확인 필요</span>
+                    )}
+                  </dd>
                 </div>
                 {result.subject && (
                   <div>
@@ -241,27 +254,33 @@ export function AnalyzeModal({
                 <div className="conditions">
                   {result.conditions.map((item, index) => (
                     <div className="condition" key={index}>
-                      <CircleHelp
-                        size={16}
-                        className={`status-${item.status}`}
-                      />
+                      <span className="condition-index" aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
                       <div>
                         <strong>{item.label}</strong>
                         <p>{item.reason}</p>
-                        <span className={`status-text status-${item.status}`}>
-                          {item.status === "met"
-                            ? "충족"
-                            : item.status === "unmet"
-                              ? "불충족"
-                              : "확인 필요"}
-                        </span>
                       </div>
+                      <span className={`status-text status-${item.status}`}>
+                        {item.status === "met" ? (
+                          <Check size={16} aria-hidden="true" />
+                        ) : item.status === "unmet" ? (
+                          <X size={16} aria-hidden="true" />
+                        ) : (
+                          <CircleHelp size={16} aria-hidden="true" />
+                        )}
+                        {item.status === "met"
+                          ? "충족"
+                          : item.status === "unmet"
+                            ? "불충족"
+                            : "확인 필요"}
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
               <button
-                className="button primary"
+                className="button primary analysis-register"
                 onClick={() => {
                   onAdd({
                     title: result.title,
@@ -345,6 +364,7 @@ export function Coaching({
         <label className="field">
           목표 채용 공고
           <textarea
+            className="coaching-source"
             rows={6}
             value={jobText}
             onChange={(event) => {
@@ -357,6 +377,7 @@ export function Coaching({
         <label className="field">
           이력서 · 자기소개서
           <textarea
+            className="coaching-source"
             rows={10}
             value={resumeText}
             onChange={(event) => {
@@ -413,10 +434,7 @@ export function Coaching({
         ) : (
           <>
             <p className="coaching-summary">{result.summary}</p>
-            <h3 className="detail-section-title">
-              <FileText size={17} />
-              서류 피드백
-            </h3>
+            <h3 className="coaching-eyebrow">서류 피드백</h3>
             {result.feedback.map((item, index) => (
               <article className="feedback-item" key={index}>
                 <blockquote>{item.quote}</blockquote>
@@ -424,45 +442,41 @@ export function Coaching({
                 <p>{item.reason}</p>
               </article>
             ))}
-            <h3 className="detail-section-title">
-              <MessageSquareText size={17} />
-              예상 면접 질문
-            </h3>
+            <h3 className="coaching-eyebrow">예상 면접 질문</h3>
             <ol className="question-list">
               {result.questions.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ol>
-            <h3 className="detail-section-title">
-              <ListChecks size={17} />
-              준비할 일
-            </h3>
-            {result.tasks.length > 0 && (
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() =>
-                  onAdd({
-                    title: "취업 준비 계획",
-                    kind: "career",
-                    date: "",
-                    time: null,
-                    notes: result.tasks
-                      .map((task) => `${task.title}: ${task.notes}`)
-                      .join("\n"),
-                    checklist: checklistFromDocuments(
-                      result.tasks.map((task) => task.title),
-                    ),
-                    source: "취업 컨설팅 준비 계획",
-                    isSample: result.mode === "sample",
-                    reminders: [],
-                  })
-                }
-              >
-                <CalendarPlus size={16} />
-                준비 계획 한 번에 등록
-              </button>
-            )}
+            <div className="coaching-eyebrow-row">
+              <h3 className="coaching-eyebrow">준비할 일</h3>
+              {result.tasks.length > 0 && (
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() =>
+                    onAdd({
+                      title: "취업 준비 계획",
+                      kind: "career",
+                      date: "",
+                      time: null,
+                      notes: result.tasks
+                        .map((task) => `${task.title}: ${task.notes}`)
+                        .join("\n"),
+                      checklist: checklistFromDocuments(
+                        result.tasks.map((task) => task.title),
+                      ),
+                      source: "취업 컨설팅 준비 계획",
+                      isSample: result.mode === "sample",
+                      reminders: [],
+                    })
+                  }
+                >
+                  <CalendarPlus size={16} />
+                  준비 계획 한 번에 등록
+                </button>
+              )}
+            </div>
             <div className="coaching-tasks">
               {result.tasks.map((task, index) => (
                 <div className="coaching-task" key={index}>
@@ -471,7 +485,7 @@ export function Coaching({
                     <p>{task.notes}</p>
                   </div>
                   <button
-                    className="icon-button"
+                    className="icon-button coaching-task-add"
                     title="준비 일정 등록"
                     aria-label={`${task.title} 일정 등록`}
                     onClick={() =>
