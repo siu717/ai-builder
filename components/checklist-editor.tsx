@@ -14,7 +14,29 @@ export function ChecklistProgress({ items = [] }: { items?: ChecklistItem[] }) {
   if (!total) return null;
   return (
     <span className={styles.badge} aria-label={`준비물 ${total}개 중 ${completed}개 완료`}>
-      <ListChecks size={13} aria-hidden="true" /> 준비 {completed}/{total}
+      <ListChecks size={14} aria-hidden="true" /> 준비 {completed}/{total}
+      <SegmentBar completed={completed} total={total} compact />
+    </span>
+  );
+}
+
+/** Thin segmented bar: one segment per item (filled = done). Capped so long lists stay a bar, not dots. */
+function SegmentBar({
+  completed,
+  total,
+  compact = false,
+}: {
+  completed: number;
+  total: number;
+  compact?: boolean;
+}) {
+  const segments = Math.min(total, compact ? 5 : 12);
+  const filled = total ? Math.round((completed / total) * segments) : 0;
+  return (
+    <span className={compact ? `${styles.segments} ${styles.segmentsCompact}` : styles.segments} aria-hidden="true">
+      {Array.from({ length: segments }, (_, index) => (
+        <span key={index} className={styles.segment} data-filled={index < filled} />
+      ))}
     </span>
   );
 }
@@ -41,7 +63,16 @@ export default function ChecklistEditor({
         <span className={styles.count} aria-live="polite">{completed}/{total}개 준비 완료</span>
       </div>
       {total > 0 && (
-        <progress className={styles.progress} value={completed} max={total} aria-label="준비 진행률" />
+        <div
+          className={styles.progress}
+          role="progressbar"
+          aria-label="준비 진행률"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={completed}
+        >
+          <SegmentBar completed={completed} total={total} />
+        </div>
       )}
       <ul className={styles.list}>
         {items.map((item, index) => (
@@ -70,7 +101,7 @@ export default function ChecklistEditor({
               disabled={disabled}
               onClick={() => onChange(items.filter((current) => current.id !== item.id))}
             >
-              <Trash2 size={16} aria-hidden="true" />
+              <Trash2 size={18} aria-hidden="true" />
             </button>
           </li>
         ))}
@@ -82,7 +113,7 @@ export default function ChecklistEditor({
           disabled={disabled || total >= MAX_CHECKLIST_ITEMS}
           onClick={() => onChange([...items, { id: crypto.randomUUID(), text: "", completed: false }])}
         >
-          <Plus size={15} aria-hidden="true" /> 준비물 추가
+          <Plus size={16} aria-hidden="true" /> 준비물 추가
         </button>
       </div>
       <p className={styles.hint}>

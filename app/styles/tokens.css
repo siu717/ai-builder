@@ -1,0 +1,50 @@
+/* KMU80 design tokens — 국민대 UI 전용색 + eCampus + 개교 80주년. Every partial uses these; no raw hex elsewhere except brand art. */
+@font-face { font-family: "Pretendard"; font-weight: 400; font-display: swap; src: url("/fonts/Pretendard-Regular.subset.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 500; font-display: swap; src: url("/fonts/Pretendard-Medium.subset.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 600; font-display: swap; src: url("/fonts/Pretendard-SemiBold.subset.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 700; font-display: swap; src: url("/fonts/Pretendard-Bold.subset.woff2") format("woff2"); }
+@font-face { font-family: "KMU80 Haeong"; font-weight: 400; font-display: swap; src: url("/fonts/KMU80HaeongSans.otf") format("opentype"); }
+@font-face { font-family: "Bebas Neue"; font-weight: 400; font-display: swap; src: url("/fonts/BebasNeue-Regular.woff2") format("woff2"); }
+
+:root {
+  /* type */
+  --font-sans: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-brand: "KMU80 Haeong", var(--font-sans);   /* wordmark + slogan ONLY */
+  --font-num: "Bebas Neue", var(--font-sans);        /* big numerals: D-day, dates, counts */
+  --text-xs: 13px; --text-sm: 14px; --text-md: 15px; --text-lg: 17px; --text-xl: 20px; --text-2xl: 28px; --text-3xl: 34px;
+
+  /* KMU palette (Pantone-matched, 국민대 UI 안내) */
+  --kmu-blue: #004F9F; --kmu-blue-dark: #003A75; --kmu-blue-tint: #E5EEF7; --kmu-blue-line: #BFD9F2;
+  --kmu-green: #00A470; --kmu-light-green: #95C23D; --kmu-orange: #F3953F; --kmu-yellow: #FFCE44; --kmu-sky: #A1DAF8;
+
+  /* neutrals (eCampus csms) */
+  --ink: #161819; --ink-2: #2C2F32; --ink-3: #4A5056; --ink-4: #6B737B;
+  --line: #D9DEE3; --line-strong: #161819; --surface: #FFFFFF; --surface-2: #F3F5F8; --surface-3: #E9ECEF;
+
+  /* semantic */
+  --primary: var(--kmu-blue); --primary-dark: var(--kmu-blue-dark);
+  --background: var(--surface); --foreground: var(--ink); --muted: var(--ink-3);
+  --met: #00754F; --unmet: var(--ink); --check: var(--kmu-yellow);  /* 충족 / 불충족 / 확인 필요(fill) */
+  --danger: #B42318; --danger-bg: #FDECEA;
+  --success-bg: #E2F4EC;
+
+  /* D-day urgency */
+  --due-overdue: var(--ink); --due-today: var(--kmu-blue); --due-near: #B4560A; --due-week: var(--ink); --due-later: var(--ink-4);
+
+  /* kinds: dot = KMU sub colour, ink = AA text, bg = tint */
+  --kind-scholarship-dot: var(--kmu-light-green); --kind-scholarship-ink: #3F6B12; --kind-scholarship-bg: #EEF6DE;
+  --kind-job-dot: var(--kmu-orange);              --kind-job-ink: #9A4A05;         --kind-job-bg: #FDEEDD;
+  --kind-career-dot: var(--kmu-green);            --kind-career-ink: #00704C;      --kind-career-bg: #DDF3EA;
+  --kind-assignment-dot: var(--kmu-sky);          --kind-assignment-ink: #0F5C86;  --kind-assignment-bg: #E3F3FC;
+  --kind-academic-dot: var(--kmu-blue);           --kind-academic-ink: var(--kmu-blue); --kind-academic-bg: var(--kmu-blue-tint);
+
+  /* legacy aliases so untouched rules follow the new palette */
+  --green-bg: var(--kind-career-bg); --violet: var(--kind-scholarship-ink); --violet-bg: var(--kind-scholarship-bg);
+  --cyan: var(--kind-assignment-ink); --cyan-bg: var(--kind-assignment-bg); --amber: var(--due-near); --amber-bg: #FDEEDD; --red: var(--danger);
+
+  /* shape */
+  --radius-sm: 4px; --radius: 8px; --radius-lg: 12px;
+  --shadow-pop: 0 1px 1px rgba(0,0,0,.03), 0 12px 16px -4px rgba(10,13,18,.08), 0 4px 6px -2px rgba(10,13,18,.03); /* eCampus notice box; popovers/modals/toast only */
+  --header-h: 68px;
+  --focus: 0 0 0 3px rgba(0,79,159,.28);
+}
