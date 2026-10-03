@@ -194,6 +194,21 @@ textarea { resize: vertical; line-height: 1.75; }
 .search-field input { border: 0; box-shadow: none; padding: 7px 0; font-size: 12px; }
 .view-toolbar > .button:last-child { margin-left: auto; }
 .catalog-caption { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #75828a; margin-bottom: 14px; }
+.public-tag { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; color: var(--cyan); background: var(--cyan-bg); font-size: 9px; line-height: 1.6; font-weight: 500; }
+.source-switch { margin-bottom: 14px; }
+.caption-refresh { margin-left: auto; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+.documents-missing { font-size: 11px; color: #75828a; }
+.check-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #75828a; white-space: nowrap; }
+.exam-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.exam-card { border: 1px solid var(--line); border-radius: 7px; padding: 16px; min-width: 0; }
+.exam-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.exam-card-heading h3 { font-size: 13px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.exam-steps { list-style: none; display: grid; gap: 2px; }
+.exam-steps li { display: grid; grid-template-columns: minmax(0, 1fr) auto 54px; align-items: center; gap: 10px; font-size: 11px; padding: 6px 0; border-top: 1px solid #f1f4f1; }
+.exam-steps li.past { color: #9aa5a9; }
+.exam-step-date { font-variant-numeric: tabular-nums; color: #465459; }
+.exam-steps li.past .exam-step-date { color: #9aa5a9; }
+.exam-steps .text-button { justify-self: end; display: inline-flex; align-items: center; gap: 3px; font-size: 11px; }
 .sample-tag, .ai-tag { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 3px; color: #9a7936; background: #f8f5ea; font-size: 9px; line-height: 1.6; font-weight: 500; }
 .ai-tag { color: #4d875e; background: #f1f6ea; }
 .opportunity-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 30px; }

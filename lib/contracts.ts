@@ -117,7 +117,37 @@ export interface Opportunity {
   documents: string[];
   conditions: EligibilityCondition[];
   recommendation: string;
-  isSample: true;
+  isSample: boolean;
+}
+
+export const QUALIFICATION_TYPES = {
+  T: "국가기술자격",
+  S: "국가전문자격",
+  C: "과정평가형자격",
+  W: "일학습병행자격",
+} as const;
+export type QualificationType = keyof typeof QUALIFICATION_TYPES;
+
+export interface ExamStep {
+  id: string;
+  label: string;
+  start: string | null;
+  end: string | null;
+}
+
+export interface ExamSchedule {
+  id: string;
+  year: string;
+  round: string;
+  qualification: string;
+  title: string;
+  steps: ExamStep[];
+}
+
+export interface PublicDataResult<T> {
+  items: T[];
+  total: number;
+  fetchedAt: string;
 }
 
 export interface AnalysisResult {

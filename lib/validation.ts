@@ -100,3 +100,10 @@ const dataProviderSchema = z.enum(["dataGoKr", "saramin"]);
 export const dataKeySchema = z.object({ provider: dataProviderSchema, apiKey: apiKeySchema }).strict();
 
 export const dataKeyDeleteSchema = z.object({ provider: dataProviderSchema }).strict();
+
+export const publicDataQuerySchema = z.object({
+  source: z.enum(["scholarships", "jobs", "exams"], { error: "조회할 공공데이터를 선택해주세요." }),
+  year: z.string().regex(/^20\d{2}$/, "시행년도를 확인해주세요.").optional(),
+  qualification: z.enum(["T", "S", "C", "W"], { error: "자격 구분을 확인해주세요." }).optional(),
+  refresh: z.literal("1", { error: "새로고침 값이 올바르지 않습니다." }).optional(),
+}).strict();
