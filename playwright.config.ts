@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.E2E_BASE_URL || "http://127.0.0.1:3000";
+const baseURL = process.env.E2E_BASE_URL || "http://127.0.0.1:3100";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -23,8 +23,8 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: baseURL,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 120_000,
-    env: { DATABASE_URL: "file:data/e2e.db" },
+    env: { DATABASE_URL: "file:data/e2e.db", PORT: new URL(baseURL).port || "3100" },
   },
 });
