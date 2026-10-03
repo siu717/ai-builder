@@ -47,6 +47,7 @@ button { border: 0; }
 .breadcrumbs strong { color: #4e5d54; font-weight: 550; }
 .topbar-actions { display: flex; align-items: center; gap: 16px; }
 .topbar-date { font-size: 11px; color: #75828a; }
+.guest-label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: #465459; font-size: 10px; }
 .notification-button { position: relative; }
 .notification-dot { position: absolute; right: 8px; top: 6px; width: 5px; height: 5px; background: #ba5d52; border-radius: 50%; border: 1px solid white; }
 .topbar-avatar { width: 30px; height: 30px; flex-basis: 30px; font-size: 11px; }
@@ -263,6 +264,9 @@ textarea { resize: vertical; line-height: 1.75; }
 .settings-section { padding: 7px 0 25px; border-bottom: 1px solid var(--line); }
 .settings-section .section-heading { margin-bottom: 24px; }
 .settings-section .section-heading h2 { font-size: 15px; }
+.guest-data-section { grid-column: 1 / -1; padding-bottom: 22px; margin-bottom: 20px; }
+.guest-data-section .section-heading { margin-bottom: 12px; }
+.guest-data-notice { display: grid; gap: 5px; max-width: 660px; color: #667474; font-size: 11px; overflow-wrap: anywhere; }
 .gpa-fields { gap: 8px; }
 .gpa-fields .field { margin-bottom: 0; }
 .telegram-switch-row { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #75828a; margin-bottom: 22px; }

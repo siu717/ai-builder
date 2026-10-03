@@ -13,6 +13,7 @@ import {
   Sparkles,
   Trash2,
   Database,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DATA_PROVIDERS,
@@ -167,6 +168,29 @@ export default function Settings({
     <div className="settings-layout">
       {error && <Message text={error} error />}
       {message && <Message text={message} />}
+      {settings.accessMode === "anonymous" && (
+        <section
+          className="settings-section guest-data-section"
+          aria-label="게스트 데이터 보안"
+        >
+          <div className="section-heading">
+            <h2>
+              <ShieldCheck size={19} />
+              게스트 데이터
+            </h2>
+            <span className="status-text">브라우저별 저장</span>
+          </div>
+          <div
+            className="guest-data-notice"
+            role="note"
+            aria-label="게스트 데이터 보안"
+          >
+            <p>같은 브라우저를 사용하는 사람은 동일한 데이터에 접근할 수 있습니다.</p>
+            <p>쿠키 삭제·30일 만료 후에는 저장 데이터에 다시 접근할 수 없습니다. 계정 복구는 제공하지 않습니다.</p>
+            <p>개인 API 키와 봇 토큰은 서버에 저장됩니다. 공용 기기에서는 저장하지 마세요.</p>
+          </div>
+        </section>
+      )}
       <section className="settings-section">
         <div className="section-heading">
           <h2>

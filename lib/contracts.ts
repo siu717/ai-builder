@@ -79,6 +79,7 @@ export type DataProvider = "dataGoKr" | "saramin";
 export const DATA_PROVIDERS: DataProvider[] = ["dataGoKr", "saramin"];
 
 export interface PublicSettings {
+  accessMode?: "anonymous" | "private";
   telegramConfigured: boolean;
   telegramEnabled: boolean;
   telegramChatId: string;

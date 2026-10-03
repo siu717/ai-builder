@@ -1,6 +1,7 @@
 import { loadEnvConfig } from "@next/env";
 import { closeDatabase } from "../lib/db";
 import { processDueReminders } from "../lib/reminder-worker";
+import { isAnonymousPublicMode, processAnonymousReminders } from "../lib/anonymous-session";
 
 loadEnvConfig(process.cwd());
 
@@ -19,7 +20,8 @@ async function main() {
   console.info("캠퍼스 비서 알림 워커 실행 중 (5초 간격)");
   while (!stopping) {
     try {
-      await processDueReminders();
+      if (isAnonymousPublicMode()) await processAnonymousReminders();
+      else await processDueReminders();
     } catch {
       console.error("알림 워커가 처리에 실패했습니다. 다음 주기에 재시도합니다.");
     }

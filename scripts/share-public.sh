@@ -4,22 +4,28 @@
 # 실행할 때마다 주소가 바뀐다.
 #
 # 준비: brew install cloudflared
-#       .env.local 에 BASIC_AUTH_USER, BASIC_AUTH_PASSWORD (그리고 쓸 거면 ANTHROPIC_API_KEY)
 # 실행: ./scripts/share-public.sh        종료: Ctrl+C
+# 비공개: PUBLIC_ACCESS_MODE=private ./scripts/share-public.sh (.env.local 의 BASIC_AUTH_* 필요)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PORT="${PORT:-3100}"
 LOG_DIR="data/share"
+export PUBLIC_ACCESS_MODE="${PUBLIC_ACCESS_MODE:-anonymous}"
+export PUBLIC_SESSION_DIR="${PUBLIC_SESSION_DIR:-data/public-sessions}"
 mkdir -p "$LOG_DIR"
 
-command -v cloudflared >/dev/null || { echo "cloudflared 가 없습니다: brew install cloudflared" >&2; exit 1; }
+case "$PUBLIC_ACCESS_MODE" in
+  anonymous|private) ;;
+  *) echo "PUBLIC_ACCESS_MODE 는 anonymous 또는 private 이어야 합니다." >&2; exit 1 ;;
+esac
 
-# 로그인이 없는 앱이라 접속자 전원이 같은 데이터를 공유한다. 비밀번호 없이는 공개하지 않는다.
-has() { [ -n "${!1:-}" ] || grep -qE "^$1=.+" .env.local 2>/dev/null; }
-if ! has BASIC_AUTH_USER || ! has BASIC_AUTH_PASSWORD; then
+# Anonymous guests use separate databases; private mode requires site credentials.
+if [ "$PUBLIC_ACCESS_MODE" = private ] && ! node --env-file-if-exists=.env.local -e 'process.exit(process.env.BASIC_AUTH_USER?.trim() && process.env.BASIC_AUTH_PASSWORD ? 0 : 1)'; then
   echo ".env.local 에 BASIC_AUTH_USER 와 BASIC_AUTH_PASSWORD 를 설정하세요." >&2; exit 1
 fi
+
+command -v cloudflared >/dev/null || { echo "cloudflared 가 없습니다: brew install cloudflared" >&2; exit 1; }
 
 pids=()
 cleanup() { [ ${#pids[@]} -gt 0 ] && kill "${pids[@]}" 2>/dev/null; true; }
@@ -47,7 +53,15 @@ pids+=($!)
 node --env-file-if-exists=.env.local --import tsx server/worker.ts > "$LOG_DIR/worker.log" 2>&1 &
 pids+=($!)
 
-for _ in $(seq 1 60); do curl -s -o /dev/null "http://127.0.0.1:$PORT/favicon.ico" && break; sleep 1; done
+ready=0
+for _ in $(seq 1 60); do
+  if PORT="$PORT" node --env-file-if-exists=.env.local -e 'const headers={};if(process.env.PUBLIC_ACCESS_MODE!=="anonymous"&&process.env.BASIC_AUTH_USER&&process.env.BASIC_AUTH_PASSWORD)headers.Authorization="Basic "+Buffer.from(process.env.BASIC_AUTH_USER+":"+process.env.BASIC_AUTH_PASSWORD).toString("base64");fetch("http://127.0.0.1:"+process.env.PORT+"/api/health",{headers,signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'; then
+    ready=1
+    break
+  fi
+  sleep 1
+done
+[ "$ready" -eq 1 ] || { echo "서버가 준비되지 않았습니다. $LOG_DIR/web.log 를 확인하세요." >&2; exit 1; }
 
 echo ""
 echo "공개 주소: $URL"

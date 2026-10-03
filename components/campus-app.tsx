@@ -464,6 +464,12 @@ export default function CampusApp() {
             <strong>{current.label}</strong>
           </div>
           <div className="topbar-actions">
+            {app.settings.accessMode === "anonymous" && (
+              <span className="guest-label">
+                <UserRound size={13} />
+                게스트
+              </span>
+            )}
             {syncError && (
               <span
                 className="sync-warning"

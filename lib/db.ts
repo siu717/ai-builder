@@ -1,6 +1,8 @@
 import { createClient, type Client } from "@libsql/client";
 import { chmod, mkdir, open } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { ANONYMOUS_COOKIE_NAME, closeAnonymousDatabases, getAnonymousDatabase, isAnonymousPublicMode, validateAnonymousSession } from "./anonymous-session";
+import { RouteError } from "./http";
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS campus_profile (id INTEGER PRIMARY KEY CHECK(id = 1), value TEXT NOT NULL)`,
@@ -64,7 +66,13 @@ export async function createDatabase(databaseUrl: string): Promise<Client> {
 
 let database: Promise<Client> | undefined;
 
-export function getDatabase(): Promise<Client> {
+export async function getDatabase(): Promise<Client> {
+  if (isAnonymousPublicMode()) {
+    const { cookies } = await import("next/headers");
+    const session = await validateAnonymousSession((await cookies()).get(ANONYMOUS_COOKIE_NAME)?.value);
+    if (!session) throw new RouteError(403, "방문자 세션이 필요합니다. 페이지를 새로고침해주세요.");
+    return getAnonymousDatabase(session);
+  }
   database ??= createDatabase(process.env.DATABASE_URL || "file:data/campus.db");
   return database;
 }
@@ -72,4 +80,5 @@ export function getDatabase(): Promise<Client> {
 export async function closeDatabase(): Promise<void> {
   if (database) (await database).close();
   database = undefined;
+  await closeAnonymousDatabases();
 }

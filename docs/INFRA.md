@@ -2,7 +2,11 @@
 
 > **knowverse.net / www.knowverse.net 은 노우버스 회사 사이트입니다.** 캠퍼스 비서는 반드시 별도 주소(`campus.knowverse.net` 또는 터널 주소)로만 공개합니다.
 
-앱에는 로그인이 없어 접속자 전원이 같은 프로필·일정·텔레그램 설정을 공유하고 AI 호출 비용도 발생시킬 수 있습니다. 그래서 공개할 때는 항상 사이트 비밀번호(`BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`)를 켭니다. 두 값이 모두 있으면 `proxy.ts`가 모든 요청에 비밀번호를 요구하고, 없으면(로컬 개발) 꺼집니다.
+공개 배포의 기본값은 `PUBLIC_ACCESS_MODE=anonymous`입니다. 로그인이나 사이트 비밀번호 화면 없이 접속하고, 서명된 HttpOnly 게스트 쿠키로 브라우저별 SQLite 데이터를 분리합니다. `PUBLIC_SESSION_DIR`은 기존 개인용 `DATABASE_URL`과 별도의 디렉터리를 지정합니다. 공개 모드에서는 운영자의 환경변수 AI·텔레그램·외부 데이터 API 키를 사용하지 않으며, 각 방문자가 자신의 설정에서 입력한 키만 사용합니다.
+
+게스트 쿠키는 생성 시점부터 30일 후 만료되고, 만료된 게스트 DB는 worker가 정리합니다. 쿠키 삭제·만료 후 데이터 접근을 복구하거나 다른 브라우저로 이전하는 계정 기능은 없습니다. 같은 브라우저를 사용하는 사람은 같은 데이터에 접근하므로 공용 기기에 개인 키를 저장하지 않습니다. 게스트 쿠키는 사용자 계정이나 비밀 저장소를 대신하지 않습니다.
+
+개인용 비밀번호 보호가 필요하면 `PUBLIC_ACCESS_MODE=private`와 `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`를 모두 설정합니다. 이 모드는 기존 `DATABASE_URL`을 공유하며 환경변수 자격증명도 사용할 수 있습니다. 개인용 공유 DB는 사이트 비밀번호 없이 공개하지 않습니다.
 
 | 방법 | 비용 | 주소 | 언제 |
 |---|---|---|---|
@@ -20,9 +24,8 @@ brew install cloudflared            # 최초 1회
 `.env.local`에 다음을 넣습니다(커밋되지 않음).
 
 ```bash
-BASIC_AUTH_USER=team
-BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
-ANTHROPIC_API_KEY=sk-ant-...        # 선택: 배포 후 설정 화면에서 저장해도 됨
+PUBLIC_ACCESS_MODE=anonymous
+PUBLIC_SESSION_DIR=./data/public-sessions
 ```
 
 실행:
@@ -31,9 +34,9 @@ ANTHROPIC_API_KEY=sk-ant-...        # 선택: 배포 후 설정 화면에서 저
 ./scripts/share-public.sh
 ```
 
-`공개 주소: https://….trycloudflare.com`이 출력되면 그 주소로 접속해 비밀번호를 입력합니다. `Ctrl+C`로 종료합니다.
+`공개 주소: https://….trycloudflare.com`이 출력되면 로그인 없이 바로 접속합니다. AI 분석과 텔레그램 알림에는 방문자가 설정 화면에 저장한 자격증명이 필요합니다. `Ctrl+C`로 종료합니다.
 
-- 공개용 데이터는 `data/public.db`에 따로 저장돼 로컬 개발 데이터와 섞이지 않습니다.
+- 공개용 데이터는 `PUBLIC_SESSION_DIR`의 브라우저별 DB에 저장됩니다. 기존 `data/public.db`와 로컬 개발 DB는 공개 방문자에게 제공하지 않습니다.
 - 로그는 `data/share/`(tunnel, build, web, worker)에 남습니다.
 - 다시 실행하면 주소가 바뀝니다. `APP_URL`은 스크립트가 자동으로 맞춥니다.
 - 맥이 잠자기에 들어가면 끊깁니다. 데모 중에는 `caffeinate -dims`를 함께 켜 두세요.
@@ -57,22 +60,21 @@ cp .env.example .env
 `.env`:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
 APP_URL=https://campus.knowverse.net
-BASIC_AUTH_USER=team
-BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
+PUBLIC_ACCESS_MODE=anonymous
+PUBLIC_SESSION_DIR=/app/data/public-sessions
 ```
 
-`APP_URL`이 정확해야 합니다. 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 일치하는 요청만 받으므로, 틀리면 화면은 떠도 저장·AI 분석이 403으로 실패합니다. `APP_URL`·`BASIC_AUTH_*`가 비어 있으면 compose가 시작을 거부합니다.
+`APP_URL`이 정확해야 합니다. 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 일치하는 요청만 받으므로, 틀리면 화면은 떠도 저장·AI 분석이 403으로 실패합니다. 게스트 모드에서는 `BASIC_AUTH_*`를 설정하지 않아도 되며, 남아 있어도 로그인 화면을 요구하지 않습니다. 비밀번호 보호 배포로 전환할 때는 `PUBLIC_ACCESS_MODE=private`와 두 사이트 비밀번호 변수를 함께 설정합니다.
 
-Anthropic 키는 배포 후 **설정 → AI 분석 설정**에서도 저장·교체·삭제할 수 있습니다. UI 저장값이 환경변수보다 우선하며 웹 서버를 재시작하지 않아도 다음 분석에 반영됩니다. SQLite 본 파일과 WAL·SHM 보조 파일은 `0600`, 컨테이너의 데이터 디렉터리는 `0700`으로 보관합니다.
+Anthropic 키는 배포 후 **설정 → AI 분석 설정**에서 저장·교체·삭제합니다. 게스트 모드는 방문자 DB에 저장된 키만 사용하고 환경변수 키로 대체하지 않습니다. 비밀번호 보호 모드에서는 UI 저장값이 환경변수보다 우선합니다. 변경된 키는 웹 서버를 재시작하지 않아도 다음 분석에 반영됩니다. SQLite 본 파일과 WAL·SHM 보조 파일은 `0600`, 게스트 데이터 및 컨테이너의 데이터 디렉터리는 `0700`으로 보관합니다.
 
 ```bash
 docker compose up -d --build
 docker compose ps                    # web healthy, worker·caddy running
 ```
 
-웹 상태 확인은 컨테이너의 사이트 암호로 `/api/state`에 인증해 실행합니다. 비밀번호 보호가 켜진 상태에서도 worker가 정상 시작할 수 있어야 합니다.
+웹 상태 확인은 공개 모드에 맞춰 수행합니다. 비밀번호 보호 모드에서는 사이트 암호를 사용하며, 게스트 모드에서도 worker가 각 방문자의 예약 알림을 처리해야 합니다.
 
 ### nginx 서버에 올릴 때 (기존 knowverse 서버)
 
@@ -112,11 +114,12 @@ sudo certbot --nginx -d campus.knowverse.net   # HTTPS 인증서
 | 업데이트 | `git pull && docker compose up -d --build` |
 | 로그 | `docker compose logs -f web worker` |
 | 알림이 안 뜰 때 | `docker compose ps worker` — 앱 내 알림도 worker가 처리합니다 |
-| DB 꺼내기 | `docker compose cp web:/app/data/campus.db ./campus.db` |
+| 게스트 데이터 꺼내기 | 서비스 중지 후 `docker compose cp web:/app/data/public-sessions ./public-sessions` |
 | 중지 | `docker compose down` (`-v`를 붙이면 **DB 삭제**) |
 
 - `@libsql/client`는 네이티브 바이너리를 쓰므로 서버에서 직접 `--build`하거나 `docker build --platform linux/amd64`를 씁니다.
 - AI 모델은 `.env`의 `ANTHROPIC_MODEL`로 바꿉니다.
+- 게스트 데이터 백업은 `PUBLIC_SESSION_DIR` 전체를 대상으로 하며, 서비스 중지 후 복사하거나 SQLite의 일관된 백업 기능을 사용합니다. 쿠키 삭제는 DB를 즉시 삭제하지 않으며 만료 후 worker가 정리합니다. 비밀번호 보호 모드의 개인 DB는 `DATABASE_URL`에 지정한 파일입니다.
 
 ## CI
 

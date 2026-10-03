@@ -5,8 +5,19 @@ import { getDatabase } from "./db";
 import { RouteError } from "./http";
 import { aiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
 import { sendTelegramMessage, verifyTelegramBot } from "./telegram";
+import { isAnonymousPublicMode } from "./anonymous-session";
 
 type Executor = Client | Transaction;
+
+function environmentCredential(name: string): string {
+  return isAnonymousPublicMode() ? "" : process.env[name] || "";
+}
+
+async function assertGuestReminderCapacity(db: Executor, incoming: number): Promise<void> {
+  if (!isAnonymousPublicMode()) return;
+  const result = await db.execute("SELECT COUNT(*) AS count FROM campus_reminders");
+  if (Number(result.rows[0].count) + incoming > 4000) throw new RouteError(429, "방문자 알림 저장 한도에 도달했습니다.");
+}
 
 function eventFromRow(row: Row): CalendarEvent {
   const value = JSON.parse(String(row.value)) as EventInput;
@@ -46,10 +57,10 @@ export async function getPrivateSettings(database?: Client) {
   const result = await db.execute("SELECT * FROM campus_settings WHERE id = 1");
   const row = result.rows[0];
   return {
-    token: String(row.token || process.env.TELEGRAM_BOT_TOKEN || ""),
-    chatId: String(row.chat_id || process.env.TELEGRAM_CHAT_ID || ""),
+    token: String(row.token || environmentCredential("TELEGRAM_BOT_TOKEN")),
+    chatId: String(row.chat_id || environmentCredential("TELEGRAM_CHAT_ID")),
     enabled: Boolean(row.enabled),
-    botUsername: row.bot_username ? String(row.bot_username) : process.env.TELEGRAM_BOT_USERNAME || null,
+    botUsername: row.bot_username ? String(row.bot_username) : environmentCredential("TELEGRAM_BOT_USERNAME") || null,
     workerLastSeen: row.worker_last_seen ? String(row.worker_last_seen) : null,
   };
 }
@@ -58,7 +69,7 @@ async function getAnthropicConfiguration(database?: Client) {
   const db = database || await getDatabase();
   const result = await db.execute("SELECT anthropic_api_key FROM campus_settings WHERE id = 1");
   const saved = String(result.rows[0]?.anthropic_api_key || "").trim();
-  const environment = (process.env.ANTHROPIC_API_KEY || "").trim();
+  const environment = environmentCredential("ANTHROPIC_API_KEY").trim();
   return {
     key: saved || environment,
     source: saved ? "saved" as const : environment ? "environment" as const : null,
@@ -79,7 +90,7 @@ async function getDataKeyConfiguration(provider: DataProvider, database?: Client
   const { column, environment: variable } = DATA_KEYS[provider];
   const result = await db.execute(`SELECT ${column} AS api_key FROM campus_settings WHERE id = 1`);
   const saved = String(result.rows[0]?.api_key || "").trim();
-  const environment = (process.env[variable] || "").trim();
+  const environment = environmentCredential(variable).trim();
   return { key: saved || environment, source: saved ? "saved" : environment ? "environment" : null };
 }
 
@@ -112,6 +123,7 @@ export async function getPublicSettings(database?: Client): Promise<PublicSettin
     aiConfigured: Boolean(ai.key),
     aiKeySource: ai.source,
     dataKeys,
+    accessMode: isAnonymousPublicMode() ? "anonymous" : "private",
   };
 }
 
@@ -184,6 +196,11 @@ export async function createEvent(input: unknown, database?: Client, now = new D
       }
     }
     const id = randomUUID();
+    if (isAnonymousPublicMode()) {
+      const count = await tx.execute("SELECT COUNT(*) AS count FROM campus_events");
+      if (Number(count.rows[0].count) >= 200) throw new RouteError(429, "방문자 일정 저장 한도는 200개입니다.");
+      await assertGuestReminderCapacity(tx, event.reminders.length);
+    }
     await tx.execute({ sql: "INSERT INTO campus_events(id, value, created_at, idempotency_key) VALUES(?, ?, ?, ?)", args: [id, JSON.stringify(event), now.toISOString(), event.idempotencyKey || null] });
     await insertReminders(tx, id, event, 1);
     await tx.commit();
@@ -232,6 +249,7 @@ export async function updateEvent(id: string, input: unknown, database?: Client,
       await tx.execute({ sql: "UPDATE campus_events SET value = ?, revision = ? WHERE id = ?", args: [JSON.stringify(next), remindersChanged ? revision : Number(row.revision), id] });
       // 준비물·메모만 수정한 경우 예약과 발송 기록은 그대로 둔다.
       if (remindersChanged) {
+        await assertGuestReminderCapacity(tx, next.reminders.length);
         await tx.execute({ sql: "UPDATE campus_reminders SET status = 'cancelled', error = '일정 수정으로 기존 알림을 취소했습니다.', next_attempt_at = NULL, lease_until = NULL, claimed_by = NULL WHERE event_id = ? AND status IN ('pending', 'sending', 'failed')", args: [id] });
         await insertReminders(tx, id, next, revision, oldEvent.completed);
       }
@@ -262,7 +280,7 @@ export async function saveSettings(input: unknown, database?: Client, fetcher = 
   const db = database || await getDatabase();
   const previous = await getPrivateSettings(db);
   const token = settings.telegramToken || previous.token;
-  const chatId = settings.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
+  const chatId = settings.telegramChatId || environmentCredential("TELEGRAM_CHAT_ID");
   if (settings.telegramEnabled && (!token || !chatId)) throw new RouteError(400, "봇 토큰과 Chat ID를 설정해주세요.");
   let botUsername = previous.botUsername;
   if (settings.telegramToken) {
