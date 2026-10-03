@@ -157,7 +157,7 @@ export interface BackupFile {
 export interface StorageOverview {
   accessMode: "anonymous" | "private";
   database: { path: string | null; sizeBytes: number | null; modifiedAt: string | null };
-  keys: { anthropic: string | null; dataGoKr: string | null; saramin: string | null; telegramToken: string | null };
+  keys: { anthropic: string | null; anthropicFormatValid: boolean | null; dataGoKr: string | null; saramin: string | null; telegramToken: string | null };
   telegram: { chatId: string; enabled: boolean; botUsername: string | null };
   profile: Profile;
   counts: { events: number; reminders: number; sentReminders: number; scholarshipNotices: number };

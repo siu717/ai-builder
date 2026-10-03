@@ -80,6 +80,7 @@ test("the storage route shows saved values masked and creates a manual backup", 
   const overview = await (await GET()).json();
   assert.equal(overview.keys.dataGoKr, "abcd••••9876");
   assert.equal(overview.keys.anthropic, null);
+  assert.equal(overview.keys.anthropicFormatValid, null);
   assert.equal(overview.telegram.chatId, "42");
   assert.equal(overview.telegram.enabled, true);
   assert.equal(overview.database.path, join(directory, "campus.db"));
