@@ -36,6 +36,9 @@ BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
 
 - 공개용 데이터는 `data/public-demo.db` 하나에 저장됩니다. 다른 경로는 `PUBLIC_DATABASE_URL=file:/절대/경로.db`로 지정합니다.
 - 스크립트는 시작할 때마다 DB를 `data/backups/pre-start-*.db`로 백업합니다.
+- 알림 워커는 6시간마다 DB를 `data/backups/auto-*.db`로 자동 백업하고 최근 28개를 남깁니다. 수동·배포 전 백업은 지우지 않습니다.
+- 설정 → **저장된 데이터**에서 DB에 저장된 키(앞뒤 4자만 표시), 텔레그램·프로필, 일정 수, 백업 목록을 확인하고 **지금 백업**을 누를 수 있습니다.
+- `npm start`로 직접 띄울 때는 `.env.local`에 `DATABASE_REQUIRE_EXISTING=1`을 두면, DB 경로가 바뀌었을 때 빈 DB를 새로 만들지 않고 시작을 멈춥니다.
 - DB 파일이 없으면 빈 DB를 만들지 않고 멈춥니다. 처음 만들 때만 `PUBLIC_DB_INIT=1`을 붙입니다.
 - 로그는 `data/share/`(tunnel, build, web, worker)에 남습니다.
 - 다시 실행하면 주소가 바뀝니다. `APP_URL`은 스크립트가 자동으로 맞춥니다.

@@ -126,3 +126,19 @@
 .data-key-form + .data-key-form { margin-top: 24px; padding-top: 4px; border-top: 1px solid var(--line); }
 .data-key-form .setting-inline .text-button { margin-left: auto; }
 .data-key-hint { margin: 10px 0 14px; color: var(--ink-3); font-size: var(--text-sm); line-height: 1.6; }
+
+/* 저장된 데이터: DB에 실제로 저장된 값(비밀값은 가림)과 백업 목록 */
+.stored-data-list { margin: 4px 0 0; }
+.stored-data-list > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.stored-data-list dt { width: 180px; flex: none; font-size: var(--text-md); font-weight: 600; color: var(--ink-2); word-break: keep-all; }
+.stored-data-list dd { margin: 0; min-width: 0; font-size: var(--text-sm); color: var(--ink); overflow-wrap: anywhere; }
+.stored-data-list dd.stored-empty { color: var(--ink-4); }
+.stored-data-list code, .stored-backups code { font-size: var(--text-xs); overflow-wrap: anywhere; }
+.stored-backups .setting-inline .button { margin-left: auto; }
+.stored-backup-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.stored-backup-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: var(--text-xs); color: var(--ink-3); }
+@media (max-width: 640px) {
+  .stored-data-list > div { flex-direction: column; gap: 4px; }
+  .stored-data-list dt { width: auto; }
+  .stored-backups .setting-inline { flex-wrap: wrap; }
+}
