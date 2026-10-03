@@ -96,7 +96,7 @@ test("real reminder worker processes app reminders and keeps delivery records", 
   try {
     await expect.poll(async () => (await state(request)).notifications.find((item) => item.eventId === event.id)?.status, { timeout: 20_000 }).toBe("sent");
     await page.goto("/");
-    await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: /^알림(?:\s|$)/ }).click();
+    await page.getByRole("banner").getByRole("button", { name: /^알림함/ }).click();
     await expect(page.getByText(title, { exact: true })).toBeVisible();
     await page.reload();
     const delivered = (await state(request)).notifications.filter((item) => item.eventId === event.id);
