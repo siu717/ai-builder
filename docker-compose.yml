@@ -28,7 +28,7 @@ services:
     expose:
       - "3000"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "const auth=Buffer.from(process.env.BASIC_AUTH_USER+':'+process.env.BASIC_AUTH_PASSWORD).toString('base64');fetch('http://127.0.0.1:3000/api/state',{headers:{Authorization:'Basic '+auth}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

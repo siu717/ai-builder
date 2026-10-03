@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createClient, type Client } from "@libsql/client";
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { chmod, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test, type TestContext } from "node:test";
@@ -112,6 +112,45 @@ test("legacy databases migrate once under concurrent initialization and preserve
   const reopened = await createDatabase(`file:${path}`);
   connections.push(reopened);
   assert.equal(await getAnthropicApiKey(reopened), savedKey);
+});
+
+test("existing shared directories retain their mode while old SQLite files and recreated sidecars stay private", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "campus-ai-permissions-"));
+  await chmod(directory, 0o755);
+  const path = join(directory, "campus.db");
+  const legacy = createClient({ url: `file:${path}` });
+  const connections: Client[] = [legacy];
+  t.after(async () => { for (const db of connections) db.close(); await rm(directory, { recursive: true, force: true }); });
+  await legacy.execute("PRAGMA journal_mode = WAL");
+  await legacy.execute("CREATE TABLE existing_data (value TEXT NOT NULL)");
+  await legacy.execute("INSERT INTO existing_data(value) VALUES ('preserve this row')");
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) await chmod(file, 0o644);
+
+  const secured = await createDatabase(`file:${path}`);
+  connections.push(secured);
+  await saveAnthropicApiKey({ apiKey: savedKey }, secured);
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) assert.equal((await stat(file)).mode & 0o777, 0o600);
+  assert.equal((await stat(directory)).mode & 0o777, 0o755);
+  assert.equal((await secured.execute("SELECT value FROM existing_data")).rows[0].value, "preserve this row");
+  legacy.close();
+  secured.close();
+
+  const reopened = await createDatabase(`file:${path}`);
+  connections.push(reopened);
+  assert.equal(await getAnthropicApiKey(reopened), savedKey);
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) assert.equal((await stat(file)).mode & 0o777, 0o600);
+  assert.equal((await stat(directory)).mode & 0o777, 0o755);
+});
+
+test("new SQLite WAL and SHM inherit private permissions in an existing public directory", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "campus-ai-new-permissions-"));
+  await chmod(directory, 0o755);
+  const path = join(directory, "campus.db");
+  const db = await createDatabase(`file:${path}`);
+  t.after(async () => { db.close(); await rm(directory, { recursive: true, force: true }); });
+  await saveAnthropicApiKey({ apiKey: savedKey }, db);
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) assert.equal((await stat(file)).mode & 0o777, 0o600);
+  assert.equal((await stat(directory)).mode & 0o777, 0o755);
 });
 
 test("AI settings routes require same-origin JSON, redact responses and delete without a body", async (t) => {

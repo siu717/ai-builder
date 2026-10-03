@@ -22,7 +22,7 @@ brew install cloudflared            # 최초 1회
 ```bash
 BASIC_AUTH_USER=team
 BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
-ANTHROPIC_API_KEY=sk-ant-...        # 없으면 AI 기능은 샘플 모드
+ANTHROPIC_API_KEY=sk-ant-...        # 선택: 배포 후 설정 화면에서 저장해도 됨
 ```
 
 실행:
@@ -50,7 +50,7 @@ ANTHROPIC_API_KEY=sk-ant-...        # 없으면 AI 기능은 샘플 모드
 
 ```bash
 git clone https://github.com/siu717/ai-builder.git && cd ai-builder
-git checkout infra/deploy            # main 에 병합되면 생략
+git switch main
 cp .env.example .env
 ```
 
@@ -65,10 +65,14 @@ BASIC_AUTH_PASSWORD=<팀에 공유할 비밀번호>
 
 `APP_URL`이 정확해야 합니다. 쓰기 API는 localhost이거나 Host·Origin이 `APP_URL`과 일치하는 요청만 받으므로, 틀리면 화면은 떠도 저장·AI 분석이 403으로 실패합니다. `APP_URL`·`BASIC_AUTH_*`가 비어 있으면 compose가 시작을 거부합니다.
 
+Anthropic 키는 배포 후 **설정 → AI 분석 설정**에서도 저장·교체·삭제할 수 있습니다. UI 저장값이 환경변수보다 우선하며 웹 서버를 재시작하지 않아도 다음 분석에 반영됩니다. SQLite 본 파일과 WAL·SHM 보조 파일은 `0600`, 컨테이너의 데이터 디렉터리는 `0700`으로 보관합니다.
+
 ```bash
 docker compose up -d --build
 docker compose ps                    # web healthy, worker·caddy running
 ```
+
+웹 상태 확인은 컨테이너의 사이트 암호로 `/api/state`에 인증해 실행합니다. 비밀번호 보호가 켜진 상태에서도 worker가 정상 시작할 수 있어야 합니다.
 
 ### nginx 서버에 올릴 때 (기존 knowverse 서버)
 
