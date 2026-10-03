@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDatabase, createSharedDatabase } from "../lib/db";
-import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, parseNoticeLinks, parseScholarship, saveScholarshipPreferences, syncScholarshipEvents } from "../lib/scholarships";
+import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, MAX_ANALYSES_PER_SYNC, parseNoticeLinks, parseScholarship, saveScholarshipPreferences, syncScholarshipEvents, type NoticeAnalyzer } from "../lib/scholarships";
 import { deleteEvent, getState, updateEvent } from "../lib/store";
 import { processDueReminders } from "../lib/reminder-worker";
 import type { EventInput } from "../lib/contracts";
@@ -118,6 +118,62 @@ test("auto-registered notices are sent to Telegram right away and again 3 and 1 
   await syncScholarshipEvents([late], user, now);
   const urgent = (await getState(user)).events.find((item) => item.idempotencyKey === late.id)!;
   assert.deepEqual(urgent.reminders.map((reminder) => reminder.at), ["2026-10-03T00:01:00.000Z"], "past D-3/D-1 slots are skipped");
+});
+
+test("new notices are analyzed by AI and the analysis is carried into the Telegram alert", async (t) => {
+  const { user } = await fixture(t);
+  await user.execute("UPDATE campus_settings SET token = '123456:test-token', chat_id = '42', enabled = 1 WHERE id = 1");
+  await saveScholarshipPreferences({ enabled: true, keywords: "" }, user);
+  const analyzed: string[] = [];
+  const analyzer: NoticeAnalyzer = async (notice, profile) => {
+    analyzed.push(notice.id);
+    assert.ok(profile, "the student's profile is compared");
+    return {
+      mode: "live", title: notice.title, kind: "scholarship", date: "2099-01-01", time: null, subject: "장학팀", submission: "이메일",
+      summary: "재학생 대상 생활비 장학금입니다.",
+      missing: ["소득분위 기준 확인"],
+      documents: ["재학증명서", "성적증명서"],
+      conditions: [
+        { label: "필수: 재학생", status: "met", reason: "프로필 재학 중" },
+        { label: "필수: 직전학기 평점 3.0", status: "unknown", reason: "성적 미입력" },
+      ],
+    };
+  };
+  const notice = parseScholarship(html, url, now);
+  await syncScholarshipEvents([notice], user, now, analyzer);
+  const [event] = (await getState(user)).events;
+  assert.deepEqual(analyzed, [notice.id]);
+  assert.equal(event.date, "2026-10-15", "the deadline comes from the notice text, not the AI");
+  assert.match(event.notes, /^\[AI 분석\] 재학생 대상 생활비 장학금입니다\./);
+  assert.match(event.notes, /지원 조건: 재학생 충족 · 직전학기 평점 3\.0 확인 필요/);
+  assert.match(event.notes, /제출 서류: 재학증명서, 성적증명서/);
+
+  const sent: string[] = [];
+  const fetcher = (async (_input: string | URL | Request, init?: RequestInit) => {
+    sent.push(JSON.parse(String(init?.body)).text);
+    return new Response(JSON.stringify({ ok: true, result: {} }));
+  }) as typeof fetch;
+  await processDueReminders({ database: user, now: new Date(now.getTime() + 2 * 60_000), fetcher });
+  assert.equal(sent.length, 1);
+  assert.match(sent[0], /\[AI 분석\] 재학생 대상 생활비 장학금입니다\./);
+  assert.match(sent[0], /지원 조건: 재학생 충족/);
+  assert.ok(sent[0].includes(`원문: ${url}`));
+  await syncScholarshipEvents([notice], user, now, analyzer);
+  assert.equal(analyzed.length, 1, "already registered notices are not analyzed again");
+});
+
+test("AI failures still register the deadline, and at most three notices are analyzed per sync", async (t) => {
+  const { user } = await fixture(t);
+  await saveScholarshipPreferences({ enabled: true, keywords: "" }, user);
+  const notices = [1, 2, 3, 4, 5].map((index) => parseScholarship(html.replace("소프트웨어", `소프트웨어${index}`), url.replace("12345", `1234${index}`), now));
+  let calls = 0;
+  const failing: NoticeAnalyzer = async () => { calls++; throw new Error("overloaded"); };
+  assert.equal((await syncScholarshipEvents(notices, user, now, failing)).created, MAX_ANALYSES_PER_SYNC);
+  assert.equal(calls, MAX_ANALYSES_PER_SYNC);
+  const events = (await getState(user)).events;
+  assert.ok(events.every((event) => event.notes.startsWith("[AI 분석] 분석에 실패했습니다.")));
+  assert.ok(events.every((event) => event.reminders.length > 0), "deadline alerts are kept");
+  assert.equal((await syncScholarshipEvents(notices, user, now, failing)).created, 2, "the rest are registered on the next sync");
 });
 
 test("uncertain source revisions stop reminders, past revisions update deadlines and stale automation cannot overwrite manual edits", async (t) => {
