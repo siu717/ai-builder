@@ -1,0 +1,31 @@
+/* 시간표 기반 마감 확인(.tt-) · 브라우저 알림 권한(.perm-) */
+.tt-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.tt-inline-button { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-xs); padding: 0 2px; color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+.tt-inline-button:hover { color: var(--primary-dark); }
+.tt-hints { margin: -4px 0 12px; }
+.tt-hints:empty { display: none; }
+.tt-hint { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: var(--text-xs); color: var(--ink-3); margin: 0 0 4px; }
+.tt-hint-ok { color: var(--met); }
+.tt-hint-warn { color: var(--due-near); }
+.tt-editor { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 16px; }
+.tt-editor summary { cursor: pointer; font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+.tt-editor[open] summary { margin-bottom: 8px; }
+.tt-count { margin-left: 6px; font-weight: 400; color: var(--ink-4); }
+.tt-note { font-size: var(--text-xs); color: var(--ink-3); margin: 4px 0 10px; }
+.tt-row { display: grid; grid-template-columns: 92px 118px minmax(0, 1fr) 32px; gap: 6px; align-items: center; margin-bottom: 8px; }
+.tt-row select, .tt-row input { font-size: var(--text-xs); padding: 7px 6px; width: 100%; min-width: 0; }
+.tt-row .icon-button { width: 32px; min-width: 32px; height: 32px; }
+.tt-confirm { border: 1px solid var(--line); border-left: 4px solid var(--check); background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; }
+.tt-confirm h4 { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 600; color: var(--ink); margin: 0; }
+.tt-confirm p { font-size: var(--text-xs); color: var(--ink-3); margin: 6px 0 10px; }
+.tt-confirm .field { margin-bottom: 8px; }
+.tt-task { flex-wrap: wrap; }
+.tt-task > div:first-child { flex: 1 1 180px; min-width: 0; }
+.tt-task-date { flex: 0 0 auto; width: 148px; font-size: var(--text-xs); padding: 6px; }
+.perm-row { flex-wrap: wrap; }
+.perm-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.perm-note { font-size: var(--text-xs); color: var(--ink-2); margin: 8px 0 0; }
+.perm-copy { font-size: var(--text-xs); color: var(--ink-3); line-height: 1.7; margin: 10px 0 4px; max-width: 640px; }
+@media (max-width: 640px) {
+  .tt-row { grid-template-columns: 78px 104px minmax(0, 1fr) 32px; }
+}

@@ -1,0 +1,78 @@
+{
+ "data": {
+  "activities": {
+   "totalCount": 2825,
+   "nodes": [
+    {
+     "id": "354691",
+     "title": "[더파운더즈] Global Recruiting Operations Intern",
+     "organizationName": "주식회사 더파운더즈",
+     "recruitCloseAt": 1798729199999,
+     "createdAt": 1790939161000,
+     "jobTypes": [
+      "INTERN"
+     ],
+     "regions": [
+      {
+       "name": "서울"
+      }
+     ],
+     "categories": [
+      {
+       "name": "인사/채용/노무"
+      }
+     ]
+    },
+    {
+     "id": "354683",
+     "title": "[ANUA] 글로벌 화장품 제품 운영 사무보조 아르바이트",
+     "organizationName": "주식회사 더파운더즈",
+     "recruitCloseAt": 1798729199999,
+     "createdAt": 1790935129000,
+     "jobTypes": [
+      "CONTRACT"
+     ],
+     "regions": [
+      {
+       "name": "서울"
+      }
+     ],
+     "categories": [
+      {
+       "name": "사무/문서관리"
+      },
+      {
+       "name": "시장조사/리서치"
+      }
+     ]
+    },
+    {
+     "id": "354680",
+     "title": "[바이오던스] 비주얼 디자인 인턴",
+     "organizationName": "주식회사 뷰티셀렉션",
+     "recruitCloseAt": 1798729199999,
+     "createdAt": 1790933967000,
+     "jobTypes": [
+      "INTERN"
+     ],
+     "regions": [
+      {
+       "name": "서울"
+      }
+     ],
+     "categories": [
+      {
+       "name": "그래픽/시각디자인"
+      },
+      {
+       "name": "영상/모션그래픽"
+      },
+      {
+       "name": "제품/산업디자인"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -19,16 +19,17 @@ import type {
   Opportunity,
   PublicDataResult,
 } from "@/lib/contracts";
+import type { LiveOpportunity, LiveOpportunityResponse } from "@/lib/sources/types";
 import type { EventDraft } from "./event-editor";
 import ExamSchedules from "./exam-schedules";
 import ScholarshipFeed from "./scholarship-feed";
 import { Busy, Message, request, seoulDate } from "./ui";
 import { checklistFromDocuments } from "@/lib/checklist";
 
-type Source = "kookmin" | "sample" | "public" | "exams";
+type Source = "kookmin" | "sample" | "public" | "exams" | "realtime";
 const SOURCE_LABELS = {
-  scholarship: { kookmin: "국민대 장학공지", public: "한국장학재단", sample: "샘플" },
-  job: { sample: "샘플", public: "공공 채용", exams: "자격증 시험" },
+  scholarship: { kookmin: "국민대 장학공지", public: "한국장학재단", sample: "샘플", realtime: "실시간 공고" },
+  job: { sample: "샘플", public: "공공 채용", exams: "자격증 시험", realtime: "실시간 공고" },
 } as const;
 const MAX_VISIBLE = 120;
 
@@ -108,9 +109,31 @@ export default function Opportunities({
       setLoading(false);
     }
   }
+  // 실시간 공고(lib/sources): 키 없이 읽는 공개 소스. 처음 고를 때 한 번 불러온다.
+  const [realtime, setRealtime] = useState<LiveOpportunityResponse | null>(null);
+  const [realtimeLoading, setRealtimeLoading] = useState(false);
+  const [realtimeError, setRealtimeError] = useState("");
+  async function loadRealtime() {
+    setRealtimeLoading(true);
+    setRealtimeError("");
+    try {
+      setRealtime(
+        await request<LiveOpportunityResponse>(
+          `/api/opportunities/live?kind=${kind}`,
+        ),
+      );
+    } catch (err) {
+      setRealtimeError(
+        err instanceof Error ? err.message : "실시간 공고를 불러오지 못했습니다.",
+      );
+    } finally {
+      setRealtimeLoading(false);
+    }
+  }
   function choose(next: Source) {
     setSource(next);
     setSelectedId(null);
+    if (next === "realtime" && !realtime && !realtimeLoading) void loadRealtime();
     if (next === "public" && dataKeyReady && !live && !loading) void loadPublic();
   }
   const pool = source === "public" ? live?.items || [] : opportunities;
@@ -174,6 +197,22 @@ export default function Opportunities({
           dataKeyReady={dataKeyReady}
           onSettings={onSettings}
           onAdd={onAdd}
+        />
+      </>
+    );
+  }
+  if (source === "realtime") {
+    return (
+      <>
+        {switcher}
+        <LivePanel
+          kind={kind}
+          data={realtime}
+          loading={realtimeLoading}
+          error={realtimeError}
+          onReload={() => void loadRealtime()}
+          onAdd={onAdd}
+          onCoach={onCoach}
         />
       </>
     );
@@ -465,6 +504,271 @@ export default function Opportunities({
                 <button
                   className="button secondary"
                   onClick={() => onCoach(selected.originalText)}
+                >
+                  취업 컨설팅 <ChevronRight size={15} />
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
+
+function LivePanel({
+  kind,
+  data,
+  loading,
+  error,
+  onReload,
+  onAdd,
+  onCoach,
+}: {
+  kind: "scholarship" | "job";
+  data: LiveOpportunityResponse | null;
+  loading: boolean;
+  error: string;
+  onReload: () => void;
+  onAdd: (draft: EventDraft) => void;
+  onCoach: (text: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const kindLabel = kind === "scholarship" ? "장학금" : "채용 공고";
+  if (!data) {
+    return (
+      <div className="empty-state public-data-state live-state">
+        <Database size={27} />
+        {error ? (
+          <>
+            <Message text={error} error />
+            <button type="button" className="button secondary" onClick={onReload}>
+              <RefreshCw size={15} />
+              다시 시도
+            </button>
+          </>
+        ) : (
+          <Busy label="실시간 공고를 불러오는 중" />
+        )}
+      </div>
+    );
+  }
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const matches = data.items.filter((item) => {
+    const haystack =
+      `${item.title} ${item.organization} ${item.tags.join(" ")}`.toLowerCase();
+    return item.kind === kind && words.every((word) => haystack.includes(word));
+  });
+  const results = matches.slice(0, MAX_VISIBLE);
+  const selected: LiveOpportunity | undefined =
+    results.find((item) => item.id === selectedId) || results[0];
+  return (
+    <>
+      <div className="view-toolbar">
+        <div className="search-field">
+          <Search size={17} />
+          <input
+            aria-label="실시간 공고 검색"
+            placeholder={
+              kind === "scholarship" ? "장학금 · 기관 검색" : "회사 · 직무 검색"
+            }
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+      </div>
+      <div className="catalog-caption live-caption">
+        <span>
+          {kindLabel} {matches.length}개
+          {matches.length > results.length && ` 중 ${results.length}개 표시`}
+        </span>
+        <span className="public-tag live-tag">실시간</span>
+        <span>{format(new Date(data.fetchedAt), "HH:mm")} 기준</span>
+        <button
+          type="button"
+          className="text-button caption-refresh"
+          disabled={loading}
+          onClick={onReload}
+        >
+          <RefreshCw size={14} />
+          {loading ? "불러오는 중" : "새로고침"}
+        </button>
+      </div>
+      <ul className="live-sources" aria-label="출처별 상태">
+        {data.sources.map((entry) => (
+          <li
+            key={entry.id}
+            className={`live-chip ${entry.ok ? "ok" : "fail"}`}
+            title={entry.error ?? undefined}
+          >
+            {entry.name}
+            <b>{entry.ok ? `${entry.count}건` : "실패"}</b>
+          </li>
+        ))}
+      </ul>
+      {error && <Message text={error} error />}
+      <div className={`opportunity-layout opp-kind-${kind}`}>
+        <div className="opportunity-list">
+          {results.length === 0 && (
+            <div className="empty-state">
+              <Search size={27} />
+              <h3>{query ? "검색 결과가 없어요" : "지금 불러온 공고가 없어요"}</h3>
+              <p>{query ? "검색어를 바꿔 보세요." : "잠시 후 새로고침해 보세요."}</p>
+            </div>
+          )}
+          {results.map((item) => {
+            const isSelected = selected?.id === item.id;
+            return (
+              <button
+                className={`opportunity-card ${isSelected ? "selected" : ""}`}
+                key={item.id}
+                onClick={() => setSelectedId(item.id)}
+                aria-pressed={isSelected}
+              >
+                <div className="opportunity-card-top">
+                  <span className="opp-kind-dot" aria-hidden="true" />
+                  <span className="opportunity-org">{item.organization}</span>
+                  <span className="public-tag live-source">{item.sourceName}</span>
+                </div>
+                <h3>{item.title}</h3>
+                {item.matchReason && (
+                  <p className="live-reason">{item.matchReason}</p>
+                )}
+                <div className="opportunity-card-bottom">
+                  {item.date ? (
+                    <span className="opp-due">
+                      <strong
+                        className={`opp-dday opp-due-${dueTier(daysLeft(item.date))}`}
+                      >
+                        {dueLabel(daysLeft(item.date))}
+                      </strong>
+                      <span className="opp-due-date">
+                        {format(parseISO(item.date), "M.d")} 마감
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="opp-needs-check live-no-date">
+                      마감 확인 필요
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        {selected && (
+          <section className="opportunity-detail live-detail">
+            <div className="opp-detail-head">
+              <div className="opp-detail-heading">
+                <div className="detail-eyebrow">
+                  <span className="opp-crumb">{kindLabel}</span>
+                  <span className="opp-crumb-sep" aria-hidden="true">
+                    /
+                  </span>
+                  <span>{selected.organization}</span>
+                  <span className="public-tag">{selected.sourceName}</span>
+                </div>
+                <h2>{selected.title}</h2>
+              </div>
+              {selected.date && (
+                <div className="opp-detail-due">
+                  <span
+                    className={`opp-dday opp-dday-lg opp-due-${dueTier(daysLeft(selected.date))}`}
+                  >
+                    {dueLabel(daysLeft(selected.date))}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="detail-facts">
+              <div>
+                <span>신청 마감</span>
+                <strong>
+                  {selected.date ? (
+                    <>
+                      {format(parseISO(selected.date), "yyyy.MM.dd")}{" "}
+                      {selected.time || (
+                        <span className="opp-needs-check">시각 확인 필요</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="opp-needs-check">마감 확인 필요</span>
+                  )}
+                </strong>
+              </div>
+              <div>
+                <span>출처</span>
+                <strong>{selected.sourceName}</strong>
+              </div>
+            </div>
+            {selected.matchReason && (
+              <div className="recommendation">
+                <span className="opp-eyebrow">추천 이유</span>
+                <p>{selected.matchReason}</p>
+              </div>
+            )}
+            {selected.description && (
+              <p className="live-description">{selected.description}</p>
+            )}
+            {selected.tags.length > 0 && (
+              <div className="tag-row live-tags">
+                {selected.tags.map((tag) => (
+                  <span className="plain-tag" key={tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="live-note">
+              자격 요건과 제출 서류는 원문에서 확인해 주세요.
+            </p>
+            <div className="detail-actions">
+              <button
+                className="button primary"
+                onClick={() =>
+                  onAdd({
+                    title: selected.title,
+                    kind,
+                    date: selected.date ?? "",
+                    time: selected.time,
+                    notes: `출처: ${selected.sourceName}\n${selected.url}`,
+                    source: selected.url,
+                    isSample: false,
+                    reminders: [],
+                    idempotencyKey: selected.id,
+                  })
+                }
+              >
+                신청 일정 등록
+                <ArrowRight size={17} />
+              </button>
+              {/^https?:\/\//.test(selected.url) && (
+                <a
+                  className="button secondary"
+                  href={selected.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  원문 보기 <ArrowUpRight size={15} />
+                </a>
+              )}
+              {kind === "job" && (
+                <button
+                  className="button secondary"
+                  onClick={() =>
+                    onCoach(
+                      [
+                        selected.title,
+                        selected.organization,
+                        selected.description,
+                        selected.tags.join(", "),
+                        selected.url,
+                      ]
+                        .filter(Boolean)
+                        .join("\n"),
+                    )
+                  }
                 >
                   취업 컨설팅 <ChevronRight size={15} />
                 </button>

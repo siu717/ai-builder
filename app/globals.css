@@ -5,9 +5,12 @@
 @import "./styles/dashboard.css";
 @import "./styles/calendar.css";
 @import "./styles/opportunities.css";
+@import "./styles/live.css";
 @import "./styles/ai-tools.css";
 @import "./styles/settings.css";
 @import "./styles/modal.css";
+@import "./styles/timetable.css";
+@import "./styles/kookmin.css";
 
 .guest-label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; }
 .guest-data-section { grid-column: 1 / -1; }

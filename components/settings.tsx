@@ -24,6 +24,15 @@ import {
 } from "@/lib/contracts";
 import { Busy, Message, request } from "./ui";
 
+type BrowserPermission = NotificationPermission | "unsupported";
+
+const PERMISSION_LABELS: Record<BrowserPermission, string> = {
+  unsupported: "지원 안 함",
+  granted: "허용됨",
+  denied: "거부됨",
+  default: "요청 전",
+};
+
 export default function Settings({
   profile,
   settings,
@@ -44,9 +53,9 @@ export default function Settings({
   const [aiError, setAiError] = useState("");
   const [aiMessage, setAiMessage] = useState("");
   const [confirmAiDelete, setConfirmAiDelete] = useState(false);
-  const [permission, setPermission] = useState<
-    NotificationPermission | "unsupported"
-  >("unsupported");
+  const [permission, setPermission] =
+    useState<BrowserPermission>("unsupported");
+  const [permissionNote, setPermissionNote] = useState("");
   useEffect(() => {
     if ("Notification" in window) setPermission(Notification.permission);
   }, []);
@@ -114,13 +123,48 @@ export default function Settings({
       setBusy(null);
     }
   }
-  async function enableBrowser() {
-    if (!("Notification" in window)) return;
+  async function requestBrowserPermission() {
+    if (!("Notification" in window)) {
+      setPermission("unsupported");
+      return;
+    }
     try {
       const result = await Notification.requestPermission();
       setPermission(result);
+      setPermissionNote(
+        result === "granted"
+          ? "브라우저 알림을 허용했습니다. 테스트 알림으로 확인해 보세요."
+          : result === "denied"
+            ? "권한이 거부되어 앱 내 알림만 표시됩니다. 다시 받으려면 브라우저의 사이트 설정에서 알림을 허용해 주세요."
+            : "권한 요청을 닫았습니다. 필요할 때 다시 요청할 수 있습니다.",
+      );
     } catch {
-      setError("브라우저 알림 권한을 확인하지 못했습니다.");
+      setPermissionNote(
+        "브라우저 알림 권한을 확인하지 못했습니다. 앱 내 알림은 계속 표시됩니다.",
+      );
+    }
+  }
+  function sendTestNotification() {
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+      setPermission(
+        "Notification" in window ? Notification.permission : "unsupported",
+      );
+      setPermissionNote(
+        "브라우저 알림 권한이 허용되지 않아 테스트 알림을 보내지 않았습니다.",
+      );
+      return;
+    }
+    try {
+      new Notification("참십 Campus 테스트", {
+        body: "브라우저 알림이 켜져 있습니다.",
+      });
+      setPermissionNote(
+        "테스트 알림을 보냈습니다. 보이지 않으면 운영체제의 알림 설정(방해 금지 모드 등)을 확인해 주세요.",
+      );
+    } catch {
+      setPermissionNote(
+        "이 브라우저는 페이지에서 알림을 직접 표시하지 못합니다. 앱 내 알림으로 확인해 주세요.",
+      );
     }
   }
   async function saveAiKey(event: React.FormEvent) {
@@ -529,28 +573,46 @@ export default function Settings({
             브라우저 알림
           </h2>
         </div>
-        <div className="setting-inline">
+        <div className="setting-inline perm-row">
           <span>알림 권한</span>
           <span
-            className={`status-text ${permission === "granted" ? "status-met" : "status-unknown"}`}
+            className={`status-text ${permission === "granted" ? "status-met" : permission === "denied" ? "status-unmet" : "status-unknown"}`}
+            role="status"
+            aria-label={`브라우저 알림 권한 ${PERMISSION_LABELS[permission]}`}
           >
-            {permission === "granted"
-              ? "허용됨"
-              : permission === "denied"
-                ? "차단됨"
-                : permission === "unsupported"
-                  ? "지원하지 않는 브라우저"
-                  : "권한 대기"}
+            {PERMISSION_LABELS[permission]}
           </span>
-          <button
-            className="button secondary"
-            onClick={enableBrowser}
-            disabled={permission !== "default"}
-          >
-            <BellRing size={16} />
-            권한 요청
-          </button>
+          <div className="perm-actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={requestBrowserPermission}
+              disabled={permission === "unsupported" || permission === "granted"}
+            >
+              <BellRing size={16} />
+              알림 권한 요청
+            </button>
+            {permission === "granted" && (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={sendTestNotification}
+              >
+                <Send size={15} />
+                테스트 알림 보내기
+              </button>
+            )}
+          </div>
         </div>
+        {permissionNote && (
+          <p className="perm-note" role="status">
+            {permissionNote}
+          </p>
+        )}
+        <p className="perm-copy">
+          알림은 앱과 알림 워커가 실행 중일 때 발송되며, 권한을 거부하면 앱 내
+          알림만 표시됩니다.
+        </p>
         <div className="setting-inline">
           <span>
             <Radio size={16} />
