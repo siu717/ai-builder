@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { Client, Row } from "@libsql/client";
-import { KIND_LABELS, type EventInput } from "./contracts";
+import type { EventInput } from "./contracts";
 import { getDatabase } from "./db";
 import { getPrivateSettings } from "./store";
-import { sendTelegramMessage } from "./telegram";
+import { notificationText, sendTelegramMessage } from "./telegram";
 
 export interface ReminderWorkerOptions {
   database?: Client;
@@ -11,10 +11,6 @@ export interface ReminderWorkerOptions {
   fetcher?: typeof fetch;
   workerId?: string;
   limit?: number;
-}
-
-function notificationText(event: EventInput): string {
-  return `[캠퍼스 비서 · ${KIND_LABELS[event.kind]}]\n${event.title}\n마감: ${event.date}${event.time ? ` ${event.time} (한국 시간)` : " (시각 확인 필요)"}${event.notes ? `\n${event.notes.slice(0, 1000)}` : ""}`;
 }
 
 async function cancelClaim(database: Client, reminder: Row, workerId: string, error: string) {

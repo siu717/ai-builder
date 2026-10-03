@@ -1,3 +1,5 @@
+import { KIND_LABELS, type EventInput } from "./contracts";
+
 export interface TelegramResult {
   ok: boolean;
   error?: string;
@@ -50,4 +52,8 @@ export async function sendTelegramMessage(token: string, chatId: string, text: s
 export async function verifyTelegramBot(token: string, fetcher = fetch): Promise<{ ok: boolean; username: string | null; error?: string }> {
   const response = await requestTelegram(token, "getMe", {}, fetcher);
   return { ok: response.result.ok, username: response.username || null, error: response.result.error };
+}
+
+export function notificationText(event: EventInput): string {
+  return `[캠퍼스 비서 · ${KIND_LABELS[event.kind]}]\n${event.title}\n마감: ${event.date}${event.time ? ` ${event.time} (한국 시간)` : " (시각 확인 필요)"}${event.notes ? `\n${event.notes.slice(0, 1000)}` : ""}`;
 }

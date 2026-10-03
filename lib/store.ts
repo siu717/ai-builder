@@ -4,7 +4,7 @@ import { DATA_PROVIDERS, DEFAULT_PROFILE, type AppState, type DataProvider, type
 import { getDatabase } from "./db";
 import { RouteError } from "./http";
 import { aiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
-import { sendTelegramMessage, verifyTelegramBot } from "./telegram";
+import { notificationText, sendTelegramMessage, verifyTelegramBot } from "./telegram";
 import { isAnonymousPublicMode } from "./anonymous-session";
 
 type Executor = Client | Transaction;
@@ -210,7 +210,7 @@ export async function createEvent(input: unknown, database?: Client, now = new D
   return getState(db);
 }
 
-export async function updateEvent(id: string, input: unknown, database?: Client, now = new Date()): Promise<AppState> {
+export async function updateEvent(id: string, input: unknown, database?: Client, now = new Date(), expectedEvent?: CalendarEvent): Promise<AppState> {
   const completedOnly = typeof input === "object" && input !== null && !Array.isArray(input) && Object.keys(input).length === 1 && "completed" in input && typeof input.completed === "boolean";
   const replacement = completedOnly ? null : validateEvent(input, now);
   const db = database || await getDatabase();
@@ -221,6 +221,10 @@ export async function updateEvent(id: string, input: unknown, database?: Client,
     const row = result.rows[0];
     const revision = Number(row.revision) + 1;
     const oldEvent = eventFromRow(row);
+    // 자동 등록이 읽은 뒤 사용자가 고쳤다면 자동 갱신으로 덮어쓰지 않는다.
+    if (expectedEvent && JSON.stringify(expectedEvent) !== JSON.stringify(oldEvent)) {
+      throw new RouteError(409, "일정이 변경되었습니다. 최신 내용으로 다시 처리해주세요.");
+    }
     if (completedOnly) {
       const completed = (input as { completed: boolean }).completed;
       if (oldEvent.completed !== completed) {
@@ -234,6 +238,10 @@ export async function updateEvent(id: string, input: unknown, database?: Client,
     } else if (replacement) {
       // 체크리스트가 없는 기존 요청으로 저장해도 준비 상태를 보존한다.
       const next = { ...replacement, checklist: replacement.checklist ?? oldEvent.checklist ?? [] };
+      // 사용자가 제목·마감·출처를 직접 바꾼 자동 등록 일정은 이후 공지 갱신 대상에서 제외한다.
+      if (!expectedEvent && (next.title !== oldEvent.title || next.date !== oldEvent.date || next.time !== oldEvent.time || next.source !== oldEvent.source)) {
+        await tx.execute({ sql: "UPDATE scholarship_imports SET ignored = 1 WHERE event_id = ?", args: [id] });
+      }
       const reminderKey = (event: EventInput) => JSON.stringify({
         title: event.title,
         kind: event.kind,
@@ -265,6 +273,7 @@ export async function deleteEvent(id: string, database?: Client): Promise<AppSta
   const db = database || await getDatabase();
   const tx = await db.transaction("write");
   try {
+    await tx.execute({ sql: "UPDATE scholarship_imports SET ignored = 1 WHERE event_id = ?", args: [id] });
     const result = await tx.execute({ sql: "DELETE FROM campus_events WHERE id = ?", args: [id] });
     if (!result.rowsAffected) throw new RouteError(404, "일정을 찾을 수 없습니다.");
     await tx.execute({ sql: "UPDATE campus_reminders SET status = 'cancelled', error = '삭제한 일정의 알림을 취소했습니다.', next_attempt_at = NULL, lease_until = NULL, claimed_by = NULL WHERE event_id = ? AND status IN ('pending', 'sending', 'failed')", args: [id] });
@@ -310,7 +319,15 @@ export async function markNotificationsRead(ids: string[] | undefined, database?
 export async function testTelegram(database?: Client, fetcher = fetch) {
   const settings = await getPrivateSettings(database);
   if (!settings.token || !settings.chatId) throw new RouteError(400, "봇 토큰과 Chat ID를 먼저 저장해주세요.");
-  const result = await sendTelegramMessage(settings.token, settings.chatId, "[캠퍼스 비서] 테스트 알림입니다. 일정 알림이 이 대화로 도착합니다.", fetcher);
+  // 발표·점검용: 가장 가까운 진행 중 일정을 실제 알림과 같은 형식으로 보낸다. 예약 상태는 바꾸지 않는다.
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+  const upcoming = (await getState(database)).events
+    .filter((event) => !event.completed && event.date >= today)
+    .sort((a, b) => `${a.date} ${a.time || "23:59"}`.localeCompare(`${b.date} ${b.time || "23:59"}`))[0];
+  const text = upcoming
+    ? `[테스트 알림] 실제 알림은 아래 형식으로 도착합니다.\n\n${notificationText(upcoming)}`
+    : "[캠퍼스 비서] 테스트 알림입니다. 일정 알림이 이 대화로 도착합니다.";
+  const result = await sendTelegramMessage(settings.token, settings.chatId, text, fetcher);
   if (!result.ok) throw new RouteError(result.retryAfter ? 429 : 502, result.error || "테스트 알림을 보내지 못했습니다.");
-  return { ok: true, message: "텔레그램 테스트 알림을 보냈습니다." };
+  return { ok: true, message: upcoming ? `텔레그램으로 "${upcoming.title}" 알림을 테스트 발송했습니다.` : "텔레그램 테스트 알림을 보냈습니다." };
 }

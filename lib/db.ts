@@ -12,6 +12,15 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS campus_reminders_due ON campus_reminders(status, scheduled_at, next_attempt_at)`,
   `CREATE INDEX IF NOT EXISTS campus_reminders_event ON campus_reminders(event_id)`,
   `INSERT OR IGNORE INTO campus_settings(id) VALUES (1)`,
+  // 국민대 장학공지: 자동 등록 규칙과 등록 이력은 방문자별, 수집한 공지는 공용 DB에 둔다.
+  `CREATE TABLE IF NOT EXISTS scholarship_preferences (id INTEGER PRIMARY KEY CHECK(id = 1), enabled INTEGER NOT NULL DEFAULT 0, keywords TEXT NOT NULL DEFAULT '')`,
+  `INSERT OR IGNORE INTO scholarship_preferences(id) VALUES (1)`,
+  `CREATE TABLE IF NOT EXISTS scholarship_imports (notice_id TEXT PRIMARY KEY, event_id TEXT NOT NULL, content_hash TEXT NOT NULL, ignored INTEGER NOT NULL DEFAULT 0)`,
+];
+
+const SHARED_SCHEMA = [
+  `CREATE TABLE IF NOT EXISTS scholarship_notices (id TEXT PRIMARY KEY, url TEXT NOT NULL UNIQUE, value TEXT NOT NULL, content_hash TEXT NOT NULL, collected_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS collection_state (source TEXT PRIMARY KEY, last_attempt TEXT, last_success TEXT, next_run TEXT, lease_until TEXT, lease_token TEXT, error TEXT, count INTEGER NOT NULL DEFAULT 0)`,
 ];
 
 async function protectSidecars(path: string): Promise<void> {
@@ -73,7 +82,26 @@ export async function getDatabase(): Promise<Client> {
     if (!session) throw new RouteError(403, "방문자 세션이 필요합니다. 페이지를 새로고침해주세요.");
     return getAnonymousDatabase(session);
   }
-  database ??= createDatabase(process.env.DATABASE_URL || "file:data/campus.db");
+  return getSharedDatabase();
+}
+
+export async function createSharedDatabase(databaseUrl: string): Promise<Client> {
+  const client = await createDatabase(databaseUrl);
+  try {
+    await client.batch(SHARED_SCHEMA, "write");
+    return client;
+  } catch (error) {
+    client.close();
+    throw error;
+  }
+}
+
+// 방문자와 무관한 데이터(수집한 학교 공지)를 담는 DB. 비밀번호 보호 모드에서는 개인 DB와 같다.
+export function getSharedDatabase(): Promise<Client> {
+  database ??= createSharedDatabase(process.env.DATABASE_URL || "file:data/campus.db").catch((error) => {
+    database = undefined;
+    throw error;
+  });
   return database;
 }
 
