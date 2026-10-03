@@ -88,6 +88,9 @@ export interface PublicSettings {
   workerLastSeen: string | null;
   aiConfigured: boolean;
   aiKeySource: KeySource;
+  openaiKeySource: KeySource;
+  // AI 분석에 실제로 쓰는 공급자: Claude 키가 있으면 Claude, 없으면 OpenAI
+  aiProvider: "anthropic" | "openai" | null;
   dataKeys: Record<DataProvider, KeySource>;
 }
 
@@ -157,7 +160,7 @@ export interface BackupFile {
 export interface StorageOverview {
   accessMode: "anonymous" | "private";
   database: { path: string | null; sizeBytes: number | null; modifiedAt: string | null };
-  keys: { anthropic: string | null; aiProvider: "anthropic" | "openai" | "unknown" | null; dataGoKr: string | null; saramin: string | null; telegramToken: string | null };
+  keys: { anthropic: string | null; openai: string | null; aiProvider: "anthropic" | "openai" | null; dataGoKr: string | null; saramin: string | null; telegramToken: string | null };
   telegram: { chatId: string; enabled: boolean; botUsername: string | null };
   profile: Profile;
   counts: { events: number; reminders: number; sentReminders: number; scholarshipNotices: number };

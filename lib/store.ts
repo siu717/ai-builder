@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import { DATA_PROVIDERS, DEFAULT_PROFILE, type AppState, type DataProvider, type KeySource, type CalendarEvent, type EventInput, type KookminImportResult, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
 import { getDatabase } from "./db";
 import { RouteError } from "./http";
-import { aiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
+import { aiSettingsSchema, openAiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
 import { notificationText, sendTelegramMessage, verifyTelegramBot } from "./telegram";
 import { isAnonymousPublicMode } from "./anonymous-session";
 
@@ -81,6 +81,25 @@ export async function getAnthropicApiKey(database?: Client): Promise<string> {
   return (await getAnthropicConfiguration(database)).key;
 }
 
+async function getOpenAIConfiguration(database?: Client) {
+  const db = database || await getDatabase();
+  const result = await db.execute("SELECT openai_api_key FROM campus_settings WHERE id = 1");
+  const saved = String(result.rows[0]?.openai_api_key || "").trim();
+  const environment = environmentCredential("OPENAI_API_KEY").trim();
+  return {
+    key: saved || environment,
+    source: saved ? "saved" as const : environment ? "environment" as const : null,
+  };
+}
+
+// AI 분석에 쓸 키. Claude 키를 먼저 쓰고, 없으면 OpenAI 키를 쓴다.
+export async function getAIKey(database?: Client): Promise<{ provider: "anthropic" | "openai"; key: string } | null> {
+  const anthropic = await getAnthropicConfiguration(database);
+  if (anthropic.key) return { provider: "anthropic", key: anthropic.key };
+  const openai = await getOpenAIConfiguration(database);
+  return openai.key ? { provider: "openai", key: openai.key } : null;
+}
+
 const DATA_KEYS: Record<DataProvider, { column: string; environment: string }> = {
   dataGoKr: { column: "data_go_kr_api_key", environment: "DATA_GO_KR_API_KEY" },
   saramin: { column: "saramin_api_key", environment: "SARAMIN_API_KEY" },
@@ -112,6 +131,7 @@ function normalizeDataKey(provider: DataProvider, key: string): string {
 export async function getPublicSettings(database?: Client): Promise<PublicSettings> {
   const settings = await getPrivateSettings(database);
   const ai = await getAnthropicConfiguration(database);
+  const openai = await getOpenAIConfiguration(database);
   const dataKeys = Object.fromEntries(await Promise.all(
     DATA_PROVIDERS.map(async (provider) => [provider, (await getDataKeyConfiguration(provider, database)).source]),
   )) as Record<DataProvider, KeySource>;
@@ -121,8 +141,10 @@ export async function getPublicSettings(database?: Client): Promise<PublicSettin
     telegramChatId: settings.chatId,
     botUsername: settings.botUsername,
     workerLastSeen: settings.workerLastSeen,
-    aiConfigured: Boolean(ai.key),
+    aiConfigured: Boolean(ai.key || openai.key),
     aiKeySource: ai.source,
+    openaiKeySource: openai.source,
+    aiProvider: ai.key ? "anthropic" : openai.key ? "openai" : null,
     dataKeys,
     accessMode: isAnonymousPublicMode() ? "anonymous" : "private",
   };
@@ -147,6 +169,17 @@ export async function saveAnthropicApiKey(input: unknown, database?: Client): Pr
   return getState(db);
 }
 
+export async function saveOpenAIApiKey(input: unknown, database?: Client): Promise<AppState> {
+  const settings = openAiSettingsSchema.parse(input);
+  const db = database || await getDatabase();
+  await db.execute({ sql: "UPDATE campus_settings SET openai_api_key = ? WHERE id = 1", args: [settings.apiKey] });
+  return getState(db);
+}
+export async function deleteOpenAIApiKey(database?: Client): Promise<AppState> {
+  const db = database || await getDatabase();
+  await db.execute("UPDATE campus_settings SET openai_api_key = '' WHERE id = 1");
+  return getState(db);
+}
 export async function deleteAnthropicApiKey(database?: Client): Promise<AppState> {
   const db = database || await getDatabase();
   await db.execute("UPDATE campus_settings SET anthropic_api_key = '' WHERE id = 1");

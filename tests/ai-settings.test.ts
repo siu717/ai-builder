@@ -6,9 +6,9 @@ import { join } from "node:path";
 import { test, type TestContext } from "node:test";
 import { DELETE, PUT } from "../app/api/settings/ai/route";
 import { closeDatabase, createDatabase } from "../lib/db";
-import { deleteAnthropicApiKey, getAnthropicApiKey, getState, saveAnthropicApiKey } from "../lib/store";
+import { deleteAnthropicApiKey, deleteOpenAIApiKey, getAIKey, getAnthropicApiKey, getState, saveAnthropicApiKey, saveOpenAIApiKey } from "../lib/store";
 import { apiError } from "../lib/http";
-import { aiSettingsSchema } from "../lib/validation";
+import { aiSettingsSchema, openAiSettingsSchema } from "../lib/validation";
 
 const savedKey = "sk-ant-test-saved-sensitive-001";
 const environmentKey = "sk-ant-test-environment-sensitive-002";
@@ -87,8 +87,10 @@ test("blank, excessive, whitespace and control-character saves reject and preser
     assert.equal(await getAnthropicApiKey(db), savedKey);
   }
   assert.equal(aiSettingsSchema.parse({ apiKey: `sk-ant-${"x".repeat(4089)}` }).apiKey.length, 4096);
-  assert.equal(aiSettingsSchema.parse({ apiKey: "sk-proj-openai-style-key" }).apiKey, "sk-proj-openai-style-key");
-  assert.throws(() => aiSettingsSchema.parse({ apiKey: "AIza-not-supported" }), /OpenAI/);
+  assert.throws(() => aiSettingsSchema.parse({ apiKey: "sk-proj-openai-style-key" }), /OpenAI 칸/);
+  assert.equal(openAiSettingsSchema.parse({ apiKey: "sk-proj-openai-style-key" }).apiKey, "sk-proj-openai-style-key");
+  assert.throws(() => openAiSettingsSchema.parse({ apiKey: "sk-ant-claude-key" }), /Claude 칸/);
+  assert.throws(() => openAiSettingsSchema.parse({ apiKey: "AIza-not-supported" }), /sk-/);
 });
 
 test("legacy databases migrate once under concurrent initialization and preserve Telegram settings", async (t) => {
@@ -188,4 +190,32 @@ test("AI settings routes require same-origin JSON, redact responses and delete w
   } finally {
     await closeDatabase();
   }
+});
+
+test("an OpenAI key saved in the Claude field moves to the OpenAI field, and Claude is preferred when both exist", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "campus-ai-move-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const path = join(directory, "campus.db");
+  const first = await createDatabase(`file:${path}`);
+  await first.execute("UPDATE campus_settings SET anthropic_api_key = 'sk-Ngx1legacy-openai-key', openai_api_key = '' WHERE id = 1");
+  first.close();
+  const reopened = await createDatabase(`file:${path}`);
+  t.after(() => reopened.close());
+  const row = (await reopened.execute("SELECT anthropic_api_key, openai_api_key FROM campus_settings")).rows[0];
+  assert.equal(row.anthropic_api_key, "");
+  assert.equal(row.openai_api_key, "sk-Ngx1legacy-openai-key");
+  let settings = (await getState(reopened)).settings;
+  assert.equal(settings.aiProvider, "openai");
+  assert.equal(settings.openaiKeySource, "saved");
+  assert.equal(settings.aiKeySource, null);
+  assert.equal(await getAIKey(reopened).then((key) => key?.provider), "openai");
+
+  await saveAnthropicApiKey({ apiKey: "sk-ant-test-claude" }, reopened);
+  settings = (await getState(reopened)).settings;
+  assert.equal(settings.aiProvider, "anthropic", "Claude is used when both keys exist");
+  assert.deepEqual(await getAIKey(reopened), { provider: "anthropic", key: "sk-ant-test-claude" });
+  await deleteOpenAIApiKey(reopened);
+  assert.equal((await getState(reopened)).settings.openaiKeySource, null);
+  await assert.rejects(saveOpenAIApiKey({ apiKey: "sk-ant-wrong-field" }, reopened), /Claude 칸/);
+  assert.ok(!JSON.stringify(await getState(reopened)).includes("sk-ant-test-claude"));
 });

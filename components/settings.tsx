@@ -183,7 +183,7 @@ export default function Settings({
       setAiKey("");
       setConfirmAiDelete(false);
       onSave(state);
-      setAiMessage("AI 분석용 API 키를 저장했습니다.");
+      setAiMessage("Claude API 키를 저장했습니다.");
     } catch (err) {
       setAiError(
         err instanceof Error ? err.message : "API 키를 저장하지 못했습니다.",
@@ -465,16 +465,19 @@ export default function Settings({
           <span
             className={`status-text ${settings.aiConfigured ? "status-met" : "status-unknown"}`}
           >
-            {settings.aiKeySource === "saved"
-              ? "설정됨"
-              : settings.aiKeySource === "environment"
-                ? "환경변수 사용"
+            {settings.aiProvider === "anthropic"
+              ? "Claude 사용 중"
+              : settings.aiProvider === "openai"
+                ? "OpenAI 사용 중"
                 : "키 미설정"}
           </span>
         </div>
         <form onSubmit={saveAiKey} className="ai-key-form">
+          <p className="data-key-hint">
+            Claude 키가 있으면 Claude로, 없으면 OpenAI로 분석합니다. 공지 자동 분석과 공고 분석·컨설팅에 쓰입니다.
+          </p>
           <label className="field">
-            AI API 키 (Anthropic · OpenAI)
+            Claude API 키 (sk-ant-…)
             <input
               type="password"
               autoComplete="new-password"
@@ -483,8 +486,8 @@ export default function Settings({
               onChange={(event) => setAiKey(event.target.value)}
               placeholder={
                 settings.aiKeySource === "saved"
-                  ? "새 API 키 입력"
-                  : "API 키 입력"
+                  ? "저장됨 · 새 Claude 키 입력"
+                  : "console.anthropic.com에서 발급한 키"
               }
             />
           </label>
@@ -548,6 +551,12 @@ export default function Settings({
           {aiError && <Message text={aiError} error />}
           {aiMessage && <Message text={aiMessage} />}
         </form>
+        <OpenAIKeyForm
+          settings={settings}
+          busy={busy}
+          setBusy={setBusy}
+          onSave={onSave}
+        />
       </section>
       <section
         className="settings-section browser-section"
@@ -694,15 +703,14 @@ function StoredData({ settings }: { settings: PublicSettings }) {
   const rows: [string, string | null][] = overview
     ? [
         [
-          "AI API 키",
+          "Claude API 키",
           overview.keys.anthropic &&
-            `${overview.keys.anthropic} · ${
-              overview.keys.aiProvider === "anthropic"
-                ? "Anthropic (Claude)"
-                : overview.keys.aiProvider === "openai"
-                  ? "OpenAI"
-                  : "형식을 알 수 없는 키입니다. AI 분석이 실패합니다."
-            }`,
+            `${overview.keys.anthropic}${overview.keys.aiProvider === "anthropic" ? " · AI 분석에 사용 중" : ""}`,
+        ],
+        [
+          "OpenAI API 키",
+          overview.keys.openai &&
+            `${overview.keys.openai}${overview.keys.aiProvider === "openai" ? " · AI 분석에 사용 중" : " · Claude 키가 있어 대기"}`,
         ],
         ["공공데이터포털 키", overview.keys.dataGoKr],
         ["사람인 키", overview.keys.saramin],
@@ -811,6 +819,112 @@ function StoredData({ settings }: { settings: PublicSettings }) {
         </>
       )}
     </section>
+  );
+}
+
+// OpenAI 키 칸. Claude 키가 없을 때 AI 분석에 쓰인다.
+function OpenAIKeyForm({
+  settings,
+  busy,
+  setBusy,
+  onSave,
+}: {
+  settings: PublicSettings;
+  busy: string | null;
+  setBusy: (value: string | null) => void;
+  onSave: (state: AppState) => void;
+}) {
+  const [key, setKey] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    if (!key.trim() || busy !== null) return;
+    setBusy("openai-save");
+    setError("");
+    setMessage("");
+    try {
+      onSave(await request<AppState>("/api/settings/openai", "PUT", { apiKey: key.trim() }));
+      setKey("");
+      setConfirmDelete(false);
+      setMessage("OpenAI API 키를 저장했습니다.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "API 키를 저장하지 못했습니다.");
+    } finally {
+      setBusy(null);
+    }
+  }
+  async function remove() {
+    if (busy !== null) return;
+    setBusy("openai-delete");
+    setError("");
+    setMessage("");
+    try {
+      onSave(await request<AppState>("/api/settings/openai", "DELETE"));
+      setConfirmDelete(false);
+      setMessage("저장된 OpenAI API 키를 삭제했습니다.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "API 키를 삭제하지 못했습니다.");
+    } finally {
+      setBusy(null);
+    }
+  }
+  return (
+    <form onSubmit={save} className="ai-key-form openai-key-form">
+      <label className="field">
+        OpenAI API 키 (sk-…)
+        <input
+          type="password"
+          autoComplete="new-password"
+          value={key}
+          disabled={busy !== null}
+          onChange={(event) => setKey(event.target.value)}
+          placeholder={
+            settings.openaiKeySource === "saved"
+              ? "저장됨 · 새 OpenAI 키 입력"
+              : "platform.openai.com에서 발급한 키"
+          }
+        />
+      </label>
+      <div className="inline-actions">
+        <button type="submit" className="button primary" disabled={busy !== null || !key.trim()}>
+          {busy === "openai-save" ? (
+            <Busy label="저장 중" />
+          ) : (
+            <>
+              <Save size={16} />
+              OpenAI 키 저장
+            </>
+          )}
+        </button>
+        {settings.openaiKeySource === "saved" && (
+          <button
+            type="button"
+            className="icon-button danger-text"
+            title="저장된 OpenAI 키 삭제"
+            aria-label="저장된 OpenAI 키 삭제"
+            disabled={busy !== null}
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
+      {confirmDelete && settings.openaiKeySource === "saved" && (
+        <div className="delete-confirm" role="group" aria-label="OpenAI 키 삭제 확인">
+          <span>저장된 OpenAI 키를 삭제할까요?</span>
+          <button type="button" className="button danger" disabled={busy !== null} onClick={remove}>
+            {busy === "openai-delete" ? <Busy label="삭제 중" /> : "OpenAI 키 삭제"}
+          </button>
+          <button type="button" className="text-button" disabled={busy !== null} onClick={() => setConfirmDelete(false)}>
+            취소
+          </button>
+        </div>
+      )}
+      {error && <Message text={error} error />}
+      {message && <Message text={message} />}
+    </form>
   );
 }
 
