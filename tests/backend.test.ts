@@ -107,3 +107,14 @@ test("mutations reject foreign and null browser origins", () => {
   assert.throws(() => assertSameOrigin(new Request("http://127.0.0.1:3000/api/events", { headers: { "sec-fetch-site": "cross-site" } })));
   assert.doesNotThrow(() => assertSameOrigin(new Request("http://127.0.0.1:3000/api/events", { headers: { origin: "http://127.0.0.1:3000" } })));
 });
+
+test("same-origin checks use the received loopback Host when Next rewrites its internal URL", () => {
+  assert.doesNotThrow(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3000", "sec-fetch-site": "same-origin" } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request("http://127.0.0.1:3000/api/events", { headers: { host: "localhost:3000", origin: "http://localhost:3000" } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "[::1]:3000", origin: "http://[::1]:3000" } })));
+  assert.throws(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3001" } })));
+  assert.throws(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "foreign.example:3000", origin: "http://foreign.example:3000" } })));
+  assert.throws(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "foreign.example@127.0.0.1:3000", origin: "http://127.0.0.1:3000" } })));
+  assert.throws(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000/extra", origin: "http://127.0.0.1:3000" } })));
+  assert.throws(() => assertSameOrigin(new Request("http://localhost:3000/api/events", { headers: { host: "127.0.0.1:3000", origin: "https://foreign.example", "x-forwarded-host": "foreign.example" } })));
+});

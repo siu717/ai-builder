@@ -22,7 +22,7 @@ test("preparation checklist saves edits and progress on desktop and mobile", asy
   const reminders = initial.notifications.filter((item) => item.eventId === saved.id);
 
   async function openEvent() {
-    await page.getByRole("button", { name: "캘린더", exact: true }).click();
+    await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "캘린더", exact: true }).click();
     await page.getByRole("button", { name: "마감순", exact: true }).click();
     await page.locator(".event-title-button").filter({ hasText: title }).click();
   }
@@ -65,7 +65,7 @@ test("preparation checklist saves edits and progress on desktop and mobile", asy
 
 test("scholarship documents become an editable preparation list before saving", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "장학금", exact: true }).click();
+  await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "장학금", exact: true }).click();
   const documents = await page.locator(".opportunity-detail .documents li").allTextContents();
   expect(documents.length).toBeGreaterThan(0);
   await page.getByRole("button", { name: "신청 일정 등록", exact: true }).click();
@@ -79,7 +79,7 @@ test("scholarship documents become an editable preparation list before saving", 
 
 test("coaching preparation tasks can be collected into one checklist with a user-chosen date", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "취업 컨설팅", exact: true }).click();
+  await page.getByRole("navigation", { name: "주 메뉴" }).getByRole("button", { name: "취업 컨설팅", exact: true }).click();
   await page.getByRole("button", { name: "샘플 컨설팅", exact: true }).click();
   await expect(page.getByRole("button", { name: "준비 계획 한 번에 등록", exact: true })).toBeVisible();
   const tasks = await page.locator(".coaching-task strong").allTextContents();

@@ -10,7 +10,21 @@ export class RouteError extends Error {
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
   const site = request.headers.get("sec-fetch-site");
-  if ((origin && origin !== new URL(request.url).origin) || (site && !["same-origin", "none"].includes(site))) {
+  const url = new URL(request.url);
+  const receivedHost = request.headers.get("host") || url.host;
+  if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/i.test(receivedHost) || !["http:", "https:"].includes(url.protocol)) {
+    throw new RouteError(403, "같은 앱에서 보낸 요청만 허용됩니다.");
+  }
+  let receivedOrigin: URL;
+  try {
+    // Next may use its internal hostname in Request.url; Host is the browser's address.
+    receivedOrigin = new URL(`${url.protocol}//${receivedHost}`);
+  } catch {
+    throw new RouteError(403, "같은 앱에서 보낸 요청만 허용됩니다.");
+  }
+  const localHost = ["localhost", "127.0.0.1", "[::1]"].includes(receivedOrigin.hostname);
+  const validHost = localHost && !receivedOrigin.username && !receivedOrigin.password && receivedOrigin.pathname === "/" && !receivedOrigin.search && !receivedOrigin.hash;
+  if (!validHost || (origin && origin !== receivedOrigin.origin) || (site && !["same-origin", "none"].includes(site))) {
     throw new RouteError(403, "같은 앱에서 보낸 요청만 허용됩니다.");
   }
 }
