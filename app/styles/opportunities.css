@@ -163,3 +163,17 @@
 .exam-steps .text-button { justify-self: end; font-size: var(--text-sm); font-weight: 600; }
 .exam-steps li.past, .exam-steps li.past .exam-step-date { color: var(--ink-4); font-weight: 400; }
 .exam-steps li.past .text-button { color: var(--ink-4); opacity: 1; }
+
+/* ---------- 국민대 장학공지: 자동 등록 설정 ---------- */
+.automation-settings { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px 40px; align-items: end; margin-bottom: 28px; padding: 22px 24px; background: var(--surface-2); border-top: 2px solid var(--line-strong); word-break: keep-all; }
+.automation-copy h2 { margin-top: 6px; font-size: var(--text-xl); font-weight: 700; color: var(--ink); }
+.automation-copy p { margin-top: 8px; font-size: var(--text-sm); line-height: 1.7; color: var(--ink-3); }
+.automation-fields { display: grid; gap: 4px; }
+.automation-fields .field { margin-bottom: 8px; }
+.automation-fields .field input { min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.automation-fields .button { justify-self: start; min-height: 48px; border-radius: 0; }
+.attachment-list li a { color: var(--kmu-blue); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.detail-actions a.button { text-decoration: none; }
+@media (max-width: 760px) {
+  .automation-settings { grid-template-columns: minmax(0, 1fr); padding: 18px 16px; }
+}

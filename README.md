@@ -91,7 +91,7 @@ npx playwright test -c playwright.public.config.ts
 
 `npm start`는 빌드된 웹 서버와 알림 프로세스를 함께 실행한다. 웹 서버는 기본적으로 `127.0.0.1`에 연결한다. 공개 배포에서도 지속 실행할 알림 프로세스가 필요하다. 서버리스 배포 시 예약 발송은 별도 worker 또는 cron 구성이 필요하다.
 
-공개 데모는 `PUBLIC_ACCESS_MODE=anonymous`를 기본값으로 사용해 로그인 없이 열린다. 서명된 HttpOnly 게스트 쿠키로 브라우저별 DB를 `PUBLIC_SESSION_DIR`에 분리하며 기존 개인 DB와 운영자 환경변수 자격증명은 공개하지 않는다. 쿠키 삭제 또는 30일 만료 후 저장 데이터에 다시 접근할 수 없고, 다른 브라우저로 이전하거나 계정을 복구하는 기능은 없다. 같은 브라우저를 공유하면 데이터와 저장된 키도 공유하므로 공용 기기에 개인 키를 저장하지 않는다. 개인용 비밀번호 보호는 `PUBLIC_ACCESS_MODE=private`로 선택한다. 공개 방법과 Docker 구성은 [배포 런북](docs/INFRA.md)을 따른다.
+공개 데모는 DB 하나(`data/public-demo.db`)를 사용해 설정·API 키·텔레그램 설정을 재시작 후에도 유지하며, 사이트 비밀번호(`BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`)를 켜고 공개한다. `scripts/share-public.sh`는 시작할 때마다 DB를 백업하고, DB 파일이 없으면 빈 DB를 만들지 않고 멈춘다. 공개 방법과 Docker 구성은 [배포 런북](docs/INFRA.md)을 따른다.
 
 ---
 ## 주제 정리

@@ -452,6 +452,15 @@ export default function CampusApp() {
     );
 
   const current = NAV.find((item) => item.id === view)!;
+  async function testTelegram() {
+    setError("");
+    try {
+      const result = await request<{ ok: true; message: string }>("/api/telegram/test", "POST", {});
+      setToast(result.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "테스트 알림을 보내지 못했습니다.");
+    }
+  }
   const unread = app.notifications.filter(
     (item) =>
       (item.status === "sent" || item.status === "failed") && !item.read,
@@ -651,6 +660,7 @@ export default function CampusApp() {
               }}
               dataKeyReady={Boolean(app.settings.dataKeys.dataGoKr)}
               onSettings={() => setView("settings")}
+              onState={applyState}
             />
           )}
           {view === "coaching" && (
@@ -675,6 +685,8 @@ export default function CampusApp() {
               onRead={readNotifications}
               onEdit={editEvent}
               onSettings={() => setView("settings")}
+              telegramConfigured={app.settings.telegramConfigured}
+              onTelegramTest={testTelegram}
             />
           )}
           {view === "settings" && (
@@ -1123,14 +1135,19 @@ function Notifications({
   onRead,
   onEdit,
   onSettings,
+  telegramConfigured,
+  onTelegramTest,
 }: {
   notifications: ReminderRecord[];
   events: CalendarEvent[];
   onRead: (ids?: string[]) => void;
   onEdit: (event: CalendarEvent) => void;
   onSettings: () => void;
+  telegramConfigured: boolean;
+  onTelegramTest: () => Promise<void>;
 }) {
   const [filter, setFilter] = useState("received");
+  const [testing, setTesting] = useState(false);
   const records = notifications
     .filter((item) =>
       filter === "received"
@@ -1187,6 +1204,30 @@ function Notifications({
         >
           <CheckCheck size={16} />
           모두 읽음
+        </button>
+        <button
+          type="button"
+          className="button secondary telegram-test-button"
+          disabled={testing}
+          title={telegramConfigured ? "가장 가까운 일정을 텔레그램으로 보내 봅니다." : "설정에서 텔레그램 봇을 먼저 연결하세요."}
+          onClick={async () => {
+            if (!telegramConfigured) return onSettings();
+            setTesting(true);
+            try {
+              await onTelegramTest();
+            } finally {
+              setTesting(false);
+            }
+          }}
+        >
+          {testing ? (
+            <Busy label="발송 중" />
+          ) : (
+            <>
+              <Send size={15} />
+              {telegramConfigured ? "텔레그램 테스트 알림" : "텔레그램 연결하기"}
+            </>
+          )}
         </button>
       </div>
       {!records.length ? (

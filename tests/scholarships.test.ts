@@ -1,0 +1,127 @@
+import assert from "node:assert/strict";
+import { test, type TestContext } from "node:test";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createDatabase, createSharedDatabase } from "../lib/db";
+import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, parseNoticeLinks, parseScholarship, saveScholarshipPreferences, syncScholarshipEvents } from "../lib/scholarships";
+import { deleteEvent, getState, updateEvent } from "../lib/store";
+import type { EventInput } from "../lib/contracts";
+const now = new Date("2026-10-03T00:00:00Z");
+const url = "https://www.kookmin.ac.kr/user/kmuNews/notice/7/12345/view.do";
+const detail = (body: string) => `<div class="board_view"><p class="view_tit">소프트웨어 생활비 장학금</p><div class="board_etc">작성일 2026.10.01</div><div class="view_inner">${body}</div></div>`;
+const html = detail("<p>신청기간: 2026.10.01.(목) ~ 10.15.(목) 18:00</p><p>제출서류: 재학증명서</p>");
+const list = `<div class="board_list"><a href="${url}?currentPageNo=1">공지</a><a href="${url}?currentPageNo=2">중복</a><a href="https://other.example/evil">외부</a></div>`;
+async function fixture(t: TestContext) {
+  const directory = await mkdtemp(join(tmpdir(), "campus-crawl-"));
+  const shared = await createSharedDatabase(`file:${join(directory, "shared.db")}`);
+  const user = await createDatabase(`file:${join(directory, "student.db")}`);
+  t.after(async () => { shared.close(); user.close(); await rm(directory, { recursive: true, force: true }); });
+  return { shared, user };
+}
+test("official HTML parser deduplicates links and retains deadline evidence", () => {
+  assert.deepEqual(parseNoticeLinks(list), [url]);
+  const notice = parseScholarship(html, url, now);
+  assert.equal(notice.deadline, "2026-10-15"); assert.equal(notice.time, "18:00");
+  assert.equal(notice.needsReview, false); assert.match(notice.evidence!, /신청기간/);
+  assert.ok(notice.documents[0].includes("재학증명서"));
+  assert.equal(notice.id, "kookmin:12345");
+  assert.throws(() => parseScholarship("<html>로그인하세요</html>", url));
+  assert.throws(() => parseNoticeLinks("<html>서비스 점검</html>"));
+});
+test("ambiguous, image-only, impossible and missing deadlines require review without fabricated time", () => {
+  assert.equal(parseScholarship(detail('<img src="poster.png">'), url).deadline, null);
+  assert.equal(extractDeadline("신청기간: 추후 공지", "2026-10-01").deadline, null);
+  assert.equal(extractDeadline("신청마감: 2026.02.30", "2026-10-01").deadline, null);
+  assert.equal(extractDeadline("신청마감: 10.15", null).deadline, null);
+  assert.equal(extractDeadline("신청마감: 2026.10.15\n접수기한: 2026.10.20", "2026-10-01").deadline, null);
+  assert.equal(extractDeadline("신청마감: 2026.10.15", "2026-10-01").time, null);
+  assert.equal(extractDeadline("신청기간: 2026.10.15 24:00", "2026-10-01").deadline, null);
+  assert.equal(extractDeadline("신청기한: 2026.09.09.(수) ~ 모집 완료시 까지", "2026-09-01").deadline, null);
+  assert.equal(extractDeadline("신청기간: 2026.12.20 ~ 1.10", "2026-12-01").deadline, null);
+  assert.equal(extractDeadline("신청기간: 2026.10.10 ~", "2026-10-01").deadline, null);
+  assert.equal(extractDeadline("신청마감: 2026년 10월 14일(수)(22:59)", "2026-10-01").time, "22:59");
+  assert.equal(extractDeadline("신청마감: 2026년 10월 11일(22:59까지)", "2026-10-01").time, "22:59");
+});
+test("collector observes robots, durable interval, deduplication and failures preserve previous notices", async (t) => {
+  const { shared } = await fixture(t);
+  const calls: string[] = [];
+  const fetcher: typeof fetch = async (input) => { const path = String(input); calls.push(path); return new Response(path.endsWith("robots.txt") ? "User-agent: *\nDisallow: /private" : path.includes("index.do") ? list : html); };
+  const results = await Promise.all([collectScholarships({ database: shared, fetcher, now, delayMs: 0 }), collectScholarships({ database: shared, fetcher, now, delayMs: 0 })]);
+  assert.equal(results.filter((result) => result.skipped).length, 1);
+  assert.equal((await getNotices(shared)).length, 1);
+  assert.equal(calls.filter((path) => path === url).length, 1);
+  assert.ok((await getCollectionStatus(shared)).lastSuccess);
+  const later = new Date(now.getTime() + 31 * 60 * 1000);
+  const failed = await collectScholarships({ database: shared, fetcher: async () => { throw new Error("offline"); }, now: later, delayMs: 0 });
+  assert.equal(failed.failed, true); assert.equal((await getNotices(shared)).length, 1);
+  assert.ok((await getCollectionStatus(shared)).error);
+  let reads = 0;
+  await collectScholarships({ database: shared, now: new Date(later.getTime() + 6 * 60 * 1000), delayMs: 0, fetcher: async () => { reads++; return new Response("User-agent: *\nDisallow: /user/"); } });
+  assert.equal(reads, 1);
+});
+test("personal rules register once, update deadlines, preserve edits and respect deletion and manual overrides", async (t) => {
+  const { user } = await fixture(t);
+  let notice = parseScholarship(html, url, now);
+  assert.deepEqual(await syncScholarshipEvents([notice], user, now), { created: 0, updated: 0 });
+  await saveScholarshipPreferences({ enabled: true, keywords: "의학" }, user);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).created, 0);
+  await saveScholarshipPreferences({ enabled: true, keywords: "소프트웨어, 생활비" }, user);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).created, 1);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).created, 0);
+  let event = (await getState(user)).events[0];
+  const input = (value: typeof event): EventInput => ({ title: value.title, kind: value.kind, date: value.date, time: value.time, notes: value.notes, source: value.source, isSample: value.isSample, reminders: value.reminders, checklist: value.checklist, idempotencyKey: value.idempotencyKey });
+  await updateEvent(event.id, { ...input(event), notes: "개인 메모", checklist: event.checklist?.map((item) => ({ ...item, completed: true })) }, user, now);
+  notice = parseScholarship(html.replace("10.15", "10.17"), url, now);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).updated, 1);
+  event = (await getState(user)).events[0];
+  assert.equal(event.date, "2026-10-17"); assert.equal(event.notes, "개인 메모"); assert.equal(event.checklist?.[0].completed, true);
+  await updateEvent(event.id, { ...input(event), date: "2026-10-18" }, user, now);
+  notice = parseScholarship(html.replace("10.15", "10.19"), url, now);
+  assert.equal((await syncScholarshipEvents([notice], user, now)).updated, 0);
+  assert.equal((await getState(user)).events[0].date, "2026-10-18");
+  await deleteEvent(event.id, user);
+  await syncScholarshipEvents([notice], user, now);
+  assert.equal((await getState(user)).events.length, 0);
+});
+
+test("uncertain source revisions stop reminders, past revisions update deadlines and stale automation cannot overwrite manual edits", async (t) => {
+  const { user } = await fixture(t);
+  await saveScholarshipPreferences({ enabled: true, keywords: "" }, user);
+  const notice = parseScholarship(html, url, now);
+  await syncScholarshipEvents([notice], user, now);
+  let event = (await getState(user)).events[0];
+  const input: EventInput = { title: event.title, kind: event.kind, date: event.date, time: event.time, notes: event.notes, source: event.source, isSample: false, checklist: event.checklist, idempotencyKey: event.idempotencyKey, reminders: [{ at: "2026-10-10T00:00:00Z", channel: "app" }] };
+  await updateEvent(event.id, input, user, now);
+  event = (await getState(user)).events[0];
+  await updateEvent(event.id, { ...input, notes: "동시 편집한 메모" }, user, now);
+  await assert.rejects(updateEvent(event.id, { ...input, date: "2026-10-20" }, user, now, event), /일정이 변경/);
+  const uncertain = parseScholarship(detail("<p>신청기간: 추후 공지</p>"), url, now);
+  await syncScholarshipEvents([uncertain], user, now);
+  const state = await getState(user);
+  assert.match(state.events[0].notes, /원문 변경 확인 필요/);
+  assert.match(state.events[0].notes, /동시 편집한 메모/);
+  assert.equal(state.notifications[0].status, "cancelled");
+  const past = parseScholarship(html.replace("10.15", "10.02"), url, now);
+  await syncScholarshipEvents([past], user, now);
+  assert.equal((await getState(user)).events[0].date, "2026-10-02");
+  assert.equal((await getState(user)).events[0].notes, "동시 편집한 메모");
+});
+
+test("one unreadable notice is skipped while the rest are stored", async (t) => {
+  const { shared } = await fixture(t);
+  const other = url.replace("12345", "12346");
+  const twoLinks = `<div class="board_list"><a href="${url}">공지</a><a href="${other}">공지2</a></div>`;
+  const fetcher: typeof fetch = async (input) => {
+    const path = String(input);
+    if (path === other) throw new Error("timeout");
+    return new Response(path.endsWith("robots.txt") ? "User-agent: *\nDisallow: /private" : path.includes("index.do") ? twoLinks : html);
+  };
+  const result = await collectScholarships({ database: shared, fetcher, now, delayMs: 0 });
+  assert.equal(result.failed, undefined);
+  assert.equal(result.collected, 1);
+  assert.equal((await getNotices(shared)).length, 1);
+  const status = await getCollectionStatus(shared);
+  assert.ok(status.lastSuccess);
+  assert.match(status.error!, /1개를 읽지 못해/);
+});

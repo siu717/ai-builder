@@ -232,6 +232,30 @@ export async function processAnonymousReminders(options: Omit<ReminderWorkerOpti
   return totals;
 }
 
+// 방문자 DB마다 같은 작업을 실행한다. 한 방문자의 실패가 다른 방문자 처리를 막지 않는다.
+export async function forEachAnonymousDatabase(action: (database: Client) => Promise<unknown>, now = new Date()): Promise<{ processed: number; failed: number }> {
+  if (!isAnonymousPublicMode()) throw new RouteError(403, "공개 방문자 모드가 아닙니다.");
+  const directory = await privateDirectory();
+  const unlock = await allocationLock(directory);
+  let sessions: AnonymousSession[];
+  try {
+    sessions = await activeSessions(directory, now);
+  } finally {
+    await unlock();
+  }
+  const totals = { processed: 0, failed: 0 };
+  for (const session of sessions) {
+    if (session.expiresAt <= Date.now()) continue;
+    try {
+      await action(await getAnonymousDatabase(session));
+      totals.processed++;
+    } catch {
+      totals.failed++;
+    }
+  }
+  return totals;
+}
+
 export async function closeAnonymousDatabases(): Promise<void> {
   const pending = [...databases.values()];
   databases.clear();
