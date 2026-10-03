@@ -52,7 +52,8 @@ test("anonymous visitors keep separate profile, schedules and API keys", async (
       const noKey = await second.request.post("/api/analyze", { data: {
         text: "과제 공지입니다.", kind: "assignment", referenceDate: null, classTime: null, sample: false,
       } });
-      expect(noKey.status()).toBe(503);
+      expect(noKey.status()).toBe(424);
+      expect(noKey.headers()["x-upstream-status"]).toBe("503");
       const sample = await second.request.post("/api/analyze", { data: {
         text: TASK_SAMPLE, kind: "assignment", referenceDate: "2026-10-03", classTime: "09:00", sample: true,
       } });

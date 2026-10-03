@@ -24,6 +24,7 @@ export interface PublicDataOptions {
 const RECRUITMENT_URL = "https://apis.data.go.kr/1051000/recruitment/list";
 const MPM_JOBS_URL = "https://apis.data.go.kr/1760000/PblJobService/getList";
 const EXAM_URL = "https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList";
+const EXAM_PAGE_SIZE = 50;
 // 한국장학재단 파일데이터는 매월 새 uddi로 갱신되므로 명세에서 최신 경로를 찾는다.
 const SCHOLARSHIP_SPEC_URL = "https://infuser.odcloud.kr/oas/docs?namespace=15028252/v1";
 const SCHOLARSHIP_BASE = "https://api.odcloud.kr/api";
@@ -468,8 +469,10 @@ function interestFit(haystack: string, profile: Profile): { fit: string; matched
 const MPM_TYPES: Record<string, string> = { e01: "공개경쟁채용", e02: "경력경쟁채용", e03: "계약직", e04: "행정지원인력" };
 const MPM_AGENCIES: Record<string, string> = { g01: "국가공무원", g02: "지방공무원", g03: "공공기관", g04: "교육청" };
 const MPM_LABEL = "인사혁신처 공공취업정보";
-// 접수 기간이 두 달을 넘는 공고는 드물어 최근 등록분만 조회해 호출 수를 줄인다.
-const MPM_LOOKBACK_DAYS = 60;
+// 접수 기간이 한 달을 넘는 공고는 드물어 최근 등록분만 조회한다.
+// 목록이 오래된 순으로 와서 페이지 수가 부족하면 최신 공고가 빠지므로, 기간을 줄이고 끝까지(최대 5페이지) 읽는다.
+const MPM_LOOKBACK_DAYS = 30;
+const MPM_MAX_PAGES = 5;
 
 interface MpmRow {
   id: string;
@@ -504,10 +507,10 @@ function mpmPage(raw: string, data: unknown): { items: Row[]; total: number } {
 async function mpmRows(serviceKey: string, fetcher: Fetcher, refresh: boolean, today: string): Promise<MpmRow[]> {
   const since = addDays(today, -MPM_LOOKBACK_DAYS);
   return cached(`mpm:${keyId(serviceKey)}:${since}`, CACHE_MS, refresh, async () => {
-    const rows: Row[] = [];
-    for (const type of Object.keys(MPM_TYPES)) {
-      let collected = 0;
-      for (let page = 1; page <= 3; page += 1) {
+    // 공고 유형별 조회는 서로 독립이라 동시에 보내 첫 로딩 시간을 줄인다.
+    const rows = (await Promise.all(Object.keys(MPM_TYPES).map(async (type) => {
+      const typeRows: Row[] = [];
+      for (let page = 1; page <= MPM_MAX_PAGES; page += 1) {
         const url = new URL(MPM_JOBS_URL);
         // Instt_se를 비우면 국가직·지방직·공공기관 전체를 조회한다.
         url.search = new URLSearchParams({
@@ -516,11 +519,11 @@ async function mpmRows(serviceKey: string, fetcher: Fetcher, refresh: boolean, t
         }).toString();
         const { text: body, data } = await getBody(url, MPM_LABEL, fetcher);
         const { items, total } = mpmPage(body, data);
-        rows.push(...items);
-        collected += items.length;
-        if (items.length < 100 || collected >= total) break;
+        typeRows.push(...items);
+        if (items.length < 100 || typeRows.length >= total) break;
       }
-    }
+      return typeRows;
+    }))).flat();
     const unique = new Map<string, MpmRow>();
     for (const row of rows) {
       const idx = text(row.idx);
@@ -638,15 +641,16 @@ export async function getExamSchedules(serviceKey: string, year: string, qualifi
   const fetcher = options.fetcher || fetch;
   const rows = await cached(`exams:${keyId(serviceKey)}:${year}:${qualification}`, CACHE_MS, Boolean(options.refresh), async () => {
     const collected: Row[] = [];
-    for (let page = 1; page <= 5; page += 1) {
+    // 큐넷 시험일정은 한 페이지에 50개까지만 허용한다(초과 시 오류 응답).
+    for (let page = 1; page <= 10; page += 1) {
       const url = new URL(EXAM_URL);
-      url.search = new URLSearchParams({ serviceKey, numOfRows: "100", pageNo: String(page), dataFormat: "json", implYy: year, qualgbCd: qualification }).toString();
+      url.search = new URLSearchParams({ serviceKey, numOfRows: String(EXAM_PAGE_SIZE), pageNo: String(page), dataFormat: "json", implYy: year, qualgbCd: qualification }).toString();
       const data = await getJson(url, "국가자격 시험일정", fetcher);
       const batch = examItems(data);
       collected.push(...batch);
       const root = data as { response?: { body?: { totalCount?: number } }; body?: { totalCount?: number } };
       const total = Number(root.response?.body?.totalCount ?? root.body?.totalCount ?? 0);
-      if (batch.length < 100 || collected.length >= total) break;
+      if (batch.length < EXAM_PAGE_SIZE || collected.length >= total) break;
     }
     return collected;
   });

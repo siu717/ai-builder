@@ -116,24 +116,46 @@ export function Message({
   );
 }
 
+// 서버 재시작·터널 순간 끊김(502·503·504·530, 연결 실패)은 조회 요청만 다시 시도한다.
+const TRANSIENT = new Set([502, 503, 504, 530]);
+const RETRY_DELAYS_MS = [1500, 3000, 5000];
+
 export async function request<T>(
   path: string,
   method = "GET",
   body?: unknown,
 ): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    headers:
-      body === undefined ? undefined : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache: "no-store",
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok)
+  const retries = method === "GET" ? RETRY_DELAYS_MS.length : 0;
+  for (let attempt = 0; ; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(path, {
+        method,
+        headers:
+          body === undefined ? undefined : { "Content-Type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+        cache: "no-store",
+      });
+    } catch {
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+        continue;
+      }
+      throw new Error("서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 잠시 후 다시 시도해 주세요.");
+    }
+    const data = await response.json().catch(() => ({}));
+    if (response.ok) return data as T;
+    if (data.error) throw new Error(data.error);
+    if (TRANSIENT.has(response.status) && attempt < retries) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+      continue;
+    }
     throw new Error(
-      data.error || "요청을 처리하지 못했습니다. 다시 시도해 주세요.",
+      TRANSIENT.has(response.status)
+        ? `서버가 재시작 중이거나 연결이 잠시 끊겼습니다. 잠시 후 다시 시도해 주세요. (HTTP ${response.status})`
+        : `요청을 처리하지 못했습니다. 다시 시도해 주세요. (HTTP ${response.status})`,
     );
-  return data as T;
+  }
 }
 
 export function seoulDate() {
