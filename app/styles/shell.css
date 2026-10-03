@@ -2,7 +2,29 @@
 :root {
   --x-shell-max: 1440px;   /* content max-width (main + strip). Partials can full-bleed with negative margin --x-shell-pad */
   --x-shell-pad: 40px;     /* horizontal gutter; 24px ≤1024, 16px ≤760 */
+  --x-nav-fade: 40px;      /* mobile nav: edge fade width hinting it scrolls sideways */
 }
+
+/* ── skip link (visible only on keyboard focus) ─────── */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  min-height: 44px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--kmu-blue);
+  font-size: var(--text-md);
+  font-weight: 700;
+  box-shadow: var(--shadow-pop);
+  transform: translateY(calc(-100% - 16px));
+}
+.skip-link:focus, .skip-link:focus-visible { transform: none; outline: 2px solid var(--kmu-blue); outline-offset: 2px; }
+main:focus, .page-heading h1:focus { outline: none; }
 
 /* ── header ─────────────────────────────────────────── */
 .site-header { background: var(--kmu-blue); color: var(--surface); position: relative; z-index: 20; }
@@ -186,6 +208,19 @@ main { width: 100%; max-width: var(--x-shell-max); margin: 0 auto; padding: 36px
     border-top: 1px solid var(--kmu-blue-dark);
   }
   .main-nav::-webkit-scrollbar { display: none; }
+  /* fade the side(s) that still have items to scroll to */
+  .main-nav:not([data-end="true"]) {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--x-nav-fade)), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - var(--x-nav-fade)), transparent);
+  }
+  .main-nav:not([data-start="true"]) {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--x-nav-fade));
+    mask-image: linear-gradient(to right, transparent, #000 var(--x-nav-fade));
+  }
+  .main-nav:not([data-start="true"]):not([data-end="true"]) {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--x-nav-fade), #000 calc(100% - var(--x-nav-fade)), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 var(--x-nav-fade), #000 calc(100% - var(--x-nav-fade)), transparent);
+  }
   .nav-item { min-height: 48px; flex: 0 0 auto; }
   .page-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
   .page-heading h1 { font-size: var(--text-2xl); }
@@ -204,6 +239,15 @@ main { width: 100%; max-width: var(--x-shell-max); margin: 0 auto; padding: 36px
   .workspace-footer { margin-top: 48px; flex-direction: column; align-items: flex-start; }
   .campus-photo { width: 96px; height: 56px; flex-basis: 96px; }
   .footer-side { width: 100%; justify-content: space-between; }
+}
+/* page heading: compact, actions 2-up full width */
+@media (max-width: 640px) {
+  main { padding-top: 16px; }
+  .page-heading { gap: 12px; margin-bottom: 20px; }
+  .page-heading h1 { font-size: var(--text-2xl); line-height: 1.25; }
+  .page-heading p { margin-top: 4px; }
+  .heading-actions { width: 100%; flex-wrap: nowrap; }
+  .heading-actions .button { flex: 1 1 0; min-width: 0; padding: 0 12px; }
 }
 @media (max-width: 420px) {
   .topbar-date { display: none; }

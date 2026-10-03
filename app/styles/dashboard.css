@@ -1,5 +1,8 @@
 /* dashboard (오늘) — KMU80 redesign: blue TODAY panel + "다가오는 마감" ledger. Rules are scoped under .today-board so legacy shell media queries can't override them. */
 
+/* partial-local values (not in tokens.css) */
+.today-board { --x-meter-empty: rgba(255, 255, 255, .3); --x-step-num: 56px; }
+
 /* tone utilities — still consumed by opportunities (.organization-icon.violet/.cyan); kept global, on tokens */
 .green { background: var(--kind-career-bg); color: var(--kind-career-ink); }
 .violet { background: var(--kind-scholarship-bg); color: var(--kind-scholarship-ink); }
@@ -115,6 +118,47 @@
 .today-board .quick-scholarship { color: var(--kind-scholarship-ink); }
 .today-board .quick-job { color: var(--kind-job-ink); }
 .today-board .quick-assignment { color: var(--kind-assignment-ink); }
+
+/* profile completeness on blue (hidden when 4/4) */
+.today-board .profile-meter { display: flex; align-items: center; gap: 12px; margin-top: -12px; font-size: var(--text-xs); color: var(--surface); }
+.today-board .profile-meter-label { flex: 0 0 auto; font-weight: 500; white-space: nowrap; }
+.today-board .profile-meter-label b { margin-left: 2px; font-weight: 700; }
+.today-board .profile-meter-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; flex: 1 1 auto; min-width: 48px; height: 4px; }
+.today-board .profile-meter-bar > span { display: block; height: 4px; background: var(--x-meter-empty); }
+.today-board .profile-meter-bar > span.is-filled { background: var(--surface); }
+.today-board .profile-meter-action { flex: 0 0 auto; min-height: 44px; min-width: 44px; padding: 0 2px; border: 0; background: none; color: var(--surface); font-size: var(--text-sm); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.today-board .profile-meter-action:hover { text-decoration-thickness: 2px; }
+
+/* selected day: legible counter + list on blue */
+.today-board .selected-day > div > span { font-size: var(--text-sm); font-weight: 600; color: var(--surface); }
+.today-board .selected-count { font-family: var(--font-num); font-size: var(--text-xl); font-weight: 400; line-height: 1; letter-spacing: .02em; margin: 0 1px; }
+.today-board .mini-event, .today-board .mini-event > span:nth-child(2) { font-size: var(--text-sm); color: var(--surface); }
+
+/* ledger head: title + overdue nudge */
+.today-board .ledger-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; min-width: 0; }
+.today-board .overdue-nudge { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 2px; border: 0; background: none; color: var(--ink); font-size: var(--text-sm); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; align-self: center; }
+.today-board .overdue-nudge:hover { color: var(--kmu-blue); }
+
+/* first-run onboarding: 3 numbered steps on a 2px ink rule, no cards */
+.today-board .onboarding { border-top: 2px solid var(--line-strong); }
+.today-board .onboarding-title { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: var(--text-xs); font-weight: 700; letter-spacing: .14em; color: var(--kmu-blue); }
+.today-board .onboarding-steps { margin: 0; padding: 0; list-style: none; }
+.today-board .onboarding-step { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 4px 20px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.today-board .onboarding-num { font-family: var(--font-num); font-size: var(--x-step-num); line-height: .9; letter-spacing: .01em; color: var(--ink); }
+.today-board .onboarding-step.is-done .onboarding-num { color: var(--met); }
+.today-board .onboarding-copy { min-width: 0; }
+.today-board .onboarding-copy h4 { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin: 0 0 4px; font-size: var(--text-lg); font-weight: 700; color: var(--ink); }
+.today-board .onboarding-copy p { margin: 0; font-size: var(--text-sm); line-height: 1.55; color: var(--ink-3); }
+.today-board .onboarding-done { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-xs); font-weight: 700; color: var(--met); }
+.today-board .today-ledger .onboarding-action { white-space: nowrap; }
+.today-board .onboarding-sample { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 12px 0 0; font-size: var(--text-sm); color: var(--ink-3); }
+
+@media (max-width: 640px) {
+  .today-board .onboarding-step { grid-template-columns: 56px minmax(0, 1fr); align-items: start; padding: 18px 0; }
+  .today-board .onboarding-num { font-size: 44px; }
+  .today-board .onboarding-action { grid-column: 2; justify-self: start; }
+  .today-board .ledger-title h2 { flex-wrap: wrap; }
+}
 
 /* responsive */
 @media (max-width: 1190px) {
