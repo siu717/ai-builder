@@ -1,0 +1,264 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Search,
+  ArrowUpRight,
+  CalendarPlus,
+  CheckCircle2,
+  XCircle,
+  CircleHelp,
+  FileText,
+  Building2,
+  GraduationCap,
+  BriefcaseBusiness,
+  ChevronRight,
+} from "lucide-react";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import type { Opportunity } from "@/lib/contracts";
+import type { EventDraft } from "./event-editor";
+import { seoulDate } from "./ui";
+import { checklistFromDocuments } from "@/lib/checklist";
+
+const conditionLabels = { met: "충족", unmet: "불충족", unknown: "확인 필요" };
+export default function Opportunities({
+  kind,
+  opportunities,
+  onAdd,
+  onAnalyze,
+  onCoach,
+}: {
+  kind: "scholarship" | "job";
+  opportunities: Opportunity[];
+  onAdd: (draft: EventDraft) => void;
+  onAnalyze: () => void;
+  onCoach: (text: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [condition, setCondition] = useState("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const results = opportunities.filter(
+    (item) =>
+      item.kind === kind &&
+      `${item.title} ${item.organization} ${item.tags.join(" ")}`
+        .toLowerCase()
+        .includes(query.toLowerCase()) &&
+      (condition === "all" || overall(item) === condition),
+  );
+  const selected = results.find((item) => item.id === selectedId) || results[0];
+  function overall(item: Opportunity) {
+    return item.conditions.some((entry) => entry.status === "unmet")
+      ? "unmet"
+      : item.conditions.every((entry) => entry.status === "met")
+        ? "met"
+        : "unknown";
+  }
+  return (
+    <>
+      <div className="view-toolbar">
+        <div className="search-field">
+          <Search size={17} />
+          <input
+            aria-label="공고 검색"
+            placeholder={
+              kind === "scholarship" ? "장학금 · 기관 검색" : "회사 · 직무 검색"
+            }
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        <select
+          aria-label="지원 조건 필터"
+          value={condition}
+          onChange={(event) => setCondition(event.target.value)}
+        >
+          <option value="all">모든 지원 조건</option>
+          <option value="met">조건 충족</option>
+          <option value="unknown">확인 필요</option>
+          <option value="unmet">조건 불충족</option>
+        </select>
+        <button className="button secondary" onClick={onAnalyze}>
+          <FileText size={16} />
+          공고 입력
+        </button>
+      </div>
+      <div className="catalog-caption">
+        <span>
+          {kind === "scholarship" ? "장학금" : "채용 공고"} {results.length}개
+        </span>
+        <span className="sample-tag">샘플 공고</span>
+      </div>
+      <div className="opportunity-layout">
+        <div className="opportunity-list">
+          {results.length === 0 && (
+            <div className="empty-state">
+              <Search size={27} />
+              <h3>검색 결과가 없어요</h3>
+              <p>검색어나 지원 조건을 바꿔 보세요.</p>
+            </div>
+          )}
+          {results.map((item) => (
+            <button
+              className={`opportunity-card ${selected?.id === item.id ? "selected" : ""}`}
+              key={item.id}
+              onClick={() => setSelectedId(item.id)}
+            >
+              <div className="opportunity-card-top">
+                <span
+                  className={`organization-icon ${kind === "scholarship" ? "violet" : "cyan"}`}
+                >
+                  {kind === "scholarship" ? (
+                    <GraduationCap size={23} />
+                  ) : (
+                    <Building2 size={22} />
+                  )}
+                </span>
+                <span className="opportunity-org">{item.organization}</span>
+                <ChevronRight size={16} className="muted" />
+              </div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <div className="tag-row">
+                {item.tags.map((tag) => (
+                  <span className="plain-tag" key={tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="opportunity-card-bottom">
+                <span className={`condition-summary status-${overall(item)}`}>
+                  {conditionLabels[overall(item)]}
+                </span>
+                <span>
+                  {format(parseISO(item.date), "M.d")} 마감{" "}
+                  <strong>
+                    {differenceInCalendarDays(
+                      parseISO(item.date),
+                      parseISO(seoulDate()),
+                    ) < 0
+                      ? "마감 지남"
+                      : `D-${differenceInCalendarDays(parseISO(item.date), parseISO(seoulDate()))}`}
+                  </strong>
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+        {selected && (
+          <section className="opportunity-detail">
+            <div className="detail-eyebrow">
+              <span>{selected.organization}</span>
+              <span className="sample-tag">샘플</span>
+            </div>
+            <h2>{selected.title}</h2>
+            <div className="detail-facts">
+              <div>
+                <span>신청 마감</span>
+                <strong>
+                  {format(parseISO(selected.date), "yyyy.MM.dd")}{" "}
+                  {selected.time || "시각 확인 필요"}
+                </strong>
+              </div>
+              <div>
+                <span>
+                  {kind === "scholarship" ? "지원 규모" : "채용 구분"}
+                </span>
+                <strong>{selected.amount}</strong>
+              </div>
+            </div>
+            <div className="recommendation">
+              <span
+                className={kind === "scholarship" ? "violet-text" : "cyan-text"}
+              >
+                {kind === "scholarship" ? (
+                  <GraduationCap size={18} />
+                ) : (
+                  <BriefcaseBusiness size={18} />
+                )}
+              </span>
+              <p>{selected.recommendation}</p>
+            </div>
+            <h3 className="detail-section-title">지원 조건</h3>
+            <div className="conditions">
+              {selected.conditions.map((entry, index) => (
+                <div className="condition" key={index}>
+                  <span className={`condition-icon status-${entry.status}`}>
+                    {entry.status === "met" ? (
+                      <CheckCircle2 size={17} />
+                    ) : entry.status === "unmet" ? (
+                      <XCircle size={17} />
+                    ) : (
+                      <CircleHelp size={17} />
+                    )}
+                  </span>
+                  <div>
+                    <div className="condition-heading">
+                      <strong>{entry.label}</strong>
+                      <span className={`status-text status-${entry.status}`}>
+                        {conditionLabels[entry.status]}
+                      </span>
+                    </div>
+                    <p>{entry.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <h3 className="detail-section-title">준비할 서류</h3>
+            <ul className="documents">
+              {selected.documents.map((document) => (
+                <li key={document}>
+                  <FileText size={15} />
+                  {document}
+                </li>
+              ))}
+            </ul>
+            <details className="original-source">
+              <summary>공고 원문</summary>
+              <pre>{selected.originalText}</pre>
+              {/^https?:\/\//.test(selected.source) && (
+                <a
+                  className="text-button"
+                  href={selected.source}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  출처 <ArrowUpRight size={15} />
+                </a>
+              )}
+            </details>
+            <div className="detail-actions">
+              <button
+                className="button primary"
+                onClick={() =>
+                  onAdd({
+                    title: selected.title,
+                    kind: selected.kind,
+                    date: selected.date,
+                    time: selected.time,
+                    notes: `준비 서류: ${selected.documents.join(", ")}`,
+                    source: selected.originalText,
+                    checklist: checklistFromDocuments(selected.documents),
+                    isSample: true,
+                    reminders: [],
+                    idempotencyKey: selected.id,
+                  })
+                }
+              >
+                <CalendarPlus size={16} />
+                신청 일정 등록
+              </button>
+              {kind === "job" && (
+                <button
+                  className="button secondary"
+                  onClick={() => onCoach(selected.originalText)}
+                >
+                  취업 컨설팅 <ChevronRight size={15} />
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
