@@ -136,7 +136,7 @@ test("MPM public jobs are read from XML, merged with ALIO and limited to open st
   assert.deepEqual(mpmCalls.map((url) => url.searchParams.get("Pblanc_ty")), ["e01", "e02", "e03", "e04"]);
   assert.equal(mpmCalls[0].searchParams.get("serviceKey"), KEY);
   assert.equal(mpmCalls[0].searchParams.get("Instt_se"), "");
-  assert.equal(mpmCalls[0].searchParams.get("Begin_de"), "2026-08-04");
+  assert.equal(mpmCalls[0].searchParams.get("Begin_de"), "2026-09-03");
   assert.equal(mpmCalls[0].searchParams.get("End_de"), "2026-10-03");
   assert.deepEqual(result.items.map((item) => item.id), ["mpm-101", "mpm-103"], "interest matches first, closed and duplicate postings dropped");
   assert.equal(result.notices, undefined);
@@ -189,6 +189,7 @@ test("exam schedules accept the nested item shape and keep only dated steps", as
   const { fetcher, calls } = mockFetch(() => json({ header: { resultCode: "00", resultMsg: "NORMAL SERVICE" }, body: { items: { item }, numOfRows: 100, pageNo: 1, totalCount: 1 } }));
   const result = await getExamSchedules(KEY, "2026", "T", { fetcher });
   assert.equal(calls[0].searchParams.get("dataFormat"), "json");
+  assert.equal(calls[0].searchParams.get("numOfRows"), "50", "Q-Net rejects more than 50 rows per page");
   assert.equal(calls[0].searchParams.get("implYy"), "2026");
   assert.equal(calls[0].searchParams.get("qualgbCd"), "T");
   assert.equal(result.items.length, 1);
@@ -263,4 +264,16 @@ test("the public data route requires a key, a valid query and a same-origin call
   const ok = await call("source=exams&year=2026&qualification=S");
   assert.equal(ok.status, 200);
   assert.deepEqual((await ok.json()).items, []);
+});
+
+test("upstream failures reach the browser as 424 so a proxy cannot replace the reason", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "campus-public-424-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  withEnvironment(t, "DATABASE_URL", `file:${join(directory, "campus.db")}`);
+  withEnvironment(t, "DATA_GO_KR_API_KEY", KEY);
+  t.mock.method(globalThis, "fetch", async () => json({ header: { resultCode: "99", resultMsg: "한 페이지당 조회 가능한 최대 목록 수는 50개를 넘을 수 없습니다." } }));
+  const response = await GET(new Request("http://127.0.0.1:3000/api/public-data?source=exams&year=2026&qualification=T", { headers: { host: "127.0.0.1:3000" } }));
+  assert.equal(response.status, 424);
+  assert.equal(response.headers.get("x-upstream-status"), "502");
+  assert.match((await response.json()).error, /국가자격 시험일정: 한 페이지당/);
 });

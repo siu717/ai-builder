@@ -62,11 +62,18 @@ export async function readJson(request: Request): Promise<unknown> {
   }
 }
 
+// Cloudflare 등 앞단 프록시는 502·503·504 응답을 자체 오류 페이지로 바꿔 사유가 화면에 닿지 않는다.
+// 외부 서비스 실패는 424로 보내고 원래 상태는 헤더에 남긴다.
+const PROXY_REPLACED = new Set([502, 503, 504]);
+
 export function apiError(error: unknown): Response {
   if (error instanceof ZodError) {
     return Response.json({ error: error.issues[0]?.message || "입력값을 확인해주세요." }, { status: 400 });
   }
   if (error instanceof Error && "status" in error && typeof error.status === "number" && error.status >= 400 && error.status < 600) {
+    if (PROXY_REPLACED.has(error.status)) {
+      return Response.json({ error: error.message }, { status: 424, headers: { "x-upstream-status": String(error.status) } });
+    }
     return Response.json({ error: error.message }, { status: error.status });
   }
   return Response.json({ error: "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요." }, { status: 500 });
