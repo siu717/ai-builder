@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import type { Client } from "@libsql/client";
 import { z } from "zod";
 
 import { addCalendarDays, getCatalog } from "./catalog";
@@ -7,6 +8,7 @@ import {
   COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE, TASK_SAMPLE,
   type AnalysisResult, type CoachingResult, type Profile,
 } from "./contracts";
+import { getAnthropicApiKey } from "./store";
 
 export { TASK_SAMPLE, COACH_JOB_SAMPLE, COACH_RESUME_SAMPLE } from "./contracts";
 
@@ -103,12 +105,13 @@ const COACHING_INSTRUCTIONS = `목표 공고와 제출 서류를 비교해 서�
 feedback.quote는 resumeText에 실제로 존재하는 연속된 문자열을 그대로 인용하세요. suggestion은 구체적인 수정 제안이며 원문에 없는 성과와 경험을 사실처럼 추가하지 마세요. 수치가 없으면 실제 측정한 수치를 확인하도록 제안하세요.
 tasks는 사용자가 검토할 준비 할 일입니다. 할 일마다 목적을 notes에 작성하세요. 공고에 없는 면접 일시나 임의의 마감 날짜를 정하지 마세요. 준비 일정은 사용자가 나중에 직접 확정합니다.`;
 
-function createClient(): Anthropic {
-  if (!process.env.ANTHROPIC_API_KEY?.trim()) {
-    throw new AIInputError(503, "AI 분석을 사용하려면 서버의 ANTHROPIC_API_KEY를 설정해 주세요. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
+async function createClient(database?: Client): Promise<Anthropic> {
+  const apiKey = await getAnthropicApiKey(database);
+  if (!apiKey) {
+    throw new AIInputError(503, "AI 분석을 사용하려면 설정 화면에서 ANTHROPIC_API_KEY를 저장해 주세요. 서버 환경변수로도 설정할 수 있습니다. API 키 없이 체험하려면 제공된 샘플 입력을 사용해 주세요.");
   }
   return new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey,
     timeout: 45000,
     maxRetries: 1,
     logLevel: "off",
@@ -149,9 +152,9 @@ function sampleAnalysis(input: AnalyzeRequest, profile: Profile, now: Date): Ana
   throw new AIInputError(422, "샘플 분석은 제공된 샘플 공지 또는 샘플 공고 원문에만 사용할 수 있습니다. 수정한 텍스트는 AI 분석으로 실행해 주세요.");
 }
 
-export async function analyzeText(input: AnalyzeRequest, profile: Profile, now = new Date()): Promise<AnalysisResult> {
+export async function analyzeText(input: AnalyzeRequest, profile: Profile, now = new Date(), database?: Client): Promise<AnalysisResult> {
   if (input.sample) return sampleAnalysis(input, profile, now);
-  const client = createClient();
+  const client = await createClient(database);
   try {
     const response = await client.messages.parse({
       model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
@@ -171,7 +174,7 @@ export async function analyzeText(input: AnalyzeRequest, profile: Profile, now =
     return { mode: "live", ...result };
   } catch (error) {
     if (error instanceof AIInputError) throw error;
-    throw new AIInputError(502, "AI 분석에 실패했습니다. 서버의 API 키·모델 설정과 연결을 확인하고 다시 시도해 주세요.");
+    throw new AIInputError(502, "AI 분석에 실패했습니다. 설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.");
   }
 }
 
@@ -201,9 +204,9 @@ function sampleCoaching(input: CoachingRequest): CoachingResult {
   };
 }
 
-export async function coachResume(input: CoachingRequest): Promise<CoachingResult> {
+export async function coachResume(input: CoachingRequest, database?: Client): Promise<CoachingResult> {
   if (input.sample) return sampleCoaching(input);
-  const client = createClient();
+  const client = await createClient(database);
   try {
     const response = await client.messages.parse({
       model: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
@@ -220,6 +223,6 @@ export async function coachResume(input: CoachingRequest): Promise<CoachingResul
     return { mode: "live", ...result };
   } catch (error) {
     if (error instanceof AIInputError) throw error;
-    throw new AIInputError(502, "AI 컨설팅에 실패했습니다. 서버의 API 키·모델 설정과 연결을 확인하고 다시 시도해 주세요.");
+    throw new AIInputError(502, "AI 컨설팅에 실패했습니다. 설정 화면의 ANTHROPIC_API_KEY와 서버 모델 설정·연결을 확인하고 다시 시도해 주세요.");
   }
 }

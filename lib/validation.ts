@@ -87,3 +87,10 @@ export const settingsSchema = z.object({
     ctx.addIssue({ code: "custom", path: ["telegramChatId"], message: "텔레그램 알림을 켜려면 Chat ID가 필요합니다." });
   }
 });
+
+export const aiSettingsSchema = z.object({
+  apiKey: z.string().trim()
+    .min(1, "API 키를 입력해주세요.")
+    .max(4096, "API 키는 4096자 이내로 입력해주세요.")
+    .refine((key) => !/[\s\p{Cc}]/u.test(key), "API 키에 공백이나 제어 문자를 사용할 수 없습니다."),
+}).strict();
