@@ -14,7 +14,7 @@
 
 knowverse.net
 
-제품 요구사항: [PRD.md](PRD.md)
+제품 요구사항: [PRD.md](PRD.md) · 아키텍처: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## 구현 현황
 
