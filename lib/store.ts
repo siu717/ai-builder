@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Client, InStatement, Row, Transaction } from "@libsql/client";
-import { DATA_PROVIDERS, DEFAULT_PROFILE, type AppState, type DataProvider, type KeySource, type CalendarEvent, type EventInput, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
+import { ZodError } from "zod";
+import { DATA_PROVIDERS, DEFAULT_PROFILE, type AppState, type DataProvider, type KeySource, type CalendarEvent, type EventInput, type KookminImportResult, type Profile, type PublicSettings, type ReminderRecord } from "./contracts";
 import { getDatabase } from "./db";
 import { RouteError } from "./http";
 import { aiSettingsSchema, dataKeyDeleteSchema, dataKeySchema, profileSchema, settingsSchema, validateEvent } from "./validation";
@@ -208,6 +209,85 @@ export async function createEvent(input: unknown, database?: Client, now = new D
     tx.close();
   }
   return getState(db);
+}
+
+/**
+ * 국민대 연동에서 고른 항목을 한 번에 저장한다.
+ * 이미 가져온 항목(idempotencyKey 일치)은 건너뛰고, 잘못된 항목은 failed에 담은 뒤 나머지를 계속 저장한다.
+ * 지났거나 마감 뒤로 잡힌 알림, 중복 알림은 항목을 실패시키지 않고 뺀다.
+ * 공개 방문자 모드에서는 createEvent와 같은 저장 한도(일정 200개, 알림 4000개)를 항목별로 적용한다.
+ */
+export async function importEvents(items: readonly unknown[], database?: Client, now = new Date()): Promise<KookminImportResult> {
+  const db = database || await getDatabase();
+  let created = 0;
+  let skipped = 0;
+  const failed: KookminImportResult["failed"] = [];
+  const tx = await db.transaction("write");
+  try {
+    const guest = isAnonymousPublicMode();
+    let eventCount = guest ? Number((await tx.execute("SELECT COUNT(*) AS count FROM campus_events")).rows[0].count) : 0;
+    let reminderCount = guest ? Number((await tx.execute("SELECT COUNT(*) AS count FROM campus_reminders")).rows[0].count) : 0;
+    for (const raw of items) {
+      const item = (typeof raw === "object" && raw !== null && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+      const idempotencyKey = typeof item.idempotencyKey === "string" ? item.idempotencyKey : "";
+      if (!idempotencyKey) {
+        failed.push({ idempotencyKey, error: "가져올 항목의 식별 키가 없습니다." });
+        continue;
+      }
+      const existing = await tx.execute({ sql: "SELECT id FROM campus_events WHERE idempotency_key = ?", args: [idempotencyKey] });
+      if (existing.rows.length) {
+        skipped++;
+        continue;
+      }
+      let reminders = item.reminders;
+      if (Array.isArray(reminders) && typeof item.date === "string") {
+        const boundary = new Date(`${item.date}T${typeof item.time === "string" ? `${item.time}:00` : "23:59:59.999"}+09:00`).getTime();
+        const seen = new Set<string>();
+        reminders = reminders.filter((reminder: unknown) => {
+          const value = reminder as { at?: unknown; channel?: unknown } | null;
+          const at = typeof value?.at === "string" ? new Date(value.at).getTime() : NaN;
+          // 형식이 틀린 알림은 남겨 두어 검증에서 항목 오류로 드러나게 한다.
+          if (!Number.isFinite(at)) return true;
+          if (at <= now.getTime() || at > boundary) return false;
+          const key = `${at}:${String(value?.channel)}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+      // 긴 본문·주소 때문에 항목 전체가 실패하지 않도록 스키마 한도에 맞춰 자른다.
+      const notes = typeof item.notes === "string" ? item.notes.slice(0, 10_000) : item.notes;
+      const source = typeof item.source === "string" ? item.source.slice(0, 2000) : item.source;
+      let event: EventInput;
+      try {
+        event = validateEvent({ title: item.title, kind: item.kind, date: item.date, time: item.time, notes, source, isSample: false, reminders, idempotencyKey }, now);
+      } catch (error) {
+        if (!(error instanceof ZodError)) throw error;
+        const message = error.issues[0]?.message || "";
+        // 형식 오류는 zod 기본 문구(영문)라서 한국어 안내로 바꾼다.
+        failed.push({ idempotencyKey, error: /[가-힣]/.test(message) ? message : "가져올 항목의 형식을 확인해주세요." });
+        continue;
+      }
+      if (guest && eventCount >= 200) {
+        failed.push({ idempotencyKey, error: "방문자 일정 저장 한도는 200개입니다." });
+        continue;
+      }
+      if (guest && reminderCount + event.reminders.length > 4000) {
+        failed.push({ idempotencyKey, error: "방문자 알림 저장 한도에 도달했습니다." });
+        continue;
+      }
+      const id = randomUUID();
+      await tx.execute({ sql: "INSERT INTO campus_events(id, value, created_at, idempotency_key) VALUES(?, ?, ?, ?)", args: [id, JSON.stringify(event), now.toISOString(), idempotencyKey] });
+      await insertReminders(tx, id, event, 1);
+      eventCount++;
+      reminderCount += event.reminders.length;
+      created++;
+    }
+    await tx.commit();
+  } finally {
+    tx.close();
+  }
+  return { created, skipped, failed, state: await getState(db) };
 }
 
 export async function updateEvent(id: string, input: unknown, database?: Client, now = new Date()): Promise<AppState> {

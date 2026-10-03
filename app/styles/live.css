@@ -1,0 +1,13 @@
+/* 실시간 공고(lib/sources) — 출처 칩과 카드 보조 문구. Tokens only (tokens.css). */
+.live-sources { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0 0 16px; }
+.live-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-3); font-size: var(--text-xs); line-height: 1.6; white-space: nowrap; }
+.live-chip b { font-weight: 700; color: var(--ink); }
+.live-chip.fail { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+.live-chip.fail b { color: var(--danger); }
+.live-source { flex: 0 0 auto; max-width: 50%; overflow: hidden; text-overflow: ellipsis; }
+.opportunity-card > p.live-reason { color: var(--kmu-blue); font-weight: 500; }
+.live-no-date { font-size: var(--text-xs); font-weight: 600; }
+.live-description { margin-top: 20px; font-size: var(--text-md); line-height: 1.8; color: var(--ink-2); white-space: pre-line; overflow-wrap: anywhere; }
+.live-tags { margin-top: 12px; }
+.live-note { margin: 20px 0 0; font-size: var(--text-sm); color: var(--ink-3); }
+.live-detail .detail-actions a.button { text-decoration: none; }

@@ -1,0 +1,82 @@
+/* 국민대 데이터 연동 (kmu-*) — 학사일정 · 공지 · eCampus 가져오기. KMU80 토큰만 쓴다. 학사 일정 종류색(.kind-academic 등)은 calendar.css에 있다. */
+.kmu-controls { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; margin-bottom: 18px; }
+.kmu-controls select { font-size: var(--text-sm); }
+.kmu-import-button { margin-left: auto; }
+.kmu-check { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-size: var(--text-sm); color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+.kmu-check input, .kmu-checkbox { width: 18px; height: 18px; min-width: 18px; padding: 0; margin: 0; accent-color: var(--kmu-blue); cursor: pointer; }
+.kmu-check input:disabled, .kmu-checkbox:disabled { cursor: not-allowed; }
+.kmu-check input:focus-visible, .kmu-checkbox:focus-visible { outline: 2px solid var(--kmu-blue); outline-offset: 2px; box-shadow: none; }
+.kmu-presets { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 0; margin: 0; padding: 0; min-width: 0; }
+.kmu-presets legend { float: left; padding: 0; margin-right: 4px; font-size: var(--text-xs); color: var(--ink-3); }
+
+/* 학사일정 */
+.kmu-month { margin-bottom: 28px; }
+.kmu-month h3 { font-size: var(--text-lg); font-weight: 700; color: var(--ink); padding-bottom: 8px; border-bottom: 2px solid var(--line-strong); }
+.kmu-list { list-style: none; margin: 0; padding: 0; }
+.kmu-row { display: grid; grid-template-columns: 18px 180px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+.kmu-date { font-size: var(--text-xs); color: var(--ink-3); white-space: nowrap; }
+.kmu-title { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--text-md); font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.kmu-chip { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); line-height: 1.6; font-weight: 600; color: var(--kind-academic-ink); background: var(--kind-academic-bg); white-space: nowrap; }
+.kmu-failures { border: 1px solid var(--danger); background: var(--danger-bg); color: var(--danger); border-radius: var(--radius); padding: 10px 12px; font-size: var(--text-sm); margin-bottom: 16px; overflow-wrap: anywhere; }
+.kmu-failures ul { margin: 6px 0 0; padding-left: 18px; }
+.kmu-row-error { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--danger); }
+.kmu-more { display: flex; justify-content: center; padding: 18px 0 4px; }
+.empty-state.kmu-compact { min-height: 110px; padding-block: 20px; }
+
+/* 공지 */
+.kmu-notice { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+.kmu-notice-title { font-size: var(--text-md); font-weight: 600; color: var(--ink); overflow-wrap: anywhere; min-width: 0; }
+.kmu-notice-title svg { display: inline-block; margin-left: 5px; vertical-align: -1px; color: var(--ink-4); }
+.kmu-notice-title:hover { color: var(--kmu-blue); text-decoration: underline; }
+.kmu-notice-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.kmu-notice-actions .button { min-height: 36px; padding: 5px 12px; font-size: var(--text-xs); }
+
+/* eCampus */
+.kmu-ecampus-sources { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.kmu-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; min-width: 0; background: var(--surface); }
+.kmu-card .field { margin-bottom: 8px; }
+.kmu-privacy { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--met); margin-bottom: 12px; }
+.kmu-steps { border-top: 1px solid var(--line); padding: 10px 0; font-size: var(--text-sm); color: var(--ink-3); }
+.kmu-steps summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
+.kmu-steps ol, .kmu-step-list { margin: 8px 0 0; padding-left: 20px; font-size: var(--text-sm); color: var(--ink-3); line-height: 1.8; list-style: decimal; }
+.kmu-steps .field { margin: 10px 0 0; }
+.kmu-steps + .button { margin-top: 6px; }
+.kmu-steps + .message { margin: 6px 0 12px; }
+.kmu-step-list { margin: 0 0 14px; }
+.kmu-bookmarklet { cursor: grab; border-style: dashed; border-color: var(--kmu-blue); color: var(--kmu-blue-dark); }
+.kmu-bookmarklet:active { cursor: grabbing; }
+.kmu-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--text-xs); line-height: 1.5; margin-top: 8px; word-break: break-all; }
+.kmu-quiet-error { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--text-xs); color: var(--ink-3); }
+.kmu-meta { font-size: var(--text-xs); color: var(--ink-3); margin-top: 8px; }
+.kmu-warn { color: var(--due-near); }
+.kmu-banner { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin-bottom: 16px; border-radius: var(--radius); border: 1px solid var(--kmu-blue-line); background: var(--kmu-blue-tint); color: var(--kmu-blue-dark); font-size: var(--text-sm); font-weight: 600; overflow-wrap: anywhere; }
+.kmu-preview { margin-top: 26px; scroll-margin-top: 12px; }
+.kmu-preview.kmu-preview-first { margin: 0 0 26px; }
+.kmu-table-wrap { max-width: 100%; overflow-x: auto; }
+.kmu-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); color: var(--ink-3); }
+.kmu-table th { text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); padding: 8px 10px; border-bottom: 2px solid var(--line-strong); white-space: nowrap; }
+.kmu-table td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; overflow-wrap: anywhere; }
+.kmu-table td:first-child, .kmu-table th:first-child { width: 30px; padding-left: 2px; }
+.kmu-cell-title { font-size: var(--text-md); font-weight: 600; color: var(--ink); }
+.kmu-cell-title .kmu-chip { margin-left: 8px; }
+.kmu-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.kmu-import-bar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; margin-top: 16px; padding: 12px 0; background: var(--surface); border-top: 1px solid var(--line); }
+.kmu-import-bar .message { flex: 1 0 100%; margin: 0; }
+
+/* 공지 AI 분석 모달 */
+.kmu-analyze-title { font-size: var(--text-md); font-weight: 600; color: var(--ink-2); margin-bottom: 12px; overflow-wrap: anywhere; }
+.kmu-analyze-title a:hover { color: var(--kmu-blue); text-decoration: underline; }
+.kmu-confirm { margin-top: 18px; }
+
+/* 오늘 화면 위젯: today-extras 격자의 첫 줄을 통째로 쓴다. 머리글·빈 상태는 dashboard.css 규칙을 그대로 따른다. */
+.today-board .today-extras > .kmu-widget { grid-column: 1 / -1; }
+.kmu-widget-list { list-style: none; margin: 0; padding: 0; }
+.kmu-widget-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.kmu-widget-list .calendar-dot { width: 8px; min-width: 8px; height: 8px; border-radius: 999px; }
+.kmu-widget-title { flex: 1; min-width: 0; font-size: var(--text-md); font-weight: 600; color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kmu-widget-list small { font-size: var(--text-xs); color: var(--ink-3); white-space: nowrap; }
+.kmu-widget .small-empty { flex-wrap: wrap; }
+
+@media (max-width: 1040px) { .kmu-ecampus-sources { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .kmu-import-button { margin-left: 0; }.kmu-row { grid-template-columns: 18px minmax(0, 1fr) auto; }.kmu-row .kmu-date { grid-column: 2 / -1; grid-row: 2; }.kmu-row .kmu-title { grid-column: 2; grid-row: 1; }.kmu-notice { grid-template-columns: minmax(0, 1fr); }.kmu-notice-actions { justify-content: flex-start; } }
+@media (max-width: 640px) { .kmu-controls { gap: 10px 14px; }.kmu-import-button { width: 100%; white-space: normal; }.kmu-card { padding: 14px; }.kmu-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }.kmu-table tr { display: grid; grid-template-columns: 22px minmax(0, 1fr) 32px; gap: 2px 8px; padding: 11px 0; border-bottom: 1px solid var(--line); align-items: center; }.kmu-table td { display: block; border: 0; padding: 0; }.kmu-table td:first-child { width: auto; grid-row: 1 / span 3; align-self: start; padding-top: 2px; }.kmu-table td:nth-child(2), .kmu-table td:nth-child(3), .kmu-table td:nth-child(4) { grid-column: 2; }.kmu-table td:nth-child(5) { grid-column: 3; grid-row: 1 / span 3; }.kmu-table td[data-label]::before { content: attr(data-label) " "; color: var(--ink-4); font-size: var(--text-xs); margin-right: 4px; }.kmu-widget-list li { flex-wrap: wrap; gap: 4px 12px; }.kmu-widget-title { white-space: normal; } }
