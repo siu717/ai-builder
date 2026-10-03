@@ -4,7 +4,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDatabase, createSharedDatabase } from "../lib/db";
-import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, MAX_ANALYSES_PER_SYNC, parseNoticeLinks, parseScholarship, saveScholarshipPreferences, syncScholarshipEvents, type NoticeAnalyzer } from "../lib/scholarships";
+import { collectScholarships, extractDeadline, getCollectionStatus, getNotices, MAX_ANALYSES_PER_SYNC, parseNoticeLinks, parseScholarship, runPipelineTest, saveScholarship, saveScholarshipPreferences, syncScholarshipEvents, type NoticeAnalyzer } from "../lib/scholarships";
+import { AIInputError } from "../lib/ai";
 import { deleteEvent, getState, updateEvent } from "../lib/store";
 import { processDueReminders } from "../lib/reminder-worker";
 import type { EventInput } from "../lib/contracts";
@@ -215,4 +216,40 @@ test("one unreadable notice is skipped while the rest are stored", async (t) => 
   const status = await getCollectionStatus(shared);
   assert.ok(status.lastSuccess);
   assert.match(status.error!, /1개를 읽지 못해/);
+});
+
+test("the demo pipeline test analyzes one collected notice and sends it to Telegram without creating events", async (t) => {
+  const { shared, user } = await fixture(t);
+  const empty = await runPipelineTest({ database: user, shared, now });
+  assert.deepEqual(empty.steps.map((step) => step.ok), [false, false, false]);
+
+  const notice = parseScholarship(html, url, now);
+  await saveScholarship(shared, notice);
+  const analyzer: NoticeAnalyzer = async () => ({
+    mode: "live", title: notice.title, kind: "scholarship", date: null, time: null, subject: "", submission: "",
+    summary: "생활비 장학금입니다.", missing: ["확인"], documents: [], conditions: [{ label: "필수: 재학생", status: "met", reason: "재학" }],
+  });
+  const noTelegram = await runPipelineTest({ database: user, shared, now, analyze: analyzer });
+  assert.deepEqual(noTelegram.steps.map((step) => [step.id, step.ok]), [["collect", true], ["analyze", true], ["telegram", false]]);
+  assert.match(noTelegram.steps[2].detail, /봇 토큰과 Chat ID/);
+
+  await user.execute("UPDATE campus_settings SET token = '123456:test-token', chat_id = '42', enabled = 1, bot_username = 'campus_bot' WHERE id = 1");
+  const sent: string[] = [];
+  const fetcher = (async (_input: string | URL | Request, init?: RequestInit) => {
+    sent.push(JSON.parse(String(init?.body)).text);
+    return new Response(JSON.stringify({ ok: true, result: {} }));
+  }) as typeof fetch;
+  const ok = await runPipelineTest({ database: user, shared, now, analyze: analyzer, fetcher });
+  assert.ok(ok.steps.every((step) => step.ok));
+  assert.match(ok.steps[2].detail, /@campus_bot/);
+  assert.equal(sent.length, 1);
+  assert.match(sent[0], /^\[캠퍼스 비서 · .+\]\n\[자동화 테스트\] 소프트웨어 생활비 장학금/);
+  assert.match(sent[0], /\[AI 분석\] 생활비 장학금입니다\./);
+  assert.ok(sent[0].includes(`원문: ${url}`));
+  assert.equal(ok.message, sent[0]);
+
+  const failing = await runPipelineTest({ database: user, shared, now, fetcher, analyze: async () => { throw new AIInputError(502, "AI 분석에 실패했습니다 (HTTP 401). OpenAI API 키가 올바르지 않거나 권한이 없습니다."); } });
+  assert.deepEqual(failing.steps.map((step) => step.ok), [true, false, true], "Telegram still reports the AI failure");
+  assert.match(sent[1], /HTTP 401/);
+  assert.equal((await getState(user)).events.length, 0, "the test never creates events");
 });

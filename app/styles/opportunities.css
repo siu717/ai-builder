@@ -177,3 +177,16 @@
 @media (max-width: 760px) {
   .automation-settings { grid-template-columns: minmax(0, 1fr); padding: 18px 16px; }
 }
+
+/* 자동화 테스트 결과: 수집 → AI 분석 → 텔레그램 단계별 성공/실패 */
+.automation-fields .button.secondary { margin-top: 6px; }
+.pipeline-test { margin: 0 0 28px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.pipeline-test ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pipeline-test li { display: flex; gap: 12px; align-items: flex-start; }
+.pipeline-test strong { font-size: var(--text-md); }
+.pipeline-test p { margin: 2px 0 0; font-size: var(--text-sm); color: var(--ink-2); white-space: pre-line; overflow-wrap: anywhere; }
+.pipeline-mark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border-radius: 50%; color: #fff; }
+.step-ok .pipeline-mark { background: var(--met); }
+.step-fail .pipeline-mark { background: var(--unmet); }
+.pipeline-test details { margin-top: 14px; font-size: var(--text-sm); }
+.pipeline-test pre { margin: 8px 0 0; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-2); border-radius: var(--radius); font-size: var(--text-xs); }

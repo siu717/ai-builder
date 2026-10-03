@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, ChevronRight, RefreshCw, Search } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, ChevronRight, FlaskConical, RefreshCw, Search, X } from "lucide-react";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import type { AppState } from "@/lib/contracts";
-import type { ScholarshipFeed as Feed, ScholarshipPreferences } from "@/lib/scholarships";
+import type { ScholarshipFeed as Feed, PipelineTestResult, ScholarshipPreferences } from "@/lib/scholarships";
 import type { EventDraft } from "./event-editor";
 import { checklistFromDocuments } from "@/lib/checklist";
 import { Busy, Message, request, seoulDate } from "./ui";
@@ -35,6 +35,22 @@ export default function ScholarshipFeed({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<PipelineTestResult | null>(null);
+  const [testError, setTestError] = useState("");
+
+  async function runTest() {
+    setTesting(true);
+    setTestError("");
+    setTestResult(null);
+    try {
+      setTestResult(await request<PipelineTestResult>("/api/scholarships/test", "POST", {}));
+    } catch (reason) {
+      setTestError(reason instanceof Error ? reason.message : "자동화 테스트를 실행하지 못했습니다.");
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function load() {
     setBusy(true);
@@ -118,10 +134,41 @@ export default function ScholarshipFeed({
           <button className="button primary" disabled={busy || !feed}>
             자동 등록 설정 저장
           </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={testing}
+            onClick={() => void runTest()}
+          >
+            <FlaskConical size={15} />
+            {testing ? "테스트 중… (AI 분석 최대 45초)" : "자동화 테스트: 수집 → AI 분석 → 텔레그램"}
+          </button>
         </div>
       </form>
       {error && <Message text={error} error />}
       {message && <Message text={message} />}
+      {testError && <Message text={testError} error />}
+      {testResult && (
+        <section className="pipeline-test" aria-label="자동화 테스트 결과">
+          <ol>
+            {testResult.steps.map((step) => (
+              <li key={step.id} className={step.ok ? "step-ok" : "step-fail"}>
+                <span className="pipeline-mark">{step.ok ? <Check size={15} /> : <X size={15} />}</span>
+                <div>
+                  <strong>{step.label}</strong>
+                  <p>{step.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          {testResult.message && (
+            <details>
+              <summary>텔레그램 메시지 내용</summary>
+              <pre>{testResult.message}</pre>
+            </details>
+          )}
+        </section>
+      )}
 
       <div className="view-toolbar">
         <div className="search-field">
